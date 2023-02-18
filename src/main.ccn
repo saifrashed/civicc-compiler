@@ -243,41 +243,41 @@ node ReturnStmt {
 };
 
 
-// Keyword nodes
+// Type keyword nodes
 
 node NumType {
-  children {
-        Expr name { constructor, mandatory }
+    attributes {
+        string name { constructor }
     }
 };
 
 node FloatType {
-    children {
-        Expr name { constructor, mandatory }
+   attributes {
+        string name { constructor }
     }
 };
 
 node BoolType {
-    children {
-        Expr name { constructor, mandatory }
+   attributes {
+        string name { constructor }
     }
 };
 
 node VoidType {
-    children {
-        Expr name { constructor, mandatory }
+   attributes {
+        string name { constructor }
     }
 };
 
 node ExportType {
-    children {
-        Expr name { constructor, mandatory }
+   attributes {
+        string name { constructor }
     }
 };
 
 node ExternType {
-    children {
-        Expr name { constructor, mandatory } 
+   attributes {
+        string name { constructor }
     }
 };
 
