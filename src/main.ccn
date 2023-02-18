@@ -3,7 +3,6 @@ start phase EntryPoint {
     
     actions {
         pass SPdoScanParse;
-        Demo;
         Print;
     }
 };
@@ -52,18 +51,188 @@ enum binop_type {
     }
 };
 
-nodeset Expr = {Num, Float, Bool, Binop, Var};
-nodeset Stmt = {Assign};
+enum basic_type {
+    prefix = BT,
+    values {
+        int, float, bool
+    }
+};
+
+enum void_type {
+    prefix = VT,
+    values {
+        void
+    }
+};
+
+nodeset Expr = {Num, Float, Bool, Binop, Monop, Var};
+nodeset Stmt = {Assign, IfStmt};
+nodeset Declaration = {FunDec, FunDef, GlobalDec, GlobalDef};
+
+
+nodeset BasicType = {NumType, FloatType, BoolType};
+nodeset ReturnType = {NumType, FloatType, BoolType} | {VoidType};
 
 // Nodes you want to be able to link to from your symbol table.
 nodeset Link = Expr | Stmt;
 
-root node Stmts {
+
+// Top level nodes
+
+root node Program {
+    children {
+        Declarations declarations { constructor }
+    }
+};
+
+node Declarations {
+    children {
+        Declaration Declaration { constructor, mandatory },
+        Declarations next { constructor }
+    }
+};
+
+node Stmts {
     children {
         Stmt stmt { constructor, mandatory },
         Stmts next { constructor }
     }
 };
+
+node Block {
+    children {
+        Stmt stmt { constructor, mandatory },
+        Stmts next { constructor }
+    }
+};
+
+node Param {
+    children {
+        BasicType type { constructor, mandatory },
+        Var id { constructor, mandatory }
+    }
+};
+
+node Params {
+    children {
+        Param arg { constructor },
+        Params next { constructor }
+    }
+};
+
+node FunHeader {
+    children {
+        ReturnType type { constructor, mandatory },
+        Var id { constructor, mandatory },
+        Params next { constructor }
+    }
+};
+
+node FunBody {
+    children {
+        VarDecs nextdecl { constructor },
+        Stmts next { constructor }
+    }
+};
+
+node VarDec {
+    children {
+        BasicType type { constructor, mandatory },
+        Var id { constructor, mandatory },
+        Expr expr { constructor }
+    }
+};
+
+node VarDecs {
+    children {
+        VarDec vardec { constructor },
+        VarDecs next { constructor }
+    }
+};
+
+node FunDec {
+    children {
+        ExternType dectype { constructor },
+        FunHeader funheader { constructor, mandatory },
+        Var id { constructor, mandatory }
+    }
+};
+
+node FunDef {
+    children {
+        ExportType deftype { constructor },
+        FunHeader funheader { constructor, mandatory },
+        FunBody funbody { constructor }
+    }
+};
+
+node GlobalDec {
+    children {
+        ExternType dectype { constructor },
+        BasicType type { constructor, mandatory },
+        Var id { constructor, mandatory }
+    }
+};
+
+node GlobalDef {
+    children {
+        ExportType deftype { constructor },
+        Var id { constructor, mandatory },
+        Expr expr { constructor }
+    }
+};
+
+// Statements
+
+node IfStmt {
+    children {
+        Expr expr { constructor, mandatory },
+        Block ifBlock { constructor, mandatory },
+        Block elseBlock { constructor }
+    }
+};
+
+
+// Keyword nodes
+
+node NumType {
+  children {
+        Expr name { constructor, mandatory }
+    }
+};
+
+node FloatType {
+    children {
+        Expr name { constructor, mandatory }
+    }
+};
+
+node BoolType {
+    children {
+        Expr name { constructor, mandatory }
+    }
+};
+
+node VoidType {
+    children {
+        Expr name { constructor, mandatory }
+    }
+};
+
+node ExportType {
+    children {
+        Expr name { constructor, mandatory }
+    }
+};
+
+node ExternType {
+    children {
+        Expr name { constructor, mandatory } 
+    }
+};
+
+
+// The rest
 
 node Assign {
     children {
@@ -80,6 +249,17 @@ node Binop {
     
     attributes {
         binop_type type { constructor }
+    }
+};
+
+node Monop {
+    children {
+        Expr left  { constructor, mandatory },
+        Expr right { constructor, mandatory }
+    },
+    
+    attributes {
+        monop_type type { constructor }
     }
 };
 
