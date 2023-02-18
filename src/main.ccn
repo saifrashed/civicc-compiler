@@ -66,7 +66,7 @@ enum void_type {
 };
 
 nodeset Expr = {Num, Float, Bool, Binop, Monop, Var};
-nodeset Stmt = {Assign, IfStmt};
+nodeset Stmt = {Assign, IfStmt, FunCall, WhileLoop, DoWhileLoop, ForLoop, ReturnStmt};
 nodeset Declaration = {FunDec, FunDef, GlobalDec, GlobalDef};
 
 
@@ -81,7 +81,7 @@ nodeset Link = Expr | Stmt;
 
 root node Program {
     children {
-        Declarations declarations { constructor }
+        Declarations declarations { constructor, mandatory }
     }
 };
 
@@ -117,6 +117,13 @@ node Params {
     children {
         Param arg { constructor },
         Params next { constructor }
+    }
+};
+
+node Exprs {
+    children {
+        Expr expr { constructor },
+        Exprs next { constructor }
     }
 };
 
@@ -184,11 +191,54 @@ node GlobalDef {
 
 // Statements
 
+node Assign {
+    children {
+        VarLet let { constructor },
+        Expr expr { constructor, mandatory }
+    }
+};
+
 node IfStmt {
     children {
         Expr expr { constructor, mandatory },
         Block ifBlock { constructor, mandatory },
         Block elseBlock { constructor }
+    }
+};
+
+node FunCall {
+    children {
+        Var funname { constructor, mandatory },
+        Exprs arg { constructor }
+    }
+};
+
+node WhileLoop {
+    children {
+        Expr loopcondition { constructor, mandatory },
+        Block loopbody { constructor, mandatory }
+    }
+};
+
+node DoWhileLoop {
+    children {
+        Block loopbody { constructor, mandatory },
+        Expr loopcondition { constructor, mandatory }
+    }
+};
+
+node ForLoop {
+    children {
+        VarDec initdecl { constructor, mandatory },
+        Expr loopcondition { constructor, mandatory },
+        Assign assign { constructor, mandatory },
+        Block loopbody { constructor, mandatory }
+    }
+};
+
+node ReturnStmt {
+    children {
+        Expr expr { constructor }
     }
 };
 
@@ -233,13 +283,6 @@ node ExternType {
 
 
 // The rest
-
-node Assign {
-    children {
-        VarLet let { constructor },
-        Expr expr { constructor, mandatory }
-    }
-};
 
 node Binop {
     children {
