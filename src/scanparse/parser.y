@@ -25,7 +25,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
  char               *id;
  int                 cint;
  float               cflt;
- enum binop_type     cbinop;
+ enum BinOpEnum     cbinop;
  node_st             *node;
 }
 
@@ -34,13 +34,18 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %token BRACKET_L BRACKET_R COMMA SEMICOLON
 %token MINUS PLUS STAR SLASH PERCENT LE LT GE GT EQ NE OR AND
 %token TRUEVAL FALSEVAL LET
+%token IF ELSE 
+%token WHILE DO FOR 
+%token RETURN
+%token EXPORT EXTERN
+%token BOOLTYPE FLOATTYPE INTTYPE VOIDTYPE
 
 %token <cint> NUM
 %token <cflt> FLOAT
 %token <id> ID
 
 %type <node> intval floatval boolval constant expr
-%type <node> stmts stmt assign varlet program
+%type <node> decl decls stmts stmt assign varlet program
 %type <cbinop> binop
 
 %start program
@@ -52,6 +57,12 @@ program: stmts
            parseresult = $1;
          }
          ;
+
+stmt: assign
+       {
+         $$ = $1;
+       }
+       ;
 
 stmts: stmt stmts
         {
@@ -81,7 +92,6 @@ varlet: ID
           AddLocToNode($$, &@1, &@1);
         }
         ;
-
 
 expr: constant
       {
@@ -147,6 +157,7 @@ binop: PLUS      { $$ = BO_add; }
      | OR        { $$ = BO_or; }
      | AND       { $$ = BO_and; }
      ;
+
 
 %%
 
