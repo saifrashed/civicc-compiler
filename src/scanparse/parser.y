@@ -45,9 +45,8 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %token <id> ID
 
 %type <node> intval floatval boolval constant expr
-%type <node> decl decls stmts stmt assign varlet program
+%type <node> decls decl  stmts stmt assign varlet program
 %type <cbinop> binop
-
 
 %right LET
 
@@ -69,11 +68,19 @@ program: stmts
          }
          ;
 
-stmt: assign
-       {
-         $$ = $1;
-       }
-       ;
+
+/*************************************
+  DECLARATIONS & DEFINITIONS                        
+*************************************/
+
+/*************************************
+  FUNCTIONS                        
+*************************************/
+
+
+/*************************************
+  STATEMENTS                        
+*************************************/
 
 stmts: stmt stmts
         {
@@ -119,6 +126,10 @@ expr: constant
       }
     ;
 
+/*************************************
+  CONSTANTS                        
+*************************************/
+
 constant: floatval
           {
             $$ = $1;
@@ -154,6 +165,12 @@ boolval: TRUEVAL
            $$ = ASTbool(false);
          }
        ;
+
+
+
+/*************************************
+  BINARY OPERATORS                        
+*************************************/
 
 binop: PLUS      { $$ = BO_add; }
      | MINUS     { $$ = BO_sub; }
