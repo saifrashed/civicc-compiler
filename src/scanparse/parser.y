@@ -31,7 +31,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
 %locations
 
-%token BRACKET_L BRACKET_R COMMA SEMICOLON
+%token ROUNDBRACKET_L ROUNDBRACKET_R CURLYBRACKET_L CURLYBRACKET_R SQUAREBRACKET_L SQUAREBRACKET_R COMMA SEMICOLON
 %token MINUS PLUS STAR SLASH PERCENT LE LT GE GT EQ NE OR AND
 %token TRUEVAL FALSEVAL LET
 %token IF ELSE 
@@ -47,6 +47,17 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %type <node> intval floatval boolval constant expr
 %type <node> decl decls stmts stmt assign varlet program
 %type <cbinop> binop
+
+
+%right LET
+
+%left OR
+%left AND
+%left EQUAL NOT_EQUAL
+%left LESS LESS_OR_EQUAL GREATER GREATER_OR_EQUAL
+%left PLUS MINUS
+%left STAR SLASH PERCENT
+%right UMINUS
 
 %start program
 
@@ -101,7 +112,7 @@ expr: constant
       {
         $$ = ASTvar($1);
       }
-    | BRACKET_L expr[left] binop[type] expr[right] BRACKET_R
+    | ROUNDBRACKET_L expr[left] binop[type] expr[right] ROUNDBRACKET_R
       {
         $$ = ASTbinop( $left, $right, $type);
         AddLocToNode($$, &@left, &@right);

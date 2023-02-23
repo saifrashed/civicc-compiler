@@ -47,7 +47,6 @@ for 				               { FILTER( FOR); }
 
 return 				             { FILTER( RETURN); }
 
-
 export				      	     { FILTER( EXPORT); }
 extern				      	     { FILTER( EXTERN); }
 
@@ -57,8 +56,12 @@ int				      	         { FILTER( INTTYPE); }
 void				      	       { FILTER( VOIDTYPE); }
 
 
-"("                        { FILTER( BRACKET_L); }
-")"                        { FILTER( BRACKET_R); }
+"("                        { FILTER( ROUNDBRACKET_L); }
+")"                        { FILTER( ROUNDBRACKET_R); }
+"{"					               { FILTER( CURLYBRACKET_L); }
+"}"						             { FILTER( CURLYBRACKET_R); }
+"["						             { FILTER( SQUAREBRACKET_L); }
+"]"						             { FILTER( SQUAREBRACKET_R); }
 ","                        { FILTER( COMMA); }
 ";"                        { FILTER( SEMICOLON); }
 
