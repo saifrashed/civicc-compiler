@@ -1,4 +1,4 @@
 
 // Globdef
 
-export int ab = (5 + 5);
+export int ab = 5 * 5 * 5;

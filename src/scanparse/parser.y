@@ -174,6 +174,11 @@ expr: constant
       {
         $$ = ASTvar($1);
       }
+    | expr[left] binop[type] expr[right]
+      {
+        $$ = ASTbinop( $left, $right, $type);
+        AddLocToNode($$, &@left, &@right);
+      }
     | ROUNDBRACKET_L expr[left] binop[type] expr[right] ROUNDBRACKET_R
       {
         $$ = ASTbinop( $left, $right, $type);
