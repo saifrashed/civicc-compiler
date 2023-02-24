@@ -1,7 +1,9 @@
-start phase RootPhase {
+start phase EntryPoint {
+    info = "Denotes the entry point of your compiler",
+    
     actions {
         pass SPdoScanParse;
-        print;
+        Print;
     }
 };
 
@@ -9,8 +11,11 @@ traversal Print {
     uid = PRT
 };
 
+
+/*** AST ***/
+
+
 enum Type {
-    // T_ collides with bison/flex generated stuff.
     prefix = CT,
     values {
         int, float, bool, void
@@ -53,7 +58,8 @@ nodeset Link = Decl;
 
 root node Program {
     children {
-        Decls decls { constructor, mandatory }
+        Stmt stmt { constructor, mandatory },
+        Stmts next { constructor }
     }
 };
 
@@ -198,7 +204,7 @@ node GlobDef {
 
     attributes {
         Type type,
-        string name,
+        string name { constructor },
         bool export
     }
 };

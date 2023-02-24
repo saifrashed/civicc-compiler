@@ -33,7 +33,7 @@ add_executable(civicc ${FLEX_CivicLexer_OUTPUTS} ${BISON_CivicParser_OUTPUTS}
     src/global/globals.c src/global/globals.h
 
     # Youre free to remove the demo directory and these entries.
-    # ADD TRAVERSALS HERE
+    
 )
 
 target_compile_options(civicc PRIVATE

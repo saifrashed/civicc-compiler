@@ -40,20 +40,20 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %token EXPORT EXTERN
 %token BOOLTYPE FLOATTYPE INTTYPE VOIDTYPE
 
+
 %token <cint> NUM
 %token <cflt> FLOAT
 %token <id> ID
 
 %type <node> intval floatval boolval constant expr
-%type <node> decls decl  stmts stmt assign varlet program
+%type <node> stmts stmt assign varlet program
+%type <node> decl decls globdef globdecl fundef fundefs
 %type <cbinop> binop
-
-%right LET
 
 %left OR
 %left AND
-%left EQUAL NOT_EQUAL
-%left LESS LESS_OR_EQUAL GREATER GREATER_OR_EQUAL
+%left EQ NE
+%left LT LE GT GE
 %left PLUS MINUS
 %left STAR SLASH PERCENT
 %right UMINUS
@@ -68,18 +68,68 @@ program: stmts
          }
          ;
 
-
 /*************************************
   DECLARATIONS & DEFINITIONS                        
-*************************************/
+*************************************/        
+
+
+decls: decl decls
+        {
+          $$ = ASTdecls($1, $2);
+        }
+      | decl
+        {
+          $$ = ASTdecls($1, NULL);
+        }
+  
+
+decl: globdef 
+       {
+         $$ = $1;
+       }
+       ;
+
+
+globdef: 
+     binop[type] ID SEMICOLON
+       {
+         $$ =  ASTglobdef($2);
+       }
+    |
+     binop[type] ID assign expr SEMICOLON
+       {
+         $$ =  ASTglobdef($2);
+       }   
+    |
+      EXPORT binop[type] ID SEMICOLON
+       {
+         $$ =  ASTglobdef($3);
+       }
+    |
+      EXPORT binop[type] ID LET expr SEMICOLON
+       {
+         $$ =  ASTglobdef($3);
+       }
+       ;          
 
 /*************************************
   FUNCTIONS                        
 *************************************/
 
-
 /*************************************
   STATEMENTS                        
+*************************************/
+
+/*************************************
+  CONSTANTS                        
+*************************************/
+
+/*************************************
+  BINARY OPERATORS                        
+*************************************/
+
+/*************************************
+  TYPES                       
 *************************************/
 
 stmts: stmt stmts
@@ -111,6 +161,7 @@ varlet: ID
         }
         ;
 
+
 expr: constant
       {
         $$ = $1;
@@ -125,10 +176,6 @@ expr: constant
         AddLocToNode($$, &@left, &@right);
       }
     ;
-
-/*************************************
-  CONSTANTS                        
-*************************************/
 
 constant: floatval
           {
@@ -166,12 +213,6 @@ boolval: TRUEVAL
          }
        ;
 
-
-
-/*************************************
-  BINARY OPERATORS                        
-*************************************/
-
 binop: PLUS      { $$ = BO_add; }
      | MINUS     { $$ = BO_sub; }
      | STAR      { $$ = BO_mul; }
@@ -185,7 +226,6 @@ binop: PLUS      { $$ = BO_add; }
      | OR        { $$ = BO_or; }
      | AND       { $$ = BO_and; }
      ;
-
 
 %%
 

@@ -25,3 +25,17 @@ make dist
 this gets everything in your git repo and combines it with the used coconut version in one archive.
 This should contain everything needed to hand in your assignments.
 **NOTE** Always check the resulting archive if it contains everything and builds correctly.
+
+
+program: stmts
+         {
+           parseresult = $1;
+         }
+         ;
+
+a = (43-2);
+b = (true*7);
+c = ((a + b) - c);
+d = ((7-7) * 0);
+e = (c - c);
+

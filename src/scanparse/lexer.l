@@ -38,22 +38,22 @@ int yycolumn = 1;
 %%
 
 
-if					               { FILTER( IF); }
-else				               { FILTER( ELSE); }
+"if"					               { FILTER( IF); }
+"else"				               { FILTER( ELSE); }
 
-while				               { FILTER( WHILE); }
-do				                 { FILTER( DO); }
-for 				               { FILTER( FOR); }
+"while"				               { FILTER( WHILE); }
+"do"				                 { FILTER( DO); }
+"for" 				               { FILTER( FOR); }
 
-return 				             { FILTER( RETURN); }
+"return" 				             { FILTER( RETURN); }
 
-export				      	     { FILTER( EXPORT); }
-extern				      	     { FILTER( EXTERN); }
+"export"				      	     { FILTER( EXPORT); }
+"extern"				      	     { FILTER( EXTERN); }
 
-bool				      	       { FILTER( BOOLTYPE); }
-float				      	       { FILTER( FLOATTYPE); }
-int				      	         { FILTER( INTTYPE); }
-void				      	       { FILTER( VOIDTYPE); }
+"bool"				      	       { FILTER( BOOLTYPE); }
+"float"				      	       { FILTER( FLOATTYPE); }
+"int"				      	         { FILTER( INTTYPE); }
+"void"				      	       { FILTER( VOIDTYPE); }
 
 
 "("                        { FILTER( ROUNDBRACKET_L); }
