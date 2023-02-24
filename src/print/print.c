@@ -175,6 +175,9 @@ node_st *PRTdecls(node_st *node)
  */
 node_st *PRTexprs(node_st *node)
 {
+
+  TRAVchildren(node);
+
   return node;
 }
 

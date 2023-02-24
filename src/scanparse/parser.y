@@ -46,7 +46,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %token <cflt> FLOAT
 %token <id> ID
 
-%type <node> intval floatval boolval constant expr
+%type <node> intval floatval boolval constant exprs expr
 %type <node> stmts stmt assign varlet program
 %type <node> decl decls globdef globdecl fundef fundefs
 %type <cbinop> binop
@@ -99,9 +99,9 @@ globdef:
          $$ =  ASTglobdef(NULL, NULL, $1, $2, false);
        }
     |
-     datatype[type] ID LET expr SEMICOLON
+     datatype[type] ID LET exprs SEMICOLON
        {
-         $$ =  ASTglobdef(NULL, $4, $1, $2, false);
+         $$ =  ASTglobdef($4, NULL, $1, $2, false);
        }   
     |
       EXPORT datatype[type] ID SEMICOLON
@@ -109,9 +109,9 @@ globdef:
          $$ =  ASTglobdef(NULL, NULL, $2, $3, true);
        }
     |
-      EXPORT datatype[type] ID LET expr SEMICOLON
+      EXPORT datatype[type] ID LET exprs SEMICOLON
        {
-         $$ =  ASTglobdef(NULL, $5, $2, $3, true);
+         $$ =  ASTglobdef($5, NULL, $2, $3, true);
        }
        ;
       
@@ -149,6 +149,16 @@ varlet: ID
         {
           $$ = ASTvarlet($1);
           AddLocToNode($$, &@1, &@1);
+        }
+        ;
+
+exprs: expr exprs
+        {
+          $$ = ASTexprs($1, $2);
+        }
+      | expr
+        {
+          $$ = ASTexprs($1, NULL);
         }
         ;
 
