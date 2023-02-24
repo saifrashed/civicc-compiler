@@ -46,7 +46,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %token <cflt> FLOAT
 %token <id> ID
 
-%type <node> intval floatval boolval constant exprs expr
+%type <node> intval floatval boolval constant exprs expr cast
 %type <node> stmts stmt assign varlet program
 %type <node> decl decls globdef globdecl fundef fundefs
 %type <cmonop> monop
@@ -167,13 +167,9 @@ exprs: expr exprs
         }
         ;
 
-expr: constant
+expr: ROUNDBRACKET_L expr ROUNDBRACKET_R
       {
-        $$ = $1;
-      }
-    | ID
-      {
-        $$ = ASTvar($1);
+        $$ = $2;
       }
     | expr[left] binop[type] expr[right]
       {
@@ -184,10 +180,19 @@ expr: constant
       {
         $$ = ASTmonop($right, $type);
         AddLocToNode($$, &@right, &@right);
-      }  
-    | ROUNDBRACKET_L expr ROUNDBRACKET_R
+      }
+    | ROUNDBRACKET_L datatype[type] ROUNDBRACKET_R expr
       {
-        $$ = $2;
+        $$ = ASTcast($4, $type);
+        AddLocToNode($$, &@4, &@4);
+      }  
+    | ID
+      {
+        $$ = ASTvar($1);
+      }     
+    | constant
+      {
+        $$ = $1;
       }
     ;
 

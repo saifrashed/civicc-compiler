@@ -118,7 +118,7 @@ node Cast {
         Expr expr {constructor, mandatory }
     }, 
     attributes {
-        Type type
+        Type type {constructor}
     }
 };
 

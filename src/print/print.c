@@ -226,6 +226,31 @@ node_st *PRTfuncall(node_st *node)
  */
 node_st *PRTcast(node_st *node)
 {
+
+  char *tmp = NULL;
+
+  switch (CAST_TYPE(node))
+  {
+  case CT_bool:
+    tmp = "bool";
+    break;
+  case CT_float:
+    tmp = "float";
+    break;
+  case CT_int:
+    tmp = "int";
+    break;
+  case CT_void:
+    tmp = "void";
+    break;
+  case CT_NULL:
+    DBUG_ASSERT(false, "unknown cast detected!");
+  }
+
+  printf("(%s) ", tmp);
+
+  TRAVchildren(node);
+
   return node;
 }
 

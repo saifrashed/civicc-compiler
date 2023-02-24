@@ -1,5 +1,7 @@
 
 // Globdef
 
-export int result = (5 * 5 * 5);
-export bool boolean = -result;
+export int z = (5 * 5 * 5);
+export bool y = !result;
+
+export float x = (float) 5;
