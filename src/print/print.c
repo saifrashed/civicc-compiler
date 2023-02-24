@@ -218,6 +218,13 @@ node_st *PRTreturn(node_st *node)
  */
 node_st *PRTfuncall(node_st *node)
 {
+
+  printf("%s(", FUNCALL_NAME(node));
+
+  TRAVchildren(node);
+
+  printf(")");
+
   return node;
 }
 

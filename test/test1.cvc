@@ -3,5 +3,8 @@
 
 export int z = (5 * 5 * 5);
 export bool y = !result;
-
 export float x = (float) 5;
+
+export float x = x();
+export float x = x(5, 7);
+

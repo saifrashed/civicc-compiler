@@ -105,10 +105,10 @@ node Return {
 
 node FunCall {
     children {
-        Exprs args
+        Exprs args { constructor }
     },
     attributes {
-        string name,
+        string name { constructor },
         Link decl
     }
 };

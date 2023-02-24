@@ -48,7 +48,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
 %type <node> intval floatval boolval constant exprs expr cast
 %type <node> stmts stmt assign varlet program
-%type <node> decl decls globdef globdecl fundef fundefs
+%type <node> decl decls globdef globdecl fundef fundefs funcall
 %type <cmonop> monop
 %type <cbinop> binop
 %type <cdatatype> datatype
@@ -104,9 +104,9 @@ globdef:
          $$ =  ASTglobdef(NULL, NULL, $1, $2, false);
        }
     |
-     datatype[type] ID LET exprs SEMICOLON
+     datatype[type] ID LET expr SEMICOLON
        {
-         $$ =  ASTglobdef($4, NULL, $1, $2, false);
+         $$ =  ASTglobdef(NULL, $4, $1, $2, false);
        }   
     |
       EXPORT datatype[type] ID SEMICOLON
@@ -114,15 +114,27 @@ globdef:
          $$ =  ASTglobdef(NULL, NULL, $2, $3, true);
        }
     |
-      EXPORT datatype[type] ID LET exprs SEMICOLON
+      EXPORT datatype[type] ID LET expr SEMICOLON
        {
-         $$ =  ASTglobdef($5, NULL, $2, $3, true);
+         $$ =  ASTglobdef(NULL, $5, $2, $3, true);
        }
        ;
       
 /*************************************
   FUNCTIONS                        
 *************************************/
+
+
+funcall: ID ROUNDBRACKET_L exprs ROUNDBRACKET_R
+              {
+                $$ = ASTfuncall($3, $1);
+              }
+             | ID ROUNDBRACKET_L ROUNDBRACKET_R
+              {
+                $$ = ASTfuncall(NULL, $1);
+              }
+             ;
+
 
 /*************************************
   STATEMENTS                        
@@ -165,6 +177,10 @@ exprs: expr exprs
         {
           $$ = ASTexprs($1, NULL);
         }
+       |  expr COMMA exprs 
+        {
+          $$ = ASTexprs($1, $3);
+        }
         ;
 
 expr: ROUNDBRACKET_L expr ROUNDBRACKET_R
@@ -185,7 +201,12 @@ expr: ROUNDBRACKET_L expr ROUNDBRACKET_R
       {
         $$ = ASTcast($4, $type);
         AddLocToNode($$, &@4, &@4);
-      }  
+      }   
+    | funcall
+      {
+        $$ = $1;
+        AddLocToNode($$, &@1, &@1);
+      }     
     | ID
       {
         $$ = ASTvar($1);
@@ -195,6 +216,7 @@ expr: ROUNDBRACKET_L expr ROUNDBRACKET_R
         $$ = $1;
       }
     ;
+
 
 /*************************************
   CONSTANTS                        
