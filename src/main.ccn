@@ -198,14 +198,14 @@ node GlobDecl {
 
 node GlobDef {
     children {
-        Exprs dims,
-        Expr init
+        Exprs dims { constructor },
+        Expr init { constructor }
     },
 
     attributes {
         Type type { constructor },
-        string name { constructor },
-        bool export
+        string name { constructor, mandatory },
+        bool export { constructor }
     }
 };
 

@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "trav_data.h": "c"
+        "trav_data.h": "c",
+        "ast.h": "c"
     }
 }

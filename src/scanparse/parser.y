@@ -96,25 +96,25 @@ decl: globdef
 globdef: 
      datatype[type] ID SEMICOLON
        {
-         $$ =  ASTglobdef($1, $2);
+         $$ =  ASTglobdef(NULL, NULL, $1, $2, false);
        }
     |
      datatype[type] ID LET expr SEMICOLON
        {
-         $$ =  ASTglobdef($1, $2);
+         $$ =  ASTglobdef(NULL, $4, $1, $2, false);
        }   
     |
       EXPORT datatype[type] ID SEMICOLON
        {
-         $$ =  ASTglobdef($2, $3);
+         $$ =  ASTglobdef(NULL, NULL, $2, $3, true);
        }
     |
       EXPORT datatype[type] ID LET expr SEMICOLON
        {
-         $$ =  ASTglobdef($2, $3);
+         $$ =  ASTglobdef(NULL, $5, $2, $3, true);
        }
-       ;          
-
+       ;
+      
 /*************************************
   FUNCTIONS                        
 *************************************/
@@ -152,7 +152,6 @@ varlet: ID
         }
         ;
 
-
 expr: constant
       {
         $$ = $1;
@@ -167,7 +166,6 @@ expr: constant
         AddLocToNode($$, &@left, &@right);
       }
     ;
-
 
 /*************************************
   CONSTANTS                        

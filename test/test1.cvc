@@ -1,1 +1,1 @@
-int ab;
+export int ab = 5;

@@ -295,7 +295,6 @@ node_st *PRTglobdecl(node_st *node)
  */
 node_st *PRTglobdef(node_st *node)
 {
-
   char *tmp = NULL;
 
   switch (GLOBDEF_TYPE(node))
@@ -316,7 +315,19 @@ node_st *PRTglobdef(node_st *node)
     DBUG_ASSERT(false, "unknown type detected!");
   }
 
-  printf("%s %s  \n", tmp, GLOBDEF_NAME(node));
+  if (GLOBDEF_EXPORT(node) == true)
+  { // print for export
+    printf("export %s %s ", tmp, GLOBDEF_NAME(node));
+  }
+  else
+  {
+    // print for non-export
+    printf("%s %s ", tmp, GLOBDEF_NAME(node));
+  }
+
+  TRAVchildren(node);
+
+  printf(";\n");
 
   return node;
 }
