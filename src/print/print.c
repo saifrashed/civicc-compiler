@@ -167,8 +167,6 @@ node_st *PRTdecls(node_st *node)
   TRAVdecl(node);
   TRAVnext(node);
 
-  printf(" = ");
-
   return node;
 }
 
@@ -297,6 +295,29 @@ node_st *PRTglobdecl(node_st *node)
  */
 node_st *PRTglobdef(node_st *node)
 {
+
+  char *tmp = NULL;
+
+  switch (GLOBDEF_TYPE(node))
+  {
+  case CT_bool:
+    tmp = "bool";
+    break;
+  case CT_float:
+    tmp = "float";
+    break;
+  case CT_int:
+    tmp = "int";
+    break;
+  case CT_void:
+    tmp = "void";
+    break;
+  case BO_NULL:
+    DBUG_ASSERT(false, "unknown type detected!");
+  }
+
+  printf("%s %s  \n", tmp, GLOBDEF_NAME(node));
+
   return node;
 }
 

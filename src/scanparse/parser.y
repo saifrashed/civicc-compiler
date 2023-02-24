@@ -26,6 +26,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
  int                 cint;
  float               cflt;
  enum BinOpEnum     cbinop;
+ enum Type          cdatatype;
  node_st             *node;
 }
 
@@ -49,6 +50,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %type <node> stmts stmt assign varlet program
 %type <node> decl decls globdef globdecl fundef fundefs
 %type <cbinop> binop
+%type <cdatatype> datatype
 
 %left OR
 %left AND
@@ -62,11 +64,12 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
 %%
 
-program: stmts
+program: decls
          {
            parseresult = $1;
          }
          ;
+
 
 /*************************************
   DECLARATIONS & DEFINITIONS                        
@@ -91,24 +94,24 @@ decl: globdef
 
 
 globdef: 
-     binop[type] ID SEMICOLON
+     datatype[type] ID SEMICOLON
        {
-         $$ =  ASTglobdef($2);
+         $$ =  ASTglobdef($1, $2);
        }
     |
-     binop[type] ID assign expr SEMICOLON
+     datatype[type] ID LET expr SEMICOLON
        {
-         $$ =  ASTglobdef($2);
+         $$ =  ASTglobdef($1, $2);
        }   
     |
-      EXPORT binop[type] ID SEMICOLON
+      EXPORT datatype[type] ID SEMICOLON
        {
-         $$ =  ASTglobdef($3);
+         $$ =  ASTglobdef($2, $3);
        }
     |
-      EXPORT binop[type] ID LET expr SEMICOLON
+      EXPORT datatype[type] ID LET expr SEMICOLON
        {
-         $$ =  ASTglobdef($3);
+         $$ =  ASTglobdef($2, $3);
        }
        ;          
 
@@ -118,18 +121,6 @@ globdef:
 
 /*************************************
   STATEMENTS                        
-*************************************/
-
-/*************************************
-  CONSTANTS                        
-*************************************/
-
-/*************************************
-  BINARY OPERATORS                        
-*************************************/
-
-/*************************************
-  TYPES                       
 *************************************/
 
 stmts: stmt stmts
@@ -177,6 +168,11 @@ expr: constant
       }
     ;
 
+
+/*************************************
+  CONSTANTS                        
+*************************************/
+
 constant: floatval
           {
             $$ = $1;
@@ -213,6 +209,10 @@ boolval: TRUEVAL
          }
        ;
 
+/*************************************
+  BINARY OPERATORS                        
+*************************************/
+
 binop: PLUS      { $$ = BO_add; }
      | MINUS     { $$ = BO_sub; }
      | STAR      { $$ = BO_mul; }
@@ -226,6 +226,16 @@ binop: PLUS      { $$ = BO_add; }
      | OR        { $$ = BO_or; }
      | AND       { $$ = BO_and; }
      ;
+
+/*************************************
+  TYPES                       
+*************************************/
+
+datatype:
+        VOIDTYPE  {   $$ = CT_void; }
+      | INTTYPE   {   $$ = CT_int;  }
+      | FLOATTYPE {   $$ = CT_float; }
+      | BOOLTYPE  {   $$ = CT_bool;  } ;
 
 %%
 

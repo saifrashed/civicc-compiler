@@ -58,8 +58,8 @@ nodeset Link = Decl;
 
 root node Program {
     children {
-        Stmt stmt { constructor, mandatory },
-        Stmts next { constructor }
+        Decl decl { constructor, mandatory },
+        Decls next { constructor }
     }
 };
 
@@ -203,7 +203,7 @@ node GlobDef {
     },
 
     attributes {
-        Type type,
+        Type type { constructor },
         string name { constructor },
         bool export
     }
