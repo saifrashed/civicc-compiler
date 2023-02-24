@@ -52,13 +52,17 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %type <cbinop> binop
 %type <cdatatype> datatype
 
+%left COMMA
+%right LET
 %left OR
 %left AND
 %left EQ NE
 %left LT LE GT GE
 %left PLUS MINUS
 %left STAR SLASH PERCENT
-%right UMINUS
+
+%nonassoc UMINUS
+%nonassoc ELSE
 
 %start program
 

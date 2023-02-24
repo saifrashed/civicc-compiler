@@ -38,6 +38,10 @@ int yycolumn = 1;
 %%
 
 
+"/*"((("*"[^/])?)|[^*])*"*/" { /* DO NOTHING */ }
+"//".*                       { /* DO NOTHING */ }
+
+
 "if"					               { FILTER( IF); }
 "else"				               { FILTER( ELSE); }
 
