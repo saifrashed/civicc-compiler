@@ -75,6 +75,7 @@ int yycolumn = 1;
 "/"                        { FILTER( SLASH);  } 
 "%"                        { FILTER( PERCENT);  } 
 
+"!"                        { FILTER( NEG); }
 "<="                       { FILTER( LE);    }
 "<"                        { FILTER( LT);    } 
 ">="                       { FILTER( GE);    }

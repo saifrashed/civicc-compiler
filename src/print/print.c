@@ -314,13 +314,13 @@ node_st *PRTglobdef(node_st *node)
   case CT_void:
     tmp = "void";
     break;
-  case BO_NULL:
+  case CT_NULL:
     DBUG_ASSERT(false, "unknown type detected!");
   }
 
   if (GLOBDEF_EXPORT(node) == true)
   { // print for export
-    printf("export %s %s ", tmp, GLOBDEF_NAME(node));
+    printf("export %s %s = ", tmp, GLOBDEF_NAME(node));
   }
   else
   {
@@ -356,5 +356,23 @@ node_st *PRTvardecl(node_st *node)
  */
 node_st *PRTmonop(node_st *node)
 {
+  char *tmp = NULL;
+
+  switch (MONOP_OP(node))
+  {
+  case MO_not:
+    tmp = "-";
+    break;
+  case MO_neg:
+    tmp = "!";
+    break;
+  case MO_NULL:
+    DBUG_ASSERT(false, "unknown unary detected!");
+  }
+
+  printf("%s", tmp);
+
+  TRAVoperand(node);
+
   return node;
 }

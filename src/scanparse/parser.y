@@ -25,6 +25,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
  char               *id;
  int                 cint;
  float               cflt;
+ enum MonOpEnum     cmonop;
  enum BinOpEnum     cbinop;
  enum Type          cdatatype;
  node_st             *node;
@@ -33,14 +34,13 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %locations
 
 %token ROUNDBRACKET_L ROUNDBRACKET_R CURLYBRACKET_L CURLYBRACKET_R SQUAREBRACKET_L SQUAREBRACKET_R COMMA SEMICOLON
-%token MINUS PLUS STAR SLASH PERCENT LE LT GE GT EQ NE OR AND
+%token MINUS PLUS STAR SLASH PERCENT LE LT GE GT EQ NE OR AND NEG
 %token TRUEVAL FALSEVAL LET
 %token IF ELSE 
 %token WHILE DO FOR 
 %token RETURN
 %token EXPORT EXTERN
 %token BOOLTYPE FLOATTYPE INTTYPE VOIDTYPE
-
 
 %token <cint> NUM
 %token <cflt> FLOAT
@@ -49,6 +49,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %type <node> intval floatval boolval constant exprs expr
 %type <node> stmts stmt assign varlet program
 %type <node> decl decls globdef globdecl fundef fundefs
+%type <cmonop> monop
 %type <cbinop> binop
 %type <cdatatype> datatype
 
@@ -179,10 +180,14 @@ expr: constant
         $$ = ASTbinop( $left, $right, $type);
         AddLocToNode($$, &@left, &@right);
       }
-    | ROUNDBRACKET_L expr[left] binop[type] expr[right] ROUNDBRACKET_R
+    | monop[type] expr[right]
       {
-        $$ = ASTbinop( $left, $right, $type);
-        AddLocToNode($$, &@left, &@right);
+        $$ = ASTmonop($right, $type);
+        AddLocToNode($$, &@right, &@right);
+      }  
+    | ROUNDBRACKET_L expr ROUNDBRACKET_R
+      {
+        $$ = $2;
       }
     ;
 
@@ -245,6 +250,15 @@ binop: PLUS      { $$ = BO_add; }
      ;
 
 /*************************************
+  MONO OPERATORS                        
+*************************************/
+
+monop: MINUS      { $$ = MO_not; }
+     | NEG        { $$ = MO_neg; }
+     ;
+
+
+/*************************************
   TYPES                       
 *************************************/
 
@@ -252,7 +266,8 @@ datatype:
         VOIDTYPE  {   $$ = CT_void; }
       | INTTYPE   {   $$ = CT_int;  }
       | FLOATTYPE {   $$ = CT_float; }
-      | BOOLTYPE  {   $$ = CT_bool;  } ;
+      | BOOLTYPE  {   $$ = CT_bool;  } 
+      ;
 
 %%
 
