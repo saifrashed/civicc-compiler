@@ -125,19 +125,19 @@ node Cast {
 node FunDefs {
     children {
         FunDef fundef { constructor, mandatory },
-        FunDefs next
+        FunDefs next{ constructor }
     }
 };
 
 node FunDef {
     children {
-        FunBody body,
-        Param params
+        FunBody body { constructor },
+        Param params { constructor }
     },
     attributes {
-        Type type,
-        string name,
-        bool export 
+        Type type { constructor },
+        string name { constructor, mandatory },
+        bool export { constructor }
     }
 };
 
@@ -210,13 +210,13 @@ node GlobDef {
 
 node Param {
     children {
-        Ids dims,
-        Param next
+        Ids dims { constructor },
+        Param next { constructor }
     },
 
     attributes {
-        string name,
-        Type type
+        string name { constructor, mandatory },
+        Type type { constructor }
     }
 };
 

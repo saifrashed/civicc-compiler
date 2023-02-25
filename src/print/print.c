@@ -196,7 +196,7 @@ node_st *PRTids(node_st *node)
 {
   printf("%s", IDS_NAME(node));
 
-  TRAVchildren(node);
+  TRAVnext(node);
   return node;
 }
 
@@ -269,6 +269,7 @@ node_st *PRTcast(node_st *node)
  */
 node_st *PRTfundefs(node_st *node)
 {
+  TRAVnext(node);
   return node;
 }
 
@@ -277,6 +278,36 @@ node_st *PRTfundefs(node_st *node)
  */
 node_st *PRTfundef(node_st *node)
 {
+  char *tmp = NULL;
+
+  switch (FUNDEF_TYPE(node))
+  {
+  case CT_bool:
+    tmp = "bool";
+    break;
+  case CT_float:
+    tmp = "float";
+    break;
+  case CT_int:
+    tmp = "int";
+    break;
+  case CT_void:
+    tmp = "void";
+    break;
+  case CT_NULL:
+    DBUG_ASSERT(false, "unknown type detected!");
+  }
+
+  printf("export %s %s", tmp, FUNDEF_NAME(node));
+
+  printf("(");
+
+  TRAVchildren(node);
+
+  printf(")");
+
+  printf(";\n");
+
   return node;
 }
 
@@ -401,6 +432,31 @@ node_st *PRTglobdef(node_st *node)
  */
 node_st *PRTparam(node_st *node)
 {
+
+  char *tmp = NULL;
+
+  switch (PARAM_TYPE(node))
+  {
+  case CT_bool:
+    tmp = "bool";
+    break;
+  case CT_float:
+    tmp = "float";
+    break;
+  case CT_int:
+    tmp = "int";
+    break;
+  case CT_void:
+    tmp = "void";
+    break;
+  case CT_NULL:
+    DBUG_ASSERT(false, "unknown type detected!");
+  }
+
+  printf("%s %s", tmp, PARAM_NAME(node));
+
+  TRAVnext(node);
+
   return node;
 }
 

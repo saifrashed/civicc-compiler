@@ -48,7 +48,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
 %type <node> intval floatval boolval constant exprs expr cast ids
 %type <node> stmts stmt assign varlet program
-%type <node> decl decls globdef globdecl fundef fundefs funcall args arglist dims dimslist
+%type <node> decl decls globdef globdecl fundef fundefs funbody funcall vardecl args arglist exprs_dims id_dims dim param params
 %type <cmonop> monop
 %type <cbinop> binop
 %type <cdatatype> datatype
@@ -60,15 +60,11 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %left AND
 %left OR
 
-
 %nonassoc ROUNDBRACKET_L CURLYBRACKET_L SQUAREBRACKET_L
 %nonassoc ROUNDBRACKET_R CURLYBRACKET_R SQUAREBRACKET_R
 
 %nonassoc UMINUS
 %nonassoc ELSE
-
-%left ','
-%left ';'
 
 %start program
 
@@ -82,7 +78,7 @@ program: decls
 
 
 /*************************************
-  DECLARATIONS & DEFINITIONS                        
+  TOP LEVEL DECLARATIONS & DEFINITIONS                        
 *************************************/        
 
 
@@ -104,77 +100,170 @@ decl: globdef
       globdecl 
        {
          $$ = $1;
-       } 
+       }
+      |
+      fundef 
+       {
+         $$ = $1;
+       }   
        ;
 
 
+/*************************************
+  GLOBAL DECLARATIONS & DEFINITIONS                        
+*************************************/
 
 globdecl: 
-     EXTERN datatype[type] ID SEMICOLON
+     EXTERN datatype[type] ID SEMICOLON // example: extern int id;
        {
          $$ =  ASTglobdecl(NULL, $type, $3);
        } 
     |
-      EXTERN datatype[type] ID SQUAREBRACKET_L dimslist SQUAREBRACKET_R SEMICOLON
+      EXTERN datatype[type] SQUAREBRACKET_L id_dims SQUAREBRACKET_R ID SEMICOLON // example: extern int[a, b] id;
        {
-         $$ =  ASTglobdecl($5, $type, $3);
-       } 
-       ;
+         $$ =  ASTglobdecl($4, $type, $6);
+       };
   
+globdef: datatype[type] ID SEMICOLON // example: int id;
+        {
+          $$ =  ASTglobdef(NULL, NULL, $type, $2, false);
+        }
+        | datatype[type] SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON // example: int[1, 2] id;
+        {
+          $$ =  ASTglobdef($3, NULL, $type, $5, false);
+        }      
+        | datatype[type] ID LET expr SEMICOLON // example: int id = 123;
+        {
+          $$ =  ASTglobdef(NULL, $4, $type, $2, false);
+        }  
+        | datatype[type] SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON // example: int[1, 2] id = 123;
+        {
+          $$ =  ASTglobdef($3, $7, $type, $5, false);
+        }       
+        | EXPORT datatype[type] ID SEMICOLON // example: export int id;
+        {
+          $$ =  ASTglobdef(NULL, NULL, $type, $3, true);
+        }
+        | EXPORT datatype[type] SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON // example: export int[1, 2] id;
+        {
+          $$ =  ASTglobdef($4, NULL, $type, $6, true);
+        }
+        | EXPORT datatype[type] ID LET expr SEMICOLON // example: export int id = 123;
+        {
+          $$ =  ASTglobdef(NULL, $5, $type, $3, true);
+        }
+        | EXPORT datatype[type] SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON // example: export int[1, 2] id = 123;
+        {
+          $$ =  ASTglobdef($4, $8, $type, $6, true);
+        };
 
-globdef: 
-     datatype[type] ID SEMICOLON
-       {
-         $$ =  ASTglobdef(NULL, NULL, $1, $2, false);
-       }
-    |
-     datatype[type] ID LET expr SEMICOLON
-       {
-         $$ =  ASTglobdef(NULL, $4, $1, $2, false);
-       }   
-    |
-      EXPORT datatype[type] ID SEMICOLON
-       {
-         $$ =  ASTglobdef(NULL, NULL, $2, $3, true);
-       }
-    |
-      EXPORT datatype[type] ID LET expr SEMICOLON
-       {
-         $$ =  ASTglobdef(NULL, $5, $2, $3, true);
-       }
-       ;
-      
 /*************************************
   FUNCTIONS                        
 *************************************/
 
 
+fundef: datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R SEMICOLON
+        { 
+          $$ = ASTfundef(NULL, NULL, $1, $2, false);
+        }
+        | datatype[type] ID ROUNDBRACKET_L params ROUNDBRACKET_R SEMICOLON
+        { 
+          $$ = ASTfundef(NULL, $4, $1, $2, false);
+        }
+        | EXPORT datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R CURLYBRACKET_L CURLYBRACKET_R SEMICOLON
+        { 
+          $$ = ASTfundef(NULL, NULL, $2, $3, true); 
+        }
+        | EXPORT datatype[type] ID ROUNDBRACKET_L params ROUNDBRACKET_R CURLYBRACKET_L CURLYBRACKET_R SEMICOLON
+        { 
+          $$ = ASTfundef(NULL, $5, $2, $3, true); 
+        }
+        | EXTERN datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R SEMICOLON
+        {
+          $$ = ASTfundef(NULL, NULL, $2, $3, false); 
+        }
+        | EXTERN datatype[type] ID ROUNDBRACKET_L params ROUNDBRACKET_R SEMICOLON
+        { 
+          $$ = ASTfundef(NULL, $5, $2, $3, false); 
+        };
+
+
+
 funcall: ID ROUNDBRACKET_L args ROUNDBRACKET_R
-              {
-                $$ = ASTfuncall($3, $1);
-              }
-             | ID ROUNDBRACKET_L ROUNDBRACKET_R
-              {
-                $$ = ASTfuncall(NULL, $1);
-              }
-             ;
+        {
+          $$ = ASTfuncall($3, $1);
+        }
+        | ID ROUNDBRACKET_L ROUNDBRACKET_R
+        {
+          $$ = ASTfuncall(NULL, $1);
+        };
+
+/*************************************
+  ARGUMENT, PARAMETERS AND DIMENSION                        
+*************************************/
 
 args: arglist
       {
-            $$ = $1;
-      }    
-      ;
+        $$ = $1;
+      };
 
 arglist: expr
-          {
+        {
           $$ = ASTexprs($1, NULL);
-          }    
-        |
-         arglist COMMA expr
-         {
+        }    
+        | arglist COMMA expr
+        {
           $$ = ASTexprs($3, $1);
-         }    
+        }    
 
+params: param COMMA params
+      {
+        PARAM_NEXT($1) = $3;
+        $$ = $1;
+      }
+      | param
+      {
+        $$ = $1;
+      };
+
+param: datatype[type] ID
+      {
+        $$ = ASTparam(NULL, NULL, $2, $type);
+      }
+      | datatype[type] SQUAREBRACKET_L id_dims SQUAREBRACKET_R ID
+      {
+        $$ = ASTparam($3, NULL, $5, $type);
+      };          
+
+
+exprs_dims: dim COMMA exprs_dims
+      {
+        EXPRS_NEXT($1) = $3;
+        $$ = $1;
+      }
+      | dim
+      {
+        $$ = $1;
+      };
+
+id_dims: dim COMMA id_dims
+      {
+        IDS_NEXT($1) = $3;
+        $$ = $1;
+      }
+      | dim
+      {
+        $$ = $1;
+      };
+
+dim:  ID
+      {
+        $$ = ASTids(NULL, $1);
+      }
+      | expr
+      {
+        $$ = ASTexprs($1, NULL);
+      };      
 
 
 /*************************************
@@ -182,100 +271,78 @@ arglist: expr
 *************************************/
 
 stmts: stmt stmts
-        {
-          $$ = ASTstmts($1, $2);
-        }
+      {
+        $$ = ASTstmts($1, $2);
+      }
       | stmt
-        {
-          $$ = ASTstmts($1, NULL);
-        }
-        ;
+      {
+        $$ = ASTstmts($1, NULL);
+      };
 
 stmt: assign
-       {
-         $$ = $1;
-       }
-       ;
+      {
+        $$ = $1;
+      };
 
 assign: varlet LET expr SEMICOLON
         {
           $$ = ASTassign($1, $3);
-        }
-        ;
+        };
 
 varlet: ID
         {
           $$ = ASTvarlet($1);
           AddLocToNode($$, &@1, &@1);
-        }
-        ;
-
-dims: dimslist
-      {
-            $$ = $1;
-      }    
-      ;
-
-dimslist: ID
-          {
-          $$ = ASTids(NULL, $1);
-          }    
-        |
-         dimslist COMMA ID
-         {
-          $$ = ASTids($1, $3);
-         }    
+        };
 
 exprs: expr exprs
-        {
-          $$ = ASTexprs($1, $2);
-        }
+      {
+        $$ = ASTexprs($1, $2);
+      }
       | expr
-        {
-          $$ = ASTexprs($1, NULL);
-        }
-        ;
+      {
+        $$ = ASTexprs($1, NULL);
+      }
+      ;
 
 expr: ROUNDBRACKET_L expr ROUNDBRACKET_R
       {
         $$ = $2;
       }
-    | expr[left] binop[type] expr[right]
+      | expr[left] binop[type] expr[right] // CONFLICTS
       {
         $$ = ASTbinop( $left, $right, $type);
         AddLocToNode($$, &@left, &@right);
       }
-    | monop[type] expr[right]
+      | monop[type] expr[right] // CONFLICTS
       {
         $$ = ASTmonop($right, $type);
         AddLocToNode($$, &@right, &@right);
       }
-    | cast
+      | cast
       {
         $$ = $1;
       }   
-    | funcall
+      | funcall
       {
         $$ = $1;
         AddLocToNode($$, &@1, &@1);
       }     
-    | ID
+      | ID
       {
         $$ = ASTvar($1);
       }     
-    | constant
+      | constant
       {
         $$ = $1;
-      }
-    ;
+      };
 
 
 cast: ROUNDBRACKET_L datatype[type] ROUNDBRACKET_R expr
       {
         $$ = ASTcast($4, $type);
         AddLocToNode($$, &@1, &@1);
-      }   
-      ;
+      };
 
 
 /*************************************
@@ -286,37 +353,33 @@ constant: floatval
           {
             $$ = $1;
           }
-        | intval
+          | intval
           {
             $$ = $1;
           }
-        | boolval
+          | boolval
           {
             $$ = $1;
-          }
-        ;
+          };
 
 floatval: FLOAT
-           {
-             $$ = ASTfloat($1);
-           }
-         ;
+          {
+            $$ = ASTfloat($1);
+          };
 
 intval: NUM
         {
           $$ = ASTnum($1);
-        }
-      ;
+        };
 
 boolval: TRUEVAL
-         {
-           $$ = ASTbool(true);
-         }
-       | FALSEVAL
-         {
-           $$ = ASTbool(false);
-         }
-       ;
+        {
+          $$ = ASTbool(true);
+        }
+        | FALSEVAL
+        {
+          $$ = ASTbool(false);
+        };
 
 /*************************************
   BINARY OPERATORS                        
