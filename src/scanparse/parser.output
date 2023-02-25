@@ -1,0 +1,1415 @@
+Nonterminals useless in grammar
+
+    fundef
+    fundefs
+    stmts
+    stmt
+    assign
+    varlet
+    ids
+    exprs
+    cast
+
+
+Terminals unused in grammar
+
+    CURLYBRACKET_L
+    CURLYBRACKET_R
+    SQUAREBRACKET_L
+    SQUAREBRACKET_R
+    IF
+    ELSE
+    WHILE
+    DO
+    FOR
+    RETURN
+    UMINUS
+
+
+Rules useless in grammar
+
+   49 stmts: stmt stmts
+   50      | stmt
+
+   51 stmt: assign
+
+   52 assign: varlet LET expr SEMICOLON
+
+   53 varlet: ID
+
+   54 ids: ID ids
+   55    | ID
+
+   56 exprs: expr exprs
+   57      | expr
+
+   58 cast: ROUNDBRACKET_L datatype ROUNDBRACKET_R expr
+
+
+State 59 conflicts: 13 shift/reduce
+State 67 conflicts: 13 shift/reduce
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: decls
+
+    2 decls: decl decls
+    3      | decl
+
+    4 decl: globdef
+    5     | globdecl
+
+    6 globdecl: EXTERN datatype ID SEMICOLON
+
+    7 globdef: datatype ID SEMICOLON
+    8        | datatype ID LET expr SEMICOLON
+    9        | EXPORT datatype ID SEMICOLON
+   10        | EXPORT datatype ID LET expr SEMICOLON
+
+   11 funcall: ID ROUNDBRACKET_L args ROUNDBRACKET_R
+   12        | ID ROUNDBRACKET_L ROUNDBRACKET_R
+
+   13 args: arglist
+
+   14 arglist: expr
+   15        | arglist COMMA expr
+
+   16 expr: ROUNDBRACKET_L expr ROUNDBRACKET_R
+   17     | expr binop expr
+   18     | monop expr
+   19     | ROUNDBRACKET_L datatype ROUNDBRACKET_R expr
+   20     | funcall
+   21     | ID
+   22     | constant
+
+   23 constant: floatval
+   24         | intval
+   25         | boolval
+
+   26 floatval: FLOAT
+
+   27 intval: NUM
+
+   28 boolval: TRUEVAL
+   29        | FALSEVAL
+
+   30 binop: PLUS
+   31      | MINUS
+   32      | STAR
+   33      | SLASH
+   34      | PERCENT
+   35      | LE
+   36      | LT
+   37      | GE
+   38      | GT
+   39      | EQ
+   40      | OR
+   41      | AND
+   42      | NE
+
+   43 monop: MINUS
+   44      | NEG
+
+   45 datatype: VOIDTYPE
+   46         | INTTYPE
+   47         | FLOATTYPE
+   48         | BOOLTYPE
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    ROUNDBRACKET_L (258) 11 12 16 19
+    ROUNDBRACKET_R (259) 11 12 16 19
+    CURLYBRACKET_L (260)
+    CURLYBRACKET_R (261)
+    SQUAREBRACKET_L (262)
+    SQUAREBRACKET_R (263)
+    COMMA (264) 15
+    SEMICOLON (265) 6 7 8 9 10
+    MINUS (266) 31 43
+    PLUS (267) 30
+    STAR (268) 32
+    SLASH (269) 33
+    PERCENT (270) 34
+    LE (271) 35
+    LT (272) 36
+    GE (273) 37
+    GT (274) 38
+    EQ (275) 39
+    NE (276) 42
+    OR (277) 40
+    AND (278) 41
+    NEG (279) 44
+    TRUEVAL (280) 28
+    FALSEVAL (281) 29
+    LET (282) 8 10
+    IF (283)
+    ELSE (284)
+    WHILE (285)
+    DO (286)
+    FOR (287)
+    RETURN (288)
+    EXPORT (289) 9 10
+    EXTERN (290) 6
+    BOOLTYPE (291) 48
+    FLOATTYPE (292) 47
+    INTTYPE (293) 46
+    VOIDTYPE (294) 45
+    NUM <cint> (295) 27
+    FLOAT <cflt> (296) 26
+    ID <id> (297) 6 7 8 9 10 11 12 21
+    UMINUS (298)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (44)
+        on left: 0
+    program <node> (45)
+        on left: 1
+        on right: 0
+    decls <node> (46)
+        on left: 2 3
+        on right: 1 2
+    decl <node> (47)
+        on left: 4 5
+        on right: 2 3
+    globdecl <node> (48)
+        on left: 6
+        on right: 5
+    globdef <node> (49)
+        on left: 7 8 9 10
+        on right: 4
+    funcall <node> (50)
+        on left: 11 12
+        on right: 20
+    args <node> (51)
+        on left: 13
+        on right: 11
+    arglist <node> (52)
+        on left: 14 15
+        on right: 13 15
+    expr <node> (53)
+        on left: 16 17 18 19 20 21 22
+        on right: 8 10 14 15 16 17 18 19
+    constant <node> (54)
+        on left: 23 24 25
+        on right: 22
+    floatval <node> (55)
+        on left: 26
+        on right: 23
+    intval <node> (56)
+        on left: 27
+        on right: 24
+    boolval <node> (57)
+        on left: 28 29
+        on right: 25
+    binop <cbinop> (58)
+        on left: 30 31 32 33 34 35 36 37 38 39 40 41 42
+        on right: 17
+    monop <cmonop> (59)
+        on left: 43 44
+        on right: 18
+    datatype <cdatatype> (60)
+        on left: 45 46 47 48
+        on right: 6 7 8 9 10 19
+
+
+State 0
+
+    0 $accept: • program $end
+
+    EXPORT     shift, and go to state 1
+    EXTERN     shift, and go to state 2
+    BOOLTYPE   shift, and go to state 3
+    FLOATTYPE  shift, and go to state 4
+    INTTYPE    shift, and go to state 5
+    VOIDTYPE   shift, and go to state 6
+
+    program   go to state 7
+    decls     go to state 8
+    decl      go to state 9
+    globdecl  go to state 10
+    globdef   go to state 11
+    datatype  go to state 12
+
+
+State 1
+
+    9 globdef: EXPORT • datatype ID SEMICOLON
+   10        | EXPORT • datatype ID LET expr SEMICOLON
+
+    BOOLTYPE   shift, and go to state 3
+    FLOATTYPE  shift, and go to state 4
+    INTTYPE    shift, and go to state 5
+    VOIDTYPE   shift, and go to state 6
+
+    datatype  go to state 13
+
+
+State 2
+
+    6 globdecl: EXTERN • datatype ID SEMICOLON
+
+    BOOLTYPE   shift, and go to state 3
+    FLOATTYPE  shift, and go to state 4
+    INTTYPE    shift, and go to state 5
+    VOIDTYPE   shift, and go to state 6
+
+    datatype  go to state 14
+
+
+State 3
+
+   48 datatype: BOOLTYPE •
+
+    $default  reduce using rule 48 (datatype)
+
+
+State 4
+
+   47 datatype: FLOATTYPE •
+
+    $default  reduce using rule 47 (datatype)
+
+
+State 5
+
+   46 datatype: INTTYPE •
+
+    $default  reduce using rule 46 (datatype)
+
+
+State 6
+
+   45 datatype: VOIDTYPE •
+
+    $default  reduce using rule 45 (datatype)
+
+
+State 7
+
+    0 $accept: program • $end
+
+    $end  shift, and go to state 15
+
+
+State 8
+
+    1 program: decls •
+
+    $default  reduce using rule 1 (program)
+
+
+State 9
+
+    2 decls: decl • decls
+    3      | decl •
+
+    EXPORT     shift, and go to state 1
+    EXTERN     shift, and go to state 2
+    BOOLTYPE   shift, and go to state 3
+    FLOATTYPE  shift, and go to state 4
+    INTTYPE    shift, and go to state 5
+    VOIDTYPE   shift, and go to state 6
+
+    $default  reduce using rule 3 (decls)
+
+    decls     go to state 16
+    decl      go to state 9
+    globdecl  go to state 10
+    globdef   go to state 11
+    datatype  go to state 12
+
+
+State 10
+
+    5 decl: globdecl •
+
+    $default  reduce using rule 5 (decl)
+
+
+State 11
+
+    4 decl: globdef •
+
+    $default  reduce using rule 4 (decl)
+
+
+State 12
+
+    7 globdef: datatype • ID SEMICOLON
+    8        | datatype • ID LET expr SEMICOLON
+
+    ID  shift, and go to state 17
+
+
+State 13
+
+    9 globdef: EXPORT datatype • ID SEMICOLON
+   10        | EXPORT datatype • ID LET expr SEMICOLON
+
+    ID  shift, and go to state 18
+
+
+State 14
+
+    6 globdecl: EXTERN datatype • ID SEMICOLON
+
+    ID  shift, and go to state 19
+
+
+State 15
+
+    0 $accept: program $end •
+
+    $default  accept
+
+
+State 16
+
+    2 decls: decl decls •
+
+    $default  reduce using rule 2 (decls)
+
+
+State 17
+
+    7 globdef: datatype ID • SEMICOLON
+    8        | datatype ID • LET expr SEMICOLON
+
+    SEMICOLON  shift, and go to state 20
+    LET        shift, and go to state 21
+
+
+State 18
+
+    9 globdef: EXPORT datatype ID • SEMICOLON
+   10        | EXPORT datatype ID • LET expr SEMICOLON
+
+    SEMICOLON  shift, and go to state 22
+    LET        shift, and go to state 23
+
+
+State 19
+
+    6 globdecl: EXTERN datatype ID • SEMICOLON
+
+    SEMICOLON  shift, and go to state 24
+
+
+State 20
+
+    7 globdef: datatype ID SEMICOLON •
+
+    $default  reduce using rule 7 (globdef)
+
+
+State 21
+
+    8 globdef: datatype ID LET • expr SEMICOLON
+
+    ROUNDBRACKET_L  shift, and go to state 25
+    MINUS           shift, and go to state 26
+    NEG             shift, and go to state 27
+    TRUEVAL         shift, and go to state 28
+    FALSEVAL        shift, and go to state 29
+    NUM             shift, and go to state 30
+    FLOAT           shift, and go to state 31
+    ID              shift, and go to state 32
+
+    funcall   go to state 33
+    expr      go to state 34
+    constant  go to state 35
+    floatval  go to state 36
+    intval    go to state 37
+    boolval   go to state 38
+    monop     go to state 39
+
+
+State 22
+
+    9 globdef: EXPORT datatype ID SEMICOLON •
+
+    $default  reduce using rule 9 (globdef)
+
+
+State 23
+
+   10 globdef: EXPORT datatype ID LET • expr SEMICOLON
+
+    ROUNDBRACKET_L  shift, and go to state 25
+    MINUS           shift, and go to state 26
+    NEG             shift, and go to state 27
+    TRUEVAL         shift, and go to state 28
+    FALSEVAL        shift, and go to state 29
+    NUM             shift, and go to state 30
+    FLOAT           shift, and go to state 31
+    ID              shift, and go to state 32
+
+    funcall   go to state 33
+    expr      go to state 40
+    constant  go to state 35
+    floatval  go to state 36
+    intval    go to state 37
+    boolval   go to state 38
+    monop     go to state 39
+
+
+State 24
+
+    6 globdecl: EXTERN datatype ID SEMICOLON •
+
+    $default  reduce using rule 6 (globdecl)
+
+
+State 25
+
+   16 expr: ROUNDBRACKET_L • expr ROUNDBRACKET_R
+   19     | ROUNDBRACKET_L • datatype ROUNDBRACKET_R expr
+
+    ROUNDBRACKET_L  shift, and go to state 25
+    MINUS           shift, and go to state 26
+    NEG             shift, and go to state 27
+    TRUEVAL         shift, and go to state 28
+    FALSEVAL        shift, and go to state 29
+    BOOLTYPE        shift, and go to state 3
+    FLOATTYPE       shift, and go to state 4
+    INTTYPE         shift, and go to state 5
+    VOIDTYPE        shift, and go to state 6
+    NUM             shift, and go to state 30
+    FLOAT           shift, and go to state 31
+    ID              shift, and go to state 32
+
+    funcall   go to state 33
+    expr      go to state 41
+    constant  go to state 35
+    floatval  go to state 36
+    intval    go to state 37
+    boolval   go to state 38
+    monop     go to state 39
+    datatype  go to state 42
+
+
+State 26
+
+   43 monop: MINUS •
+
+    $default  reduce using rule 43 (monop)
+
+
+State 27
+
+   44 monop: NEG •
+
+    $default  reduce using rule 44 (monop)
+
+
+State 28
+
+   28 boolval: TRUEVAL •
+
+    $default  reduce using rule 28 (boolval)
+
+
+State 29
+
+   29 boolval: FALSEVAL •
+
+    $default  reduce using rule 29 (boolval)
+
+
+State 30
+
+   27 intval: NUM •
+
+    $default  reduce using rule 27 (intval)
+
+
+State 31
+
+   26 floatval: FLOAT •
+
+    $default  reduce using rule 26 (floatval)
+
+
+State 32
+
+   11 funcall: ID • ROUNDBRACKET_L args ROUNDBRACKET_R
+   12        | ID • ROUNDBRACKET_L ROUNDBRACKET_R
+   21 expr: ID •
+
+    ROUNDBRACKET_L  shift, and go to state 43
+
+    $default  reduce using rule 21 (expr)
+
+
+State 33
+
+   20 expr: funcall •
+
+    $default  reduce using rule 20 (expr)
+
+
+State 34
+
+    8 globdef: datatype ID LET expr • SEMICOLON
+   17 expr: expr • binop expr
+
+    SEMICOLON  shift, and go to state 44
+    MINUS      shift, and go to state 45
+    PLUS       shift, and go to state 46
+    STAR       shift, and go to state 47
+    SLASH      shift, and go to state 48
+    PERCENT    shift, and go to state 49
+    LE         shift, and go to state 50
+    LT         shift, and go to state 51
+    GE         shift, and go to state 52
+    GT         shift, and go to state 53
+    EQ         shift, and go to state 54
+    NE         shift, and go to state 55
+    OR         shift, and go to state 56
+    AND        shift, and go to state 57
+
+    binop  go to state 58
+
+
+State 35
+
+   22 expr: constant •
+
+    $default  reduce using rule 22 (expr)
+
+
+State 36
+
+   23 constant: floatval •
+
+    $default  reduce using rule 23 (constant)
+
+
+State 37
+
+   24 constant: intval •
+
+    $default  reduce using rule 24 (constant)
+
+
+State 38
+
+   25 constant: boolval •
+
+    $default  reduce using rule 25 (constant)
+
+
+State 39
+
+   18 expr: monop • expr
+
+    ROUNDBRACKET_L  shift, and go to state 25
+    MINUS           shift, and go to state 26
+    NEG             shift, and go to state 27
+    TRUEVAL         shift, and go to state 28
+    FALSEVAL        shift, and go to state 29
+    NUM             shift, and go to state 30
+    FLOAT           shift, and go to state 31
+    ID              shift, and go to state 32
+
+    funcall   go to state 33
+    expr      go to state 59
+    constant  go to state 35
+    floatval  go to state 36
+    intval    go to state 37
+    boolval   go to state 38
+    monop     go to state 39
+
+
+State 40
+
+   10 globdef: EXPORT datatype ID LET expr • SEMICOLON
+   17 expr: expr • binop expr
+
+    SEMICOLON  shift, and go to state 60
+    MINUS      shift, and go to state 45
+    PLUS       shift, and go to state 46
+    STAR       shift, and go to state 47
+    SLASH      shift, and go to state 48
+    PERCENT    shift, and go to state 49
+    LE         shift, and go to state 50
+    LT         shift, and go to state 51
+    GE         shift, and go to state 52
+    GT         shift, and go to state 53
+    EQ         shift, and go to state 54
+    NE         shift, and go to state 55
+    OR         shift, and go to state 56
+    AND        shift, and go to state 57
+
+    binop  go to state 58
+
+
+State 41
+
+   16 expr: ROUNDBRACKET_L expr • ROUNDBRACKET_R
+   17     | expr • binop expr
+
+    ROUNDBRACKET_R  shift, and go to state 61
+    MINUS           shift, and go to state 45
+    PLUS            shift, and go to state 46
+    STAR            shift, and go to state 47
+    SLASH           shift, and go to state 48
+    PERCENT         shift, and go to state 49
+    LE              shift, and go to state 50
+    LT              shift, and go to state 51
+    GE              shift, and go to state 52
+    GT              shift, and go to state 53
+    EQ              shift, and go to state 54
+    NE              shift, and go to state 55
+    OR              shift, and go to state 56
+    AND             shift, and go to state 57
+
+    binop  go to state 58
+
+
+State 42
+
+   19 expr: ROUNDBRACKET_L datatype • ROUNDBRACKET_R expr
+
+    ROUNDBRACKET_R  shift, and go to state 62
+
+
+State 43
+
+   11 funcall: ID ROUNDBRACKET_L • args ROUNDBRACKET_R
+   12        | ID ROUNDBRACKET_L • ROUNDBRACKET_R
+
+    ROUNDBRACKET_L  shift, and go to state 25
+    ROUNDBRACKET_R  shift, and go to state 63
+    MINUS           shift, and go to state 26
+    NEG             shift, and go to state 27
+    TRUEVAL         shift, and go to state 28
+    FALSEVAL        shift, and go to state 29
+    NUM             shift, and go to state 30
+    FLOAT           shift, and go to state 31
+    ID              shift, and go to state 32
+
+    funcall   go to state 33
+    args      go to state 64
+    arglist   go to state 65
+    expr      go to state 66
+    constant  go to state 35
+    floatval  go to state 36
+    intval    go to state 37
+    boolval   go to state 38
+    monop     go to state 39
+
+
+State 44
+
+    8 globdef: datatype ID LET expr SEMICOLON •
+
+    $default  reduce using rule 8 (globdef)
+
+
+State 45
+
+   31 binop: MINUS •
+
+    $default  reduce using rule 31 (binop)
+
+
+State 46
+
+   30 binop: PLUS •
+
+    $default  reduce using rule 30 (binop)
+
+
+State 47
+
+   32 binop: STAR •
+
+    $default  reduce using rule 32 (binop)
+
+
+State 48
+
+   33 binop: SLASH •
+
+    $default  reduce using rule 33 (binop)
+
+
+State 49
+
+   34 binop: PERCENT •
+
+    $default  reduce using rule 34 (binop)
+
+
+State 50
+
+   35 binop: LE •
+
+    $default  reduce using rule 35 (binop)
+
+
+State 51
+
+   36 binop: LT •
+
+    $default  reduce using rule 36 (binop)
+
+
+State 52
+
+   37 binop: GE •
+
+    $default  reduce using rule 37 (binop)
+
+
+State 53
+
+   38 binop: GT •
+
+    $default  reduce using rule 38 (binop)
+
+
+State 54
+
+   39 binop: EQ •
+
+    $default  reduce using rule 39 (binop)
+
+
+State 55
+
+   42 binop: NE •
+
+    $default  reduce using rule 42 (binop)
+
+
+State 56
+
+   40 binop: OR •
+
+    $default  reduce using rule 40 (binop)
+
+
+State 57
+
+   41 binop: AND •
+
+    $default  reduce using rule 41 (binop)
+
+
+State 58
+
+   17 expr: expr binop • expr
+
+    ROUNDBRACKET_L  shift, and go to state 25
+    MINUS           shift, and go to state 26
+    NEG             shift, and go to state 27
+    TRUEVAL         shift, and go to state 28
+    FALSEVAL        shift, and go to state 29
+    NUM             shift, and go to state 30
+    FLOAT           shift, and go to state 31
+    ID              shift, and go to state 32
+
+    funcall   go to state 33
+    expr      go to state 67
+    constant  go to state 35
+    floatval  go to state 36
+    intval    go to state 37
+    boolval   go to state 38
+    monop     go to state 39
+
+
+State 59
+
+   17 expr: expr • binop expr
+   18     | monop expr •
+
+    MINUS    shift, and go to state 45
+    PLUS     shift, and go to state 46
+    STAR     shift, and go to state 47
+    SLASH    shift, and go to state 48
+    PERCENT  shift, and go to state 49
+    LE       shift, and go to state 50
+    LT       shift, and go to state 51
+    GE       shift, and go to state 52
+    GT       shift, and go to state 53
+    EQ       shift, and go to state 54
+    NE       shift, and go to state 55
+    OR       shift, and go to state 56
+    AND      shift, and go to state 57
+
+    MINUS     [reduce using rule 18 (expr)]
+    PLUS      [reduce using rule 18 (expr)]
+    STAR      [reduce using rule 18 (expr)]
+    SLASH     [reduce using rule 18 (expr)]
+    PERCENT   [reduce using rule 18 (expr)]
+    LE        [reduce using rule 18 (expr)]
+    LT        [reduce using rule 18 (expr)]
+    GE        [reduce using rule 18 (expr)]
+    GT        [reduce using rule 18 (expr)]
+    EQ        [reduce using rule 18 (expr)]
+    NE        [reduce using rule 18 (expr)]
+    OR        [reduce using rule 18 (expr)]
+    AND       [reduce using rule 18 (expr)]
+    $default  reduce using rule 18 (expr)
+
+    binop  go to state 58
+
+    shift/reduce conflict on token PLUS:
+       18 expr: monop expr •
+       30 binop: • PLUS
+      Example: monop expr • PLUS expr
+      Shift derivation
+        expr
+        ↳ 18: monop expr
+                    ↳ 17: expr binop        expr
+                               ↳ 30: • PLUS
+      Reduce derivation
+        expr
+        ↳ 17: expr               binop      expr
+              ↳ 18: monop expr • ↳ 30: PLUS
+
+    shift/reduce conflict on token MINUS:
+       18 expr: monop expr •
+       31 binop: • MINUS
+      Example: monop expr • MINUS expr
+      Shift derivation
+        expr
+        ↳ 18: monop expr
+                    ↳ 17: expr binop         expr
+                               ↳ 31: • MINUS
+      Reduce derivation
+        expr
+        ↳ 17: expr               binop       expr
+              ↳ 18: monop expr • ↳ 31: MINUS
+
+    shift/reduce conflict on token STAR:
+       18 expr: monop expr •
+       32 binop: • STAR
+      Example: monop expr • STAR expr
+      Shift derivation
+        expr
+        ↳ 18: monop expr
+                    ↳ 17: expr binop        expr
+                               ↳ 32: • STAR
+      Reduce derivation
+        expr
+        ↳ 17: expr               binop      expr
+              ↳ 18: monop expr • ↳ 32: STAR
+
+    shift/reduce conflict on token SLASH:
+       18 expr: monop expr •
+       33 binop: • SLASH
+      Example: monop expr • SLASH expr
+      Shift derivation
+        expr
+        ↳ 18: monop expr
+                    ↳ 17: expr binop         expr
+                               ↳ 33: • SLASH
+      Reduce derivation
+        expr
+        ↳ 17: expr               binop       expr
+              ↳ 18: monop expr • ↳ 33: SLASH
+
+    shift/reduce conflict on token PERCENT:
+       18 expr: monop expr •
+       34 binop: • PERCENT
+      Example: monop expr • PERCENT expr
+      Shift derivation
+        expr
+        ↳ 18: monop expr
+                    ↳ 17: expr binop           expr
+                               ↳ 34: • PERCENT
+      Reduce derivation
+        expr
+        ↳ 17: expr               binop         expr
+              ↳ 18: monop expr • ↳ 34: PERCENT
+
+    shift/reduce conflict on token LE:
+       18 expr: monop expr •
+       35 binop: • LE
+      Example: monop expr • LE expr
+      Shift derivation
+        expr
+        ↳ 18: monop expr
+                    ↳ 17: expr binop      expr
+                               ↳ 35: • LE
+      Reduce derivation
+        expr
+        ↳ 17: expr               binop    expr
+              ↳ 18: monop expr • ↳ 35: LE
+
+    shift/reduce conflict on token LT:
+       18 expr: monop expr •
+       36 binop: • LT
+      Example: monop expr • LT expr
+      Shift derivation
+        expr
+        ↳ 18: monop expr
+                    ↳ 17: expr binop      expr
+                               ↳ 36: • LT
+      Reduce derivation
+        expr
+        ↳ 17: expr               binop    expr
+              ↳ 18: monop expr • ↳ 36: LT
+
+    shift/reduce conflict on token GE:
+       18 expr: monop expr •
+       37 binop: • GE
+      Example: monop expr • GE expr
+      Shift derivation
+        expr
+        ↳ 18: monop expr
+                    ↳ 17: expr binop      expr
+                               ↳ 37: • GE
+      Reduce derivation
+        expr
+        ↳ 17: expr               binop    expr
+              ↳ 18: monop expr • ↳ 37: GE
+
+    shift/reduce conflict on token GT:
+       18 expr: monop expr •
+       38 binop: • GT
+      Example: monop expr • GT expr
+      Shift derivation
+        expr
+        ↳ 18: monop expr
+                    ↳ 17: expr binop      expr
+                               ↳ 38: • GT
+      Reduce derivation
+        expr
+        ↳ 17: expr               binop    expr
+              ↳ 18: monop expr • ↳ 38: GT
+
+    shift/reduce conflict on token EQ:
+       18 expr: monop expr •
+       39 binop: • EQ
+      Example: monop expr • EQ expr
+      Shift derivation
+        expr
+        ↳ 18: monop expr
+                    ↳ 17: expr binop      expr
+                               ↳ 39: • EQ
+      Reduce derivation
+        expr
+        ↳ 17: expr               binop    expr
+              ↳ 18: monop expr • ↳ 39: EQ
+
+    shift/reduce conflict on token OR:
+       18 expr: monop expr •
+       40 binop: • OR
+      Example: monop expr • OR expr
+      Shift derivation
+        expr
+        ↳ 18: monop expr
+                    ↳ 17: expr binop      expr
+                               ↳ 40: • OR
+      Reduce derivation
+        expr
+        ↳ 17: expr               binop    expr
+              ↳ 18: monop expr • ↳ 40: OR
+
+    shift/reduce conflict on token AND:
+       18 expr: monop expr •
+       41 binop: • AND
+      Example: monop expr • AND expr
+      Shift derivation
+        expr
+        ↳ 18: monop expr
+                    ↳ 17: expr binop       expr
+                               ↳ 41: • AND
+      Reduce derivation
+        expr
+        ↳ 17: expr               binop     expr
+              ↳ 18: monop expr • ↳ 41: AND
+
+    shift/reduce conflict on token NE:
+       18 expr: monop expr •
+       42 binop: • NE
+      Example: monop expr • NE expr
+      Shift derivation
+        expr
+        ↳ 18: monop expr
+                    ↳ 17: expr binop      expr
+                               ↳ 42: • NE
+      Reduce derivation
+        expr
+        ↳ 17: expr               binop    expr
+              ↳ 18: monop expr • ↳ 42: NE
+
+
+
+State 60
+
+   10 globdef: EXPORT datatype ID LET expr SEMICOLON •
+
+    $default  reduce using rule 10 (globdef)
+
+
+State 61
+
+   16 expr: ROUNDBRACKET_L expr ROUNDBRACKET_R •
+
+    $default  reduce using rule 16 (expr)
+
+
+State 62
+
+   19 expr: ROUNDBRACKET_L datatype ROUNDBRACKET_R • expr
+
+    ROUNDBRACKET_L  shift, and go to state 25
+    MINUS           shift, and go to state 26
+    NEG             shift, and go to state 27
+    TRUEVAL         shift, and go to state 28
+    FALSEVAL        shift, and go to state 29
+    NUM             shift, and go to state 30
+    FLOAT           shift, and go to state 31
+    ID              shift, and go to state 32
+
+    funcall   go to state 33
+    expr      go to state 68
+    constant  go to state 35
+    floatval  go to state 36
+    intval    go to state 37
+    boolval   go to state 38
+    monop     go to state 39
+
+
+State 63
+
+   12 funcall: ID ROUNDBRACKET_L ROUNDBRACKET_R •
+
+    $default  reduce using rule 12 (funcall)
+
+
+State 64
+
+   11 funcall: ID ROUNDBRACKET_L args • ROUNDBRACKET_R
+
+    ROUNDBRACKET_R  shift, and go to state 69
+
+
+State 65
+
+   13 args: arglist •
+   15 arglist: arglist • COMMA expr
+
+    COMMA  shift, and go to state 70
+
+    $default  reduce using rule 13 (args)
+
+
+State 66
+
+   14 arglist: expr •
+   17 expr: expr • binop expr
+
+    MINUS    shift, and go to state 45
+    PLUS     shift, and go to state 46
+    STAR     shift, and go to state 47
+    SLASH    shift, and go to state 48
+    PERCENT  shift, and go to state 49
+    LE       shift, and go to state 50
+    LT       shift, and go to state 51
+    GE       shift, and go to state 52
+    GT       shift, and go to state 53
+    EQ       shift, and go to state 54
+    NE       shift, and go to state 55
+    OR       shift, and go to state 56
+    AND      shift, and go to state 57
+
+    $default  reduce using rule 14 (arglist)
+
+    binop  go to state 58
+
+
+State 67
+
+   17 expr: expr • binop expr
+   17     | expr binop expr •
+
+    MINUS    shift, and go to state 45
+    PLUS     shift, and go to state 46
+    STAR     shift, and go to state 47
+    SLASH    shift, and go to state 48
+    PERCENT  shift, and go to state 49
+    LE       shift, and go to state 50
+    LT       shift, and go to state 51
+    GE       shift, and go to state 52
+    GT       shift, and go to state 53
+    EQ       shift, and go to state 54
+    NE       shift, and go to state 55
+    OR       shift, and go to state 56
+    AND      shift, and go to state 57
+
+    MINUS     [reduce using rule 17 (expr)]
+    PLUS      [reduce using rule 17 (expr)]
+    STAR      [reduce using rule 17 (expr)]
+    SLASH     [reduce using rule 17 (expr)]
+    PERCENT   [reduce using rule 17 (expr)]
+    LE        [reduce using rule 17 (expr)]
+    LT        [reduce using rule 17 (expr)]
+    GE        [reduce using rule 17 (expr)]
+    GT        [reduce using rule 17 (expr)]
+    EQ        [reduce using rule 17 (expr)]
+    NE        [reduce using rule 17 (expr)]
+    OR        [reduce using rule 17 (expr)]
+    AND       [reduce using rule 17 (expr)]
+    $default  reduce using rule 17 (expr)
+
+    binop  go to state 58
+
+    shift/reduce conflict on token PLUS:
+       17 expr: expr binop expr •
+       30 binop: • PLUS
+      Example: expr binop expr • PLUS expr
+      Shift derivation
+        expr
+        ↳ 17: expr binop expr
+                         ↳ 17: expr binop        expr
+                                    ↳ 30: • PLUS
+      Reduce derivation
+        expr
+        ↳ 17: expr                    binop      expr
+              ↳ 17: expr binop expr • ↳ 30: PLUS
+
+    shift/reduce conflict on token MINUS:
+       17 expr: expr binop expr •
+       31 binop: • MINUS
+      Example: expr binop expr • MINUS expr
+      Shift derivation
+        expr
+        ↳ 17: expr binop expr
+                         ↳ 17: expr binop         expr
+                                    ↳ 31: • MINUS
+      Reduce derivation
+        expr
+        ↳ 17: expr                    binop       expr
+              ↳ 17: expr binop expr • ↳ 31: MINUS
+
+    shift/reduce conflict on token STAR:
+       17 expr: expr binop expr •
+       32 binop: • STAR
+      Example: expr binop expr • STAR expr
+      Shift derivation
+        expr
+        ↳ 17: expr binop expr
+                         ↳ 17: expr binop        expr
+                                    ↳ 32: • STAR
+      Reduce derivation
+        expr
+        ↳ 17: expr                    binop      expr
+              ↳ 17: expr binop expr • ↳ 32: STAR
+
+    shift/reduce conflict on token SLASH:
+       17 expr: expr binop expr •
+       33 binop: • SLASH
+      Example: expr binop expr • SLASH expr
+      Shift derivation
+        expr
+        ↳ 17: expr binop expr
+                         ↳ 17: expr binop         expr
+                                    ↳ 33: • SLASH
+      Reduce derivation
+        expr
+        ↳ 17: expr                    binop       expr
+              ↳ 17: expr binop expr • ↳ 33: SLASH
+
+    shift/reduce conflict on token PERCENT:
+       17 expr: expr binop expr •
+       34 binop: • PERCENT
+      Example: expr binop expr • PERCENT expr
+      Shift derivation
+        expr
+        ↳ 17: expr binop expr
+                         ↳ 17: expr binop           expr
+                                    ↳ 34: • PERCENT
+      Reduce derivation
+        expr
+        ↳ 17: expr                    binop         expr
+              ↳ 17: expr binop expr • ↳ 34: PERCENT
+
+    shift/reduce conflict on token LE:
+       17 expr: expr binop expr •
+       35 binop: • LE
+      Example: expr binop expr • LE expr
+      Shift derivation
+        expr
+        ↳ 17: expr binop expr
+                         ↳ 17: expr binop      expr
+                                    ↳ 35: • LE
+      Reduce derivation
+        expr
+        ↳ 17: expr                    binop    expr
+              ↳ 17: expr binop expr • ↳ 35: LE
+
+    shift/reduce conflict on token LT:
+       17 expr: expr binop expr •
+       36 binop: • LT
+      Example: expr binop expr • LT expr
+      Shift derivation
+        expr
+        ↳ 17: expr binop expr
+                         ↳ 17: expr binop      expr
+                                    ↳ 36: • LT
+      Reduce derivation
+        expr
+        ↳ 17: expr                    binop    expr
+              ↳ 17: expr binop expr • ↳ 36: LT
+
+    shift/reduce conflict on token GE:
+       17 expr: expr binop expr •
+       37 binop: • GE
+      Example: expr binop expr • GE expr
+      Shift derivation
+        expr
+        ↳ 17: expr binop expr
+                         ↳ 17: expr binop      expr
+                                    ↳ 37: • GE
+      Reduce derivation
+        expr
+        ↳ 17: expr                    binop    expr
+              ↳ 17: expr binop expr • ↳ 37: GE
+
+    shift/reduce conflict on token GT:
+       17 expr: expr binop expr •
+       38 binop: • GT
+      Example: expr binop expr • GT expr
+      Shift derivation
+        expr
+        ↳ 17: expr binop expr
+                         ↳ 17: expr binop      expr
+                                    ↳ 38: • GT
+      Reduce derivation
+        expr
+        ↳ 17: expr                    binop    expr
+              ↳ 17: expr binop expr • ↳ 38: GT
+
+    shift/reduce conflict on token EQ:
+       17 expr: expr binop expr •
+       39 binop: • EQ
+      Example: expr binop expr • EQ expr
+      Shift derivation
+        expr
+        ↳ 17: expr binop expr
+                         ↳ 17: expr binop      expr
+                                    ↳ 39: • EQ
+      Reduce derivation
+        expr
+        ↳ 17: expr                    binop    expr
+              ↳ 17: expr binop expr • ↳ 39: EQ
+
+    shift/reduce conflict on token OR:
+       17 expr: expr binop expr •
+       40 binop: • OR
+      Example: expr binop expr • OR expr
+      Shift derivation
+        expr
+        ↳ 17: expr binop expr
+                         ↳ 17: expr binop      expr
+                                    ↳ 40: • OR
+      Reduce derivation
+        expr
+        ↳ 17: expr                    binop    expr
+              ↳ 17: expr binop expr • ↳ 40: OR
+
+    shift/reduce conflict on token AND:
+       17 expr: expr binop expr •
+       41 binop: • AND
+      Example: expr binop expr • AND expr
+      Shift derivation
+        expr
+        ↳ 17: expr binop expr
+                         ↳ 17: expr binop       expr
+                                    ↳ 41: • AND
+      Reduce derivation
+        expr
+        ↳ 17: expr                    binop     expr
+              ↳ 17: expr binop expr • ↳ 41: AND
+
+    shift/reduce conflict on token NE:
+       17 expr: expr binop expr •
+       42 binop: • NE
+      Example: expr binop expr • NE expr
+      Shift derivation
+        expr
+        ↳ 17: expr binop expr
+                         ↳ 17: expr binop      expr
+                                    ↳ 42: • NE
+      Reduce derivation
+        expr
+        ↳ 17: expr                    binop    expr
+              ↳ 17: expr binop expr • ↳ 42: NE
+
+
+
+State 68
+
+   17 expr: expr • binop expr
+   19     | ROUNDBRACKET_L datatype ROUNDBRACKET_R expr •
+
+    $default  reduce using rule 19 (expr)
+
+    binop  go to state 58
+
+
+State 69
+
+   11 funcall: ID ROUNDBRACKET_L args ROUNDBRACKET_R •
+
+    $default  reduce using rule 11 (funcall)
+
+
+State 70
+
+   15 arglist: arglist COMMA • expr
+
+    ROUNDBRACKET_L  shift, and go to state 25
+    MINUS           shift, and go to state 26
+    NEG             shift, and go to state 27
+    TRUEVAL         shift, and go to state 28
+    FALSEVAL        shift, and go to state 29
+    NUM             shift, and go to state 30
+    FLOAT           shift, and go to state 31
+    ID              shift, and go to state 32
+
+    funcall   go to state 33
+    expr      go to state 71
+    constant  go to state 35
+    floatval  go to state 36
+    intval    go to state 37
+    boolval   go to state 38
+    monop     go to state 39
+
+
+State 71
+
+   15 arglist: arglist COMMA expr •
+   17 expr: expr • binop expr
+
+    MINUS    shift, and go to state 45
+    PLUS     shift, and go to state 46
+    STAR     shift, and go to state 47
+    SLASH    shift, and go to state 48
+    PERCENT  shift, and go to state 49
+    LE       shift, and go to state 50
+    LT       shift, and go to state 51
+    GE       shift, and go to state 52
+    GT       shift, and go to state 53
+    EQ       shift, and go to state 54
+    NE       shift, and go to state 55
+    OR       shift, and go to state 56
+    AND      shift, and go to state 57
+
+    $default  reduce using rule 15 (arglist)
+
+    binop  go to state 58

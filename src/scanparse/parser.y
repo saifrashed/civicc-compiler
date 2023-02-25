@@ -48,19 +48,24 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
 %type <node> intval floatval boolval constant exprs expr cast ids
 %type <node> stmts stmt assign varlet program
-%type <node> decl decls globdef globdecl fundef fundefs funcall
+%type <node> decl decls globdef globdecl fundef fundefs funcall args arglist
 %type <cmonop> monop
 %type <cbinop> binop
 %type <cdatatype> datatype
 
 %left COMMA
 %right LET
-%left OR
-%left AND
-%left EQ NE
-%left LT LE GT GE
+
 %left PLUS MINUS
 %left STAR SLASH PERCENT
+%nonassoc LE LT GE GT
+%nonassoc EQ NE
+%left AND
+%left OR
+
+
+%nonassoc ROUNDBRACKET_L CURLYBRACKET_L SQUAREBRACKET_L
+%nonassoc ROUNDBRACKET_R CURLYBRACKET_R SQUAREBRACKET_R
 
 %nonassoc UMINUS
 %nonassoc ELSE
@@ -139,7 +144,7 @@ globdef:
 *************************************/
 
 
-funcall: ID ROUNDBRACKET_L exprs ROUNDBRACKET_R
+funcall: ID ROUNDBRACKET_L args ROUNDBRACKET_R
               {
                 $$ = ASTfuncall($3, $1);
               }
@@ -148,6 +153,23 @@ funcall: ID ROUNDBRACKET_L exprs ROUNDBRACKET_R
                 $$ = ASTfuncall(NULL, $1);
               }
              ;
+
+args: arglist
+      {
+            $$ = $1;
+      }    
+      ;
+
+arglist: expr
+          {
+          $$ = ASTexprs($1, NULL);
+          }    
+        |
+         arglist COMMA expr
+         {
+          $$ = ASTexprs($3, $1);
+         }    
+
 
 
 /*************************************
@@ -201,10 +223,6 @@ exprs: expr exprs
         {
           $$ = ASTexprs($1, NULL);
         }
-       |  expr COMMA exprs 
-        {
-          $$ = ASTexprs($1, $3);
-        }
         ;
 
 expr: ROUNDBRACKET_L expr ROUNDBRACKET_R
@@ -240,6 +258,14 @@ expr: ROUNDBRACKET_L expr ROUNDBRACKET_R
         $$ = $1;
       }
     ;
+
+
+
+cast: ROUNDBRACKET_L datatype[type] ROUNDBRACKET_R expr
+      {
+        $$ = ASTcast($4, $type);
+      }   
+      ;
 
 
 /*************************************
