@@ -15,8 +15,6 @@ Graphviz (for creating a diagram)
 2. Install Flex, Bison, and Clang on your system.
 3. Install Graphviz using Homebrew: brew install graphviz
 
-
-
 ## Additional commands
 
 ### Running flex:

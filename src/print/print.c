@@ -302,11 +302,13 @@ node_st *PRTfundef(node_st *node)
 
   printf("(");
 
-  TRAVchildren(node);
+  TRAVparams(node);
 
   printf(")");
 
-  printf(";\n");
+  TRAVbody(node);
+
+  printf("\n");
 
   return node;
 }
@@ -316,6 +318,13 @@ node_st *PRTfundef(node_st *node)
  */
 node_st *PRTfunbody(node_st *node)
 {
+
+  printf("{ \n");
+
+  TRAVchildren(node);
+
+  printf("}\n");
+
   return node;
 }
 
@@ -465,6 +474,31 @@ node_st *PRTparam(node_st *node)
  */
 node_st *PRTvardecl(node_st *node)
 {
+
+  char *tmp = NULL;
+
+  switch (VARDECL_TYPE(node))
+  {
+  case CT_bool:
+    tmp = "bool";
+    break;
+  case CT_float:
+    tmp = "float";
+    break;
+  case CT_int:
+    tmp = "int";
+    break;
+  case CT_void:
+    tmp = "void";
+    break;
+  case CT_NULL:
+    DBUG_ASSERT(false, "unknown type detected!");
+  }
+
+  printf("%s %s;\n", tmp, VARDECL_NAME(node));
+
+  TRAVnext(node);
+
   return node;
 }
 
