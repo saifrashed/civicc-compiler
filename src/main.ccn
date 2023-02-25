@@ -84,10 +84,10 @@ node ArrExpr {
 
 node Ids {
     children {
-        Ids next   
+        Ids next { constructor }
     },
     attributes {
-        string name
+        string name {constructor, mandatory}
     }
 };
 

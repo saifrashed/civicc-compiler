@@ -48,13 +48,10 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
 %type <node> intval floatval boolval constant exprs expr cast ids
 %type <node> stmts stmt assign varlet program
-%type <node> decl decls globdef globdecl fundef fundefs funcall args arglist
+%type <node> decl decls globdef globdecl fundef fundefs funcall args arglist dims dimslist
 %type <cmonop> monop
 %type <cbinop> binop
 %type <cdatatype> datatype
-
-%left COMMA
-%right LET
 
 %left PLUS MINUS
 %left STAR SLASH PERCENT
@@ -69,6 +66,9 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
 %nonassoc UMINUS
 %nonassoc ELSE
+
+%left ','
+%left ';'
 
 %start program
 
@@ -113,6 +113,11 @@ globdecl:
      EXTERN datatype[type] ID SEMICOLON
        {
          $$ =  ASTglobdecl(NULL, $type, $3);
+       } 
+    |
+      EXTERN datatype[type] ID SQUAREBRACKET_L dimslist SQUAREBRACKET_R SEMICOLON
+       {
+         $$ =  ASTglobdecl($5, $type, $3);
        } 
        ;
   
@@ -205,15 +210,21 @@ varlet: ID
         }
         ;
 
-ids: ID ids
-        {
-          $$ = ASTids($1, $2);
-        }
-      | ID
-        {
-          $$ = ASTids($1, NULL);
-        }
-        ;
+dims: dimslist
+      {
+            $$ = $1;
+      }    
+      ;
+
+dimslist: ID
+          {
+          $$ = ASTids(NULL, $1);
+          }    
+        |
+         dimslist COMMA ID
+         {
+          $$ = ASTids($1, $3);
+         }    
 
 exprs: expr exprs
         {
@@ -239,10 +250,9 @@ expr: ROUNDBRACKET_L expr ROUNDBRACKET_R
         $$ = ASTmonop($right, $type);
         AddLocToNode($$, &@right, &@right);
       }
-    | ROUNDBRACKET_L datatype[type] ROUNDBRACKET_R expr
+    | cast
       {
-        $$ = ASTcast($4, $type);
-        AddLocToNode($$, &@4, &@4);
+        $$ = $1;
       }   
     | funcall
       {
@@ -260,10 +270,10 @@ expr: ROUNDBRACKET_L expr ROUNDBRACKET_R
     ;
 
 
-
 cast: ROUNDBRACKET_L datatype[type] ROUNDBRACKET_R expr
       {
         $$ = ASTcast($4, $type);
+        AddLocToNode($$, &@1, &@1);
       }   
       ;
 

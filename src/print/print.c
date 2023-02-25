@@ -194,6 +194,9 @@ node_st *PRTarrexpr(node_st *node)
  */
 node_st *PRTids(node_st *node)
 {
+  printf("%s", IDS_NAME(node));
+
+  TRAVchildren(node);
   return node;
 }
 
@@ -322,6 +325,32 @@ node_st *PRTfor(node_st *node)
  */
 node_st *PRTglobdecl(node_st *node)
 {
+
+  char *tmp = NULL;
+
+  switch (GLOBDECL_TYPE(node))
+  {
+  case CT_bool:
+    tmp = "bool";
+    break;
+  case CT_float:
+    tmp = "float";
+    break;
+  case CT_int:
+    tmp = "int";
+    break;
+  case CT_void:
+    tmp = "void";
+    break;
+  case CT_NULL:
+    DBUG_ASSERT(false, "unknown type detected!");
+  }
+
+  printf("extern %s %s", tmp, GLOBDECL_NAME(node));
+
+  TRAVchildren(node);
+
+  printf("\n");
   return node;
 }
 
@@ -352,12 +381,12 @@ node_st *PRTglobdef(node_st *node)
 
   if (GLOBDEF_EXPORT(node) == true)
   { // print for export
-    printf("export %s %s = ", tmp, GLOBDEF_NAME(node));
+    printf("export %s %s", tmp, GLOBDEF_NAME(node));
   }
   else
   {
     // print for non-export
-    printf("%s %s ", tmp, GLOBDEF_NAME(node));
+    printf("%s %s", tmp, GLOBDEF_NAME(node));
   }
 
   TRAVchildren(node);

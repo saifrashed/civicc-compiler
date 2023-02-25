@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "trav_data.h": "c",
-        "ast.h": "c"
+        "ast.h": "c",
+        "__node_handle": "c"
     }
 }
