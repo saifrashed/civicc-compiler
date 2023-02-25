@@ -90,6 +90,9 @@ int yycolumn = 1;
 "true"                     { FILTER( TRUEVAL); }
 "false"                    { FILTER( FALSEVAL); }
 
+
+			
+
 [A-Za-z][A-Za-z0-9_]*      { yylval.id = STRcpy(yytext);
                              FILTER( ID);
                            }
@@ -97,6 +100,10 @@ int yycolumn = 1;
 [0-9]+                     { yylval.cint=atoi(yytext);
                              FILTER( NUM);
                            }
+
+[-+]?[0-9]+(\.[0-9]+)?	   { yylval.cflt=atoi(yytext);
+                             FILTER( FLOAT);
+                           }                           
 
 \n.*                       { 
                              yycolumn = 1;
