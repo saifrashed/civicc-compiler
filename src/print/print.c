@@ -343,6 +343,19 @@ node_st *PRTfunbody(node_st *node)
  */
 node_st *PRTifelse(node_st *node)
 {
+
+  printf("if(");
+  TRAVcond(node);
+  printf(") { \n ");
+
+  TRAVthen(node);
+
+  printf(" \nelse { \n ");
+
+  TRAVelse_block(node);
+
+  printf("\n}");
+
   return node;
 }
 

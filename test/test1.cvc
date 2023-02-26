@@ -72,3 +72,20 @@ int foo() {
     return foo() + 1;
 }
 
+void foo() {
+    if(true) {
+        foo();
+    } else {
+        foo();
+    }
+}
+
+
+
+void foo() {
+    if(true) {
+        foo(5, 6, 7);
+    } else {
+        foo();
+    }
+}

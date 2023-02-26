@@ -152,8 +152,8 @@ node FunBody {
 node IfElse {
     children {
         Expr cond { constructor, mandatory },
-        Stmts then,
-        Stmts else_block
+        Stmts then { constructor },
+        Stmts else_block {constructor}
     }
 };
 

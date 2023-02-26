@@ -48,7 +48,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
 %type <node> intval floatval boolval constant exprs expr cast ids
 %type <node> stmts stmt assign varlet program
-%type <node> decl decls globdef globdecl fundef fundefs funbody funcall vardecl vardecls args arg exprs_dims id_dims expr_dim id_dim param params return return_stmt
+%type <node> decl decls globdef globdecl fundef fundefs funbody funcall vardecl vardecls args arg exprs_dims id_dims expr_dim id_dim param params block
 %type <cmonop> monop
 %type <cbinop> binop
 %type <cdatatype> datatype
@@ -68,7 +68,8 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %nonassoc ROUNDBRACKET_L CURLYBRACKET_L SQUAREBRACKET_L
 %nonassoc ROUNDBRACKET_R CURLYBRACKET_R SQUAREBRACKET_R
 
-%nonassoc ELSE
+%precedence THEN
+%precedence ELSE
 
 %start program
 
@@ -378,24 +379,36 @@ stmt: assign
       {
         $$ = ASTexprstmt($1);
       }
-      | return_stmt
+      | IF ROUNDBRACKET_L expr ROUNDBRACKET_R block %prec THEN
       {
-        $$ = $1;
-      };    
+        $$ = ASTifelse($3, $5, NULL);
+      }
+      | IF ROUNDBRACKET_L expr ROUNDBRACKET_R block ELSE block
+      {
+        $$ = ASTifelse($3, $5, $7);
+      }
+      | RETURN SEMICOLON
+      {
+        $$ = ASTreturn(NULL);
+      }
+      | RETURN expr SEMICOLON
+      {
+        $$ = ASTreturn($2);
+      };   
 
-return_stmt: RETURN SEMICOLON
-        {
-          $$ = ASTreturn(NULL);
-        }
-        | RETURN expr SEMICOLON
-        {
-          $$ = ASTreturn($2);
-        };      
 
 assign: varlet LET expr SEMICOLON
         {
           $$ = ASTassign($1, $3);
         };
+
+
+block: CURLYBRACKET_L CURLYBRACKET_R {}
+      | CURLYBRACKET_L stmts CURLYBRACKET_R
+      {
+        $$ = $2;
+      };
+
 
 varlet: ID
         {
