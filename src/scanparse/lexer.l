@@ -60,8 +60,6 @@ int yycolumn = 1;
 "true"                     { FILTER( TRUEVAL); }
 "false"                    { FILTER( FALSEVAL); }
 
-
-
 "-"                        { FILTER( MINUS); }
 "+"                        { FILTER( PLUS);  }
 "*"                        { FILTER( STAR);  } 
@@ -88,9 +86,6 @@ int yycolumn = 1;
 ","                        { FILTER( COMMA); }
 ";"                        { FILTER( SEMICOLON); }
 "="                        { FILTER( LET);    }
-
-
-
 
 [A-Za-z][A-Za-z0-9_]*      { yylval.id = STRcpy(yytext); FILTER( ID); }
 

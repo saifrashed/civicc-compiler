@@ -99,7 +99,7 @@ node ExprStmt {
 
 node Return {
     children {
-        Expr expr
+        Expr expr { constructor }
     }
 };
 

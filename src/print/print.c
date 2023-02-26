@@ -205,6 +205,9 @@ node_st *PRTids(node_st *node)
  */
 node_st *PRTexprstmt(node_st *node)
 {
+
+  TRAVchildren(node);
+
   return node;
 }
 
@@ -213,6 +216,13 @@ node_st *PRTexprstmt(node_st *node)
  */
 node_st *PRTreturn(node_st *node)
 {
+
+  printf("return");
+
+  TRAVchildren(node);
+
+  printf(";\n");
+
   return node;
 }
 

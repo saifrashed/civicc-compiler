@@ -48,7 +48,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
 %type <node> intval floatval boolval constant exprs expr cast ids
 %type <node> stmts stmt assign varlet program
-%type <node> decl decls globdef globdecl fundef fundefs funbody funcall vardecl vardecls args arg exprs_dims id_dims expr_dim id_dim param params
+%type <node> decl decls globdef globdecl fundef fundefs funbody funcall vardecl vardecls args arg exprs_dims id_dims expr_dim id_dim param params return return_stmt
 %type <cmonop> monop
 %type <cbinop> binop
 %type <cdatatype> datatype
@@ -247,11 +247,11 @@ fundef: datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R SEMICOLON // example:  i
           $$ = ASTfundef(NULL, $5, $type, $3, false); 
         };
 
-funcall: ID ROUNDBRACKET_L args ROUNDBRACKET_R SEMICOLON  // example: foo(5, 3);
+funcall: ID ROUNDBRACKET_L args ROUNDBRACKET_R  // example: foo(5, 3);
         {
           $$ = ASTfuncall($3, $1);
         }
-        | ID ROUNDBRACKET_L ROUNDBRACKET_R SEMICOLON // example: foo();
+        | ID ROUNDBRACKET_L ROUNDBRACKET_R // example: foo();
         {
           $$ = ASTfuncall(NULL, $1);
         };
@@ -373,7 +373,24 @@ stmts: stmt stmts
 stmt: assign
       {
         $$ = $1;
-      };
+      }
+      | expr SEMICOLON
+      {
+        $$ = ASTexprstmt($1);
+      }
+      | return_stmt
+      {
+        $$ = $1;
+      };    
+
+return_stmt: RETURN SEMICOLON
+        {
+          $$ = ASTreturn(NULL);
+        }
+        | RETURN expr SEMICOLON
+        {
+          $$ = ASTreturn($2);
+        };      
 
 assign: varlet LET expr SEMICOLON
         {
@@ -386,14 +403,11 @@ varlet: ID
           AddLocToNode($$, &@1, &@1);
         };
 
-
 cast: ROUNDBRACKET_L datatype[type] ROUNDBRACKET_R expr
       {
         $$ = ASTcast($4, $type);
         AddLocToNode($$, &@1, &@1);
       };
-
-
 
 exprs: expr exprs
       {
