@@ -217,7 +217,7 @@ node_st *PRTexprstmt(node_st *node)
 node_st *PRTreturn(node_st *node)
 {
 
-  printf("return");
+  printf("\nreturn");
 
   TRAVchildren(node);
 
@@ -236,7 +236,7 @@ node_st *PRTfuncall(node_st *node)
 
   TRAVchildren(node);
 
-  printf(")");
+  printf(");");
 
   return node;
 }
@@ -279,7 +279,7 @@ node_st *PRTcast(node_st *node)
  */
 node_st *PRTfundefs(node_st *node)
 {
-  TRAVnext(node);
+  TRAVchildren(node);
   return node;
 }
 
@@ -316,7 +316,11 @@ node_st *PRTfundef(node_st *node)
 
   printf(")");
 
-  TRAVbody(node);
+  printf("{ \n");
+
+  TRAVchildren(node);
+
+  printf("}\n");
 
   printf("\n");
 
@@ -329,11 +333,7 @@ node_st *PRTfundef(node_st *node)
 node_st *PRTfunbody(node_st *node)
 {
 
-  printf("{ \n");
-
   TRAVchildren(node);
-
-  printf("}\n");
 
   return node;
 }
@@ -344,7 +344,7 @@ node_st *PRTfunbody(node_st *node)
 node_st *PRTifelse(node_st *node)
 {
 
-  printf("if(");
+  printf("\nif(");
   TRAVcond(node);
   printf(") { \n ");
 
@@ -364,6 +364,15 @@ node_st *PRTifelse(node_st *node)
  */
 node_st *PRTwhile(node_st *node)
 {
+
+  printf("\nwhile (");
+  TRAVcond(node);
+  printf(") { \n ");
+
+  TRAVblock(node);
+
+  printf("\n}");
+
   return node;
 }
 
@@ -372,6 +381,15 @@ node_st *PRTwhile(node_st *node)
  */
 node_st *PRTdowhile(node_st *node)
 {
+  printf("\ndo {");
+  TRAVblock(node);
+
+  printf("} while (\n ");
+
+  TRAVcond(node);
+
+  printf("\n)");
+
   return node;
 }
 

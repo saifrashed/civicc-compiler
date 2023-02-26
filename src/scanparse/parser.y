@@ -175,6 +175,10 @@ funbody: vardecls
       {
         $$ = ASTfunbody(NULL, NULL, $1);
       }
+      | fundefs
+      {
+        $$ = ASTfunbody(NULL, $1, NULL);
+      }
       | vardecls stmts 
       {
         $$ = ASTfunbody($1, NULL, $2);
@@ -183,13 +187,12 @@ funbody: vardecls
 
 fundefs: fundef fundefs
       {
-        FUNDEFS_NEXT($1) = $2;
-        $$ = $1;
+        $$ = ASTfundefs($1, $2);
       }
       | fundef
       {
-        $$ = $1;
-      };
+        $$ = ASTfundefs($1, NULL);
+      }
 
 fundef: datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R SEMICOLON // example:  int foo();
         { 
@@ -375,23 +378,31 @@ stmt: assign
       {
         $$ = $1;
       }
-      | expr SEMICOLON
+      | expr SEMICOLON 
       {
         $$ = ASTexprstmt($1);
       }
-      | IF ROUNDBRACKET_L expr ROUNDBRACKET_R block %prec THEN
+      | DO block WHILE ROUNDBRACKET_L expr ROUNDBRACKET_R SEMICOLON // example: do {...} while(true)
+      {
+        $$ = ASTdowhile($5, $2);
+      }
+      | WHILE ROUNDBRACKET_L expr ROUNDBRACKET_R block  // example: while(true) {...}
+      {
+        $$ = ASTwhile($3, $5);
+      }
+      | IF ROUNDBRACKET_L expr ROUNDBRACKET_R block %prec THEN // example: if(true) {...}
       {
         $$ = ASTifelse($3, $5, NULL);
       }
-      | IF ROUNDBRACKET_L expr ROUNDBRACKET_R block ELSE block
+      | IF ROUNDBRACKET_L expr ROUNDBRACKET_R block ELSE block // example: if(true) {...} else {...}
       {
         $$ = ASTifelse($3, $5, $7);
       }
-      | RETURN SEMICOLON
+      | RETURN SEMICOLON // example: return;
       {
         $$ = ASTreturn(NULL);
       }
-      | RETURN expr SEMICOLON
+      | RETURN expr SEMICOLON // example: return 1;
       {
         $$ = ASTreturn($2);
       };   
