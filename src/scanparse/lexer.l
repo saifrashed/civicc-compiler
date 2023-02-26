@@ -38,36 +38,29 @@ int yycolumn = 1;
 %%
 
 
+
+
 "/*"((("*"[^/])?)|[^*])*"*/" { /* DO NOTHING */ }
 "//".*                       { /* DO NOTHING */ }
 
 
 "if"					               { FILTER( IF); }
 "else"				               { FILTER( ELSE); }
-
 "while"				               { FILTER( WHILE); }
 "do"				                 { FILTER( DO); }
 "for" 				               { FILTER( FOR); }
-
 "return" 				             { FILTER( RETURN); }
-
 "export"				      	     { FILTER( EXPORT); }
 "extern"				      	     { FILTER( EXTERN); }
-
 "bool"				      	       { FILTER( BOOLTYPE); }
 "float"				      	       { FILTER( FLOATTYPE); }
 "int"				      	         { FILTER( INTTYPE); }
 "void"				      	       { FILTER( VOIDTYPE); }
 
+"true"                     { FILTER( TRUEVAL); }
+"false"                    { FILTER( FALSEVAL); }
 
-"("                        { FILTER( ROUNDBRACKET_L); }
-")"                        { FILTER( ROUNDBRACKET_R); }
-"{"					               { FILTER( CURLYBRACKET_L); }
-"}"						             { FILTER( CURLYBRACKET_R); }
-"["						             { FILTER( SQUAREBRACKET_L); }
-"]"						             { FILTER( SQUAREBRACKET_R); }
-","                        { FILTER( COMMA); }
-";"                        { FILTER( SEMICOLON); }
+
 
 "-"                        { FILTER( MINUS); }
 "+"                        { FILTER( PLUS);  }
@@ -75,6 +68,7 @@ int yycolumn = 1;
 "/"                        { FILTER( SLASH);  } 
 "%"                        { FILTER( PERCENT);  } 
 
+[-]                        { FILTER( UMINUS);} 
 "!"                        { FILTER( NEG); }
 "<="                       { FILTER( LE);    }
 "<"                        { FILTER( LT);    } 
@@ -85,25 +79,25 @@ int yycolumn = 1;
 "&&"                       { FILTER( AND);    }
 "||"                       { FILTER( OR);    }
 
+"("                        { FILTER( ROUNDBRACKET_L); }
+")"                        { FILTER( ROUNDBRACKET_R); }
+"{"					               { FILTER( CURLYBRACKET_L); }
+"}"						             { FILTER( CURLYBRACKET_R); }
+"["						             { FILTER( SQUAREBRACKET_L); }
+"]"						             { FILTER( SQUAREBRACKET_R); }
+","                        { FILTER( COMMA); }
+";"                        { FILTER( SEMICOLON); }
 "="                        { FILTER( LET);    }
 
-"true"                     { FILTER( TRUEVAL); }
-"false"                    { FILTER( FALSEVAL); }
 
 
-			
 
-[A-Za-z][A-Za-z0-9_]*      { yylval.id = STRcpy(yytext);
-                             FILTER( ID);
-                           }
+[A-Za-z][A-Za-z0-9_]*      { yylval.id = STRcpy(yytext); FILTER( ID); }
 
-[0-9]+                     { yylval.cint=atoi(yytext);
-                             FILTER( NUM);
-                           }
+[0-9]+                     { yylval.cint=atoi(yytext); FILTER( NUM); }
 
-[-+]?[0-9]+(\.[0-9]+)?	   { yylval.cflt=atoi(yytext);
-                             FILTER( FLOAT);
-                           }                           
+[-+]?[0-9]+(\.[0-9]+)?	   { yylval.cflt=atoi(yytext); FILTER( FLOAT); }         
+
 
 \n.*                       { 
                              yycolumn = 1;

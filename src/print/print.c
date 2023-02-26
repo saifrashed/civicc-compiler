@@ -298,7 +298,7 @@ node_st *PRTfundef(node_st *node)
     DBUG_ASSERT(false, "unknown type detected!");
   }
 
-  printf("export %s %s", tmp, FUNDEF_NAME(node));
+  printf("%s %s", tmp, FUNDEF_NAME(node));
 
   printf("(");
 
@@ -495,7 +495,17 @@ node_st *PRTvardecl(node_st *node)
     DBUG_ASSERT(false, "unknown type detected!");
   }
 
-  printf("%s %s;\n", tmp, VARDECL_NAME(node));
+  printf("%s", tmp);
+
+  printf("[");
+  TRAVdims(node);
+  printf("]");
+
+  printf("%s ", VARDECL_NAME(node));
+
+  TRAVinit(node);
+
+  printf("\n");
 
   TRAVnext(node);
 

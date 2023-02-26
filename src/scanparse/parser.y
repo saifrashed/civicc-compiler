@@ -48,22 +48,26 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
 %type <node> intval floatval boolval constant exprs expr cast ids
 %type <node> stmts stmt assign varlet program
-%type <node> decl decls globdef globdecl fundef fundefs funbody funcall vardecl vardecls args arg exprs_dims id_dims dim param params
+%type <node> decl decls globdef globdecl fundef fundefs funbody funcall vardecl vardecls args arg exprs_dims id_dims expr_dim id_dim param params
 %type <cmonop> monop
 %type <cbinop> binop
 %type <cdatatype> datatype
 
+
+%right LET
+
+%left OR
+%left AND
+%left EQ NE
+%left LT LE GT GE
 %left PLUS MINUS
 %left STAR SLASH PERCENT
-%nonassoc LE LT GE GT
-%nonassoc EQ NE
-%left AND
-%left OR
+%right UMINUS NEG
+
 
 %nonassoc ROUNDBRACKET_L CURLYBRACKET_L SQUAREBRACKET_L
 %nonassoc ROUNDBRACKET_R CURLYBRACKET_R SQUAREBRACKET_R
 
-%nonassoc UMINUS
 %nonassoc ELSE
 
 %start program
@@ -243,11 +247,11 @@ fundef: datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R SEMICOLON // example:  i
           $$ = ASTfundef(NULL, $5, $type, $3, false); 
         };
 
-funcall: ID ROUNDBRACKET_L args ROUNDBRACKET_R  // example: foo(5, 3);
+funcall: ID ROUNDBRACKET_L args ROUNDBRACKET_R SEMICOLON  // example: foo(5, 3);
         {
           $$ = ASTfuncall($3, $1);
         }
-        | ID ROUNDBRACKET_L ROUNDBRACKET_R // example: foo();
+        | ID ROUNDBRACKET_L ROUNDBRACKET_R SEMICOLON // example: foo();
         {
           $$ = ASTfuncall(NULL, $1);
         };
@@ -323,34 +327,35 @@ param: datatype[type] ID  // example: int a
       };          
 
 
-exprs_dims: dim COMMA exprs_dims // example: 1, 2, 3, 4 - used for arrays
+exprs_dims: expr_dim COMMA exprs_dims // example: 1, 2, 3, 4 - used for arrays
       {
         EXPRS_NEXT($1) = $3;
         $$ = $1;
       }
-      | dim
+      | expr_dim
       {
         $$ = $1;
       };
 
-id_dims: dim COMMA id_dims // example: a, b, c, d - used for arrays
+id_dims: id_dim COMMA id_dims // example: a, b, c, d - used for arrays
       {
         IDS_NEXT($1) = $3;
         $$ = $1;
       }
-      | dim
+      | id_dim
       {
         $$ = $1;
       };
 
-dim:  ID 
+id_dim: ID 
       {
         $$ = ASTids(NULL, $1);
-      }
-      | expr
+      };      
+
+expr_dim: expr
       {
         $$ = ASTexprs($1, NULL);
-      };      
+      };           
 
 /*************************************
   STATEMENTS                        
@@ -400,19 +405,9 @@ exprs: expr exprs
       }
       ;
 
-expr: ROUNDBRACKET_L expr ROUNDBRACKET_R
+expr:  ROUNDBRACKET_L expr ROUNDBRACKET_R
       {
         $$ = $2;
-      }
-      | expr[left] binop[type] expr[right] // CONFLICTS
-      {
-        $$ = ASTbinop( $left, $right, $type);
-        AddLocToNode($$, &@left, &@right);
-      }
-      | monop[type] expr[right] // CONFLICTS
-      {
-        $$ = ASTmonop($right, $type);
-        AddLocToNode($$, &@right, &@right);
       }
       | cast
       {
@@ -430,7 +425,83 @@ expr: ROUNDBRACKET_L expr ROUNDBRACKET_R
       | constant
       {
         $$ = $1;
+      } 
+      | expr PLUS expr
+      {
+        $$ = ASTbinop( $1, $3, BO_add);
+        AddLocToNode($$, &@1, &@3);
+      }
+      | expr MINUS expr
+      {
+        $$ = ASTbinop( $1, $3, BO_sub);
+        AddLocToNode($$, &@1, &@3);
+      }
+      | expr STAR expr
+      {
+        $$ = ASTbinop( $1, $3, BO_mul);
+        AddLocToNode($$, &@1, &@3);
+      }
+      | expr SLASH expr
+      {
+        $$ = ASTbinop( $1, $3, BO_div);
+        AddLocToNode($$, &@1, &@3);
+      }
+      | expr PERCENT expr
+      {
+        $$ = ASTbinop( $1, $3, BO_mod);
+        AddLocToNode($$, &@1, &@3);
+      }
+      | expr LT expr
+      {
+        $$ = ASTbinop( $1, $3, BO_le);
+        AddLocToNode($$, &@1, &@3);
+      }
+      | expr LE expr
+      {
+        $$ = ASTbinop( $1, $3, BO_lt);
+        AddLocToNode($$, &@1, &@3);
+      }
+      | expr GT expr
+      {
+        $$ = ASTbinop( $1, $3, BO_gt);
+        AddLocToNode($$, &@1, &@3);
+      }
+      | expr GE expr
+      {
+        $$ = ASTbinop( $1, $3, BO_ge);
+        AddLocToNode($$, &@1, &@3);
+      }
+      | expr EQ expr
+      {
+          $$ = ASTbinop( $1, $3, BO_eq);
+        AddLocToNode($$, &@1, &@3);
+      }
+      | expr NE expr
+      {
+        $$ = ASTbinop( $1, $3, BO_ne);
+        AddLocToNode($$, &@1, &@3);
+      }
+      | expr OR expr
+      {
+        $$ = ASTbinop( $1, $3, BO_or);
+        AddLocToNode($$, &@1, &@3);
+      }
+      | expr AND expr
+      {
+        $$ = ASTbinop( $1, $3, BO_and);
+        AddLocToNode($$, &@1, &@3);
+      }
+      | UMINUS expr %prec UMINUS
+      {
+        $$ = ASTmonop($2, MO_not);
+        AddLocToNode($$, &@2, &@2);
+      }
+      | NEG expr %prec NEG
+      {
+        $$ = ASTmonop($2, MO_neg);
+        AddLocToNode($$, &@2, &@2);
       };
+
 
 /*************************************
   CONSTANTS                        
@@ -468,33 +539,6 @@ boolval: TRUEVAL
         {
           $$ = ASTbool(false);
         };
-
-/*************************************
-  BINARY OPERATORS                        
-*************************************/
-
-binop: PLUS      { $$ = BO_add; }
-     | MINUS     { $$ = BO_sub; }
-     | STAR      { $$ = BO_mul; }
-     | SLASH     { $$ = BO_div; }
-     | PERCENT   { $$ = BO_mod; }
-     | LE        { $$ = BO_le; }
-     | LT        { $$ = BO_lt; }
-     | GE        { $$ = BO_ge; }
-     | GT        { $$ = BO_gt; }
-     | EQ        { $$ = BO_eq; }
-     | OR        { $$ = BO_or; }
-     | AND       { $$ = BO_and; }
-     | NE        { $$ = BO_ne; }
-     ;
-
-/*************************************
-  MONO OPERATORS                        
-*************************************/
-
-monop: MINUS      { $$ = MO_not; }
-     | NEG        { $$ = MO_neg; }
-     ;
 
 
 /*************************************
@@ -540,3 +584,4 @@ node_st *SPdoScanParse(node_st *root)
     yyparse();
     return parseresult;
 }
+

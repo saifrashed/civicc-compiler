@@ -1,9 +1,7 @@
-void foo() {
-    bool b;
-    int i;
-    float f;
+int b;
 
-    bool b2 = true;
-    int i2 = 1;
-    float f2 = 1.0;
+void foo() {
+    int a;
+    a = 2;
+    b = 1;
 }
