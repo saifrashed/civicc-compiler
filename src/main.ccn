@@ -175,12 +175,12 @@ node For {
     children {
         Expr start_expr { constructor, mandatory },
         Expr stop { constructor, mandatory },
-        Expr step,
-        Stmts block
+        Expr step { constructor },
+        Stmts block { constructor }
     },
 
-    attributes {
-        string var
+    attributes { 
+        string var { constructor }
     }
 };
 
@@ -270,7 +270,7 @@ node Monop {
 
 node VarLet {
     children {
-        Exprs indices
+        Exprs indices { constructor }
     }, 
 
     attributes {

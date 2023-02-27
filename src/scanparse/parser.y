@@ -46,9 +46,10 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %token <cflt> FLOAT
 %token <id> ID
 
-%type <node> intval floatval boolval constant exprs expr cast ids
+%type <node> intval floatval boolval constant ids
 %type <node> stmts stmt assign varlet program
 %type <node> decl decls globdef globdecl fundef fundefs funbody funcall vardecl vardecls args arg exprs_dims id_dims expr_dim id_dim param params block
+%type <node> expr array_expr logical_expr arithmetic_expr unary_expr comparison_expr cast
 %type <cmonop> monop
 %type <cbinop> binop
 %type <cdatatype> datatype
@@ -62,7 +63,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %left LT LE GT GE
 %left PLUS MINUS
 %left STAR SLASH PERCENT
-%right UMINUS NEG
+%right UMINUS NEG CAST
 
 
 %nonassoc ROUNDBRACKET_L CURLYBRACKET_L SQUAREBRACKET_L
@@ -374,6 +375,7 @@ stmts: stmt stmts
         $$ = ASTstmts($1, NULL);
       };
 
+
 stmt: assign
       {
         $$ = $1;
@@ -381,6 +383,14 @@ stmt: assign
       | expr SEMICOLON 
       {
         $$ = ASTexprstmt($1);
+      }
+      | FOR ROUNDBRACKET_L datatype[type] ID LET expr COMMA expr ROUNDBRACKET_R block // example: 
+      {
+        $$ = ASTfor($6, $8, NULL, $10, $4);
+      }
+      | FOR ROUNDBRACKET_L datatype[type] ID LET expr COMMA expr COMMA expr ROUNDBRACKET_R block // example: 
+      {
+        $$ = ASTfor($6, $8, $10, $12, $4 );
       }
       | DO block WHILE ROUNDBRACKET_L expr ROUNDBRACKET_R SEMICOLON // example: do {...} while(true)
       {
@@ -414,7 +424,7 @@ assign: varlet LET expr SEMICOLON
         };
 
 
-block: CURLYBRACKET_L CURLYBRACKET_R {}
+block: CURLYBRACKET_L CURLYBRACKET_R
       | CURLYBRACKET_L stmts CURLYBRACKET_R
       {
         $$ = $2;
@@ -423,30 +433,22 @@ block: CURLYBRACKET_L CURLYBRACKET_R {}
 
 varlet: ID
         {
-          $$ = ASTvarlet($1);
-          AddLocToNode($$, &@1, &@1);
+          $$ = ASTvarlet(NULL, $1);
+        }
+        | ID SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R
+        {
+          $$ = ASTvarlet($3, $1);
         };
 
-cast: ROUNDBRACKET_L datatype[type] ROUNDBRACKET_R expr
-      {
-        $$ = ASTcast($4, $type);
-        AddLocToNode($$, &@1, &@1);
-      };
-
-exprs: expr exprs
-      {
-        $$ = ASTexprs($1, $2);
-      }
-      | expr
-      {
-        $$ = ASTexprs($1, NULL);
-      }
-      ;
 
 expr:  ROUNDBRACKET_L expr ROUNDBRACKET_R
       {
         $$ = $2;
       }
+      | ID 
+      {
+        $$ = ASTvar($1);
+      }     
       | cast
       {
         $$ = $1;
@@ -454,91 +456,113 @@ expr:  ROUNDBRACKET_L expr ROUNDBRACKET_R
       | funcall
       {
         $$ = $1;
-        AddLocToNode($$, &@1, &@1);
-      }     
-      | ID
-      {
-        $$ = ASTvar($1);
       }     
       | constant
       {
         $$ = $1;
       } 
-      | expr PLUS expr
+      | array_expr
       {
-        $$ = ASTbinop( $1, $3, BO_add);
-        AddLocToNode($$, &@1, &@3);
+        $$ = $1;
       }
-      | expr MINUS expr
+      | arithmetic_expr
       {
-        $$ = ASTbinop( $1, $3, BO_sub);
-        AddLocToNode($$, &@1, &@3);
+        $$ = $1;
       }
-      | expr STAR expr
+      | comparison_expr
       {
-        $$ = ASTbinop( $1, $3, BO_mul);
-        AddLocToNode($$, &@1, &@3);
+        $$ = $1;
       }
-      | expr SLASH expr
+      | logical_expr
       {
-        $$ = ASTbinop( $1, $3, BO_div);
-        AddLocToNode($$, &@1, &@3);
+        $$ = $1;
       }
-      | expr PERCENT expr
+      | unary_expr
       {
-        $$ = ASTbinop( $1, $3, BO_mod);
-        AddLocToNode($$, &@1, &@3);
-      }
-      | expr LT expr
-      {
-        $$ = ASTbinop( $1, $3, BO_le);
-        AddLocToNode($$, &@1, &@3);
-      }
-      | expr LE expr
-      {
-        $$ = ASTbinop( $1, $3, BO_lt);
-        AddLocToNode($$, &@1, &@3);
-      }
-      | expr GT expr
-      {
-        $$ = ASTbinop( $1, $3, BO_gt);
-        AddLocToNode($$, &@1, &@3);
-      }
-      | expr GE expr
-      {
-        $$ = ASTbinop( $1, $3, BO_ge);
-        AddLocToNode($$, &@1, &@3);
-      }
-      | expr EQ expr
-      {
-          $$ = ASTbinop( $1, $3, BO_eq);
-        AddLocToNode($$, &@1, &@3);
-      }
-      | expr NE expr
-      {
-        $$ = ASTbinop( $1, $3, BO_ne);
-        AddLocToNode($$, &@1, &@3);
-      }
-      | expr OR expr
-      {
-        $$ = ASTbinop( $1, $3, BO_or);
-        AddLocToNode($$, &@1, &@3);
-      }
-      | expr AND expr
-      {
-        $$ = ASTbinop( $1, $3, BO_and);
-        AddLocToNode($$, &@1, &@3);
-      }
-      | UMINUS expr %prec UMINUS
+        $$ = $1;
+      };
+
+
+unary_expr: UMINUS expr %prec UMINUS
       {
         $$ = ASTmonop($2, MO_not);
-        AddLocToNode($$, &@2, &@2);
       }
       | NEG expr %prec NEG
       {
         $$ = ASTmonop($2, MO_neg);
-        AddLocToNode($$, &@2, &@2);
       };
+
+
+arithmetic_expr: expr PLUS expr
+      {
+        $$ = ASTbinop( $1, $3, BO_add);
+      }
+      | expr MINUS expr
+      {
+        $$ = ASTbinop( $1, $3, BO_sub);
+      }
+      | expr STAR expr
+      {
+        $$ = ASTbinop( $1, $3, BO_mul);
+      }
+      | expr SLASH expr
+      {
+        $$ = ASTbinop( $1, $3, BO_div);
+      }
+      | expr PERCENT expr
+      {
+        $$ = ASTbinop( $1, $3, BO_mod);
+      };
+
+
+comparison_expr: expr LT expr
+      {
+        $$ = ASTbinop( $1, $3, BO_le);
+      }
+      | expr LE expr
+      {
+        $$ = ASTbinop( $1, $3, BO_lt);
+      }
+      | expr GT expr
+      {
+        $$ = ASTbinop( $1, $3, BO_gt);
+      }
+      | expr GE expr
+      {
+        $$ = ASTbinop( $1, $3, BO_ge);
+      }
+      | expr EQ expr
+      {
+          $$ = ASTbinop( $1, $3, BO_eq);
+      }
+      | expr NE expr
+      {
+        $$ = ASTbinop( $1, $3, BO_ne);
+      };            
+
+
+logical_expr: expr OR expr
+      {
+        $$ = ASTbinop( $1, $3, BO_or);
+      }
+      | expr AND expr
+      {
+        $$ = ASTbinop( $1, $3, BO_and);
+      };          
+
+
+array_expr: SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R 
+      {
+        $$ = ASTarrexpr($2);
+      };
+
+
+cast: ROUNDBRACKET_L datatype[type] ROUNDBRACKET_R expr %prec CAST
+    {
+      $$ = ASTcast($4, $type);
+    }; 
+
+
 
 
 /*************************************
@@ -546,38 +570,22 @@ expr:  ROUNDBRACKET_L expr ROUNDBRACKET_R
 *************************************/
 
 
-constant: floatval
-          {
-            $$ = $1;
-          }
-          | intval
-          {
-            $$ = $1;
-          }
-          | boolval
-          {
-            $$ = $1;
-          };
-
-floatval: FLOAT
+constant: FLOAT
           {
             $$ = ASTfloat($1);
+          }
+          | NUM
+          {
+            $$ = ASTnum($1);
+          }
+          | TRUEVAL
+          {
+            $$ = ASTbool(true);
+          }
+          | FALSEVAL
+          {
+            $$ = ASTbool(false);
           };
-
-intval: NUM
-        {
-          $$ = ASTnum($1);
-        };
-
-boolval: TRUEVAL
-        {
-          $$ = ASTbool(true);
-        }
-        | FALSEVAL
-        {
-          $$ = ASTbool(false);
-        };
-
 
 /*************************************
   TYPES                       
