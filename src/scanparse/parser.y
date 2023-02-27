@@ -34,7 +34,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %locations
 
 %token ROUNDBRACKET_L ROUNDBRACKET_R CURLYBRACKET_L CURLYBRACKET_R SQUAREBRACKET_L SQUAREBRACKET_R COMMA SEMICOLON
-%token MINUS PLUS STAR SLASH PERCENT LE LT GE GT EQ NE OR AND NEG
+%token MINUS UMINUS PLUS STAR SLASH PERCENT LE LT GE GT EQ NE OR AND NEG
 %token TRUEVAL FALSEVAL LET
 %token IF ELSE 
 %token WHILE DO FOR 
@@ -48,7 +48,8 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
 %type <node> intval floatval boolval constant ids
 %type <node> stmts stmt assign varlet program
-%type <node> decl decls globdef globdecl fundef fundefs funbody funcall vardecl vardecls args arg exprs_dims id_dims expr_dim id_dim param params block
+%type <node> fundef fundefs funbody funcall vardecl vardecls vardecls_opt stmts_opt funheader
+%type <node> decl decls globdef globdecl args arg exprs_dims id_dims expr_dim id_dim param params block
 %type <node> expr array_expr logical_expr arithmetic_expr unary_expr comparison_expr cast
 %type <cmonop> monop
 %type <cbinop> binop
@@ -63,7 +64,10 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %left LT LE GT GE
 %left PLUS MINUS
 %left STAR SLASH PERCENT
-%right UMINUS NEG CAST
+
+%right NEG CAST
+
+%right UMINUS
 
 
 %nonassoc ROUNDBRACKET_L CURLYBRACKET_L SQUAREBRACKET_L
@@ -168,23 +172,34 @@ globdef: datatype[type] ID SEMICOLON // example: int id;
 *************************************/
 
 
-funbody: vardecls 
-      {
-        $$ = ASTfunbody($1, NULL, NULL);
-      }
-      | stmts
-      {
-        $$ = ASTfunbody(NULL, NULL, $1);
-      }
-      | fundefs
-      {
-        $$ = ASTfunbody(NULL, $1, NULL);
-      }
-      | vardecls stmts 
-      {
-        $$ = ASTfunbody($1, NULL, $2);
-      };
+// funbody: vardecls 
+//       {
+//         $$ = ASTfunbody($1, NULL, NULL);
+//       }
+//       | stmts
+//       {
+//         $$ = ASTfunbody(NULL, NULL, $1);
+//       }
+//       | vardecls stmts 
+//       {
+//         $$ = ASTfunbody($1, NULL, $2);
+//       };
 
+
+
+funheader: datatype[type] ID ROUNDBRACKET_L params ROUNDBRACKET_R 
+        {
+          $$ = ASTfundef(NULL, $4, $type, $2, false); 
+        }
+        | datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R
+        {
+          $$ = ASTfundef(NULL, NULL, $type, $2, false); 
+        };
+
+funbody: CURLYBRACKET_L vardecls_opt stmts_opt CURLYBRACKET_R
+        {
+          $$ = ASTfunbody($2, NULL, $3); 
+        };        
 
 fundefs: fundef fundefs
       {
@@ -195,62 +210,21 @@ fundefs: fundef fundefs
         $$ = ASTfundefs($1, NULL);
       }
 
-fundef: datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R SEMICOLON // example:  int foo();
+fundef: EXTERN funheader SEMICOLON // example:  int foo();
         { 
-          $$ = ASTfundef(NULL, NULL, $type, $2, false);
+          $$ = $2;
         }
-        | datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R CURLYBRACKET_L CURLYBRACKET_R // example: int foo() {};
+        | funheader funbody // example:  int foo();
         { 
-          $$ = ASTfundef(NULL, NULL, $type, $2, false); 
+          FUNDEF_BODY($1) = $2;
+          $$ = $1;
         }
-        | datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R CURLYBRACKET_L funbody CURLYBRACKET_R // example: int foo() {...};
+        | EXPORT funheader funbody // example:  int foo();
         { 
-          $$ = ASTfundef($6, NULL, $type, $2, false); 
+          FUNDEF_BODY($2) = $3;
+          $$ = $2;
         }
-        | datatype[type] ID ROUNDBRACKET_L params ROUNDBRACKET_R SEMICOLON  // example:  int foo(int a, int b);
-        { 
-          $$ = ASTfundef(NULL, $4, $type, $2, false);
-        }
-        | datatype[type] ID ROUNDBRACKET_L params ROUNDBRACKET_R CURLYBRACKET_L CURLYBRACKET_R // example: int foo(int a, int b) {};
-        { 
-          $$ = ASTfundef(NULL, $4, $type, $2, false); 
-        }
-        | datatype[type] ID ROUNDBRACKET_L params ROUNDBRACKET_R CURLYBRACKET_L funbody CURLYBRACKET_R // example: int foo(int a, int b) {...};
-        { 
-          $$ = ASTfundef($7, $4, $type, $2, false); 
-        }
-        | EXPORT datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R SEMICOLON // example: export int foo();
-        { 
-          $$ = ASTfundef(NULL, NULL, $type, $3, true);
-        }
-        | EXPORT datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R CURLYBRACKET_L CURLYBRACKET_R // example: export int foo() {};
-        { 
-          $$ = ASTfundef(NULL, NULL, $type, $3, true); 
-        }
-        | EXPORT datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R CURLYBRACKET_L funbody CURLYBRACKET_R // example: export int foo() {...};
-        { 
-          $$ = ASTfundef($7, NULL, $type, $3, true); 
-        }
-        | EXPORT datatype[type] ID ROUNDBRACKET_L params ROUNDBRACKET_R SEMICOLON  // example: export int foo(int a, int b);
-        { 
-          $$ = ASTfundef(NULL, $5, $type, $3, false);
-        }
-        | EXPORT datatype[type] ID ROUNDBRACKET_L params ROUNDBRACKET_R CURLYBRACKET_L CURLYBRACKET_R // example: export int foo(int a, int b) {};
-        { 
-          $$ = ASTfundef(NULL, $5, $type, $3, true); 
-        }
-        | EXPORT datatype[type] ID ROUNDBRACKET_L params ROUNDBRACKET_R CURLYBRACKET_L funbody CURLYBRACKET_R // example: export int foo(int a, int b) {...};
-        { 
-          $$ = ASTfundef($8, $5, $type, $3, true); 
-        }
-        | EXTERN datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R SEMICOLON // example: extern int foo();
-        {
-          $$ = ASTfundef(NULL, NULL, $type, $3, false); 
-        }
-        | EXTERN datatype[type] ID ROUNDBRACKET_L params ROUNDBRACKET_R SEMICOLON // example: extern int foo(int a, int b);
-        { 
-          $$ = ASTfundef(NULL, $5, $type, $3, false); 
-        };
+      
 
 funcall: ID ROUNDBRACKET_L args ROUNDBRACKET_R  // example: foo(5, 3);
         {
@@ -260,6 +234,25 @@ funcall: ID ROUNDBRACKET_L args ROUNDBRACKET_R  // example: foo(5, 3);
         {
           $$ = ASTfuncall(NULL, $1);
         };
+
+
+vardecls_opt: vardecls 
+              {
+                $$ = $1;
+              }
+              | /* empty */ 
+              {
+                $$ = NULL;
+              }; 
+
+stmts_opt: stmts 
+              {
+                $$ = $1;
+              }
+              | /* empty */ 
+              {
+                $$ = NULL;
+              }; 
 
 
 /*************************************
@@ -380,7 +373,7 @@ stmt: assign
       {
         $$ = $1;
       }
-      | expr SEMICOLON 
+      | funcall SEMICOLON 
       {
         $$ = ASTexprstmt($1);
       }
@@ -428,6 +421,10 @@ block: CURLYBRACKET_L CURLYBRACKET_R
       | CURLYBRACKET_L stmts CURLYBRACKET_R
       {
         $$ = $2;
+      }
+      | stmt
+      {
+        $$ = ASTstmts($1, NULL);
       };
 
 
@@ -445,6 +442,10 @@ expr:  ROUNDBRACKET_L expr ROUNDBRACKET_R
       {
         $$ = $2;
       }
+      | constant
+      {
+        $$ = $1;
+      } 
       | ID 
       {
         $$ = ASTvar($1);
@@ -457,10 +458,6 @@ expr:  ROUNDBRACKET_L expr ROUNDBRACKET_R
       {
         $$ = $1;
       }     
-      | constant
-      {
-        $$ = $1;
-      } 
       | array_expr
       {
         $$ = $1;
@@ -483,11 +480,11 @@ expr:  ROUNDBRACKET_L expr ROUNDBRACKET_R
       };
 
 
-unary_expr: UMINUS expr %prec UMINUS
+unary_expr: MINUS expr %prec UMINUS
       {
         $$ = ASTmonop($2, MO_not);
       }
-      | NEG expr %prec NEG
+      | NEG expr
       {
         $$ = ASTmonop($2, MO_neg);
       };
@@ -497,7 +494,7 @@ arithmetic_expr: expr PLUS expr
       {
         $$ = ASTbinop( $1, $3, BO_add);
       }
-      | expr MINUS expr
+      | expr MINUS expr 
       {
         $$ = ASTbinop( $1, $3, BO_sub);
       }
