@@ -34,7 +34,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %locations
 
 %token ROUNDBRACKET_L ROUNDBRACKET_R CURLYBRACKET_L CURLYBRACKET_R SQUAREBRACKET_L SQUAREBRACKET_R COMMA SEMICOLON
-%token MINUS UMINUS PLUS STAR SLASH PERCENT LE LT GE GT EQ NE OR AND NEG
+%token MINUS PLUS STAR SLASH PERCENT LE LT GE GT EQ NE OR AND NEG
 %token TRUEVAL FALSEVAL LET
 %token IF ELSE 
 %token WHILE DO FOR 
@@ -359,6 +359,8 @@ expr_dim: expr
   STATEMENTS                        
 *************************************/
 
+
+
 stmts: stmt stmts
       {
         $$ = ASTstmts($1, $2);
@@ -417,8 +419,7 @@ assign: varlet LET expr SEMICOLON
         };
 
 
-block: CURLYBRACKET_L CURLYBRACKET_R
-      | CURLYBRACKET_L stmts CURLYBRACKET_R
+block:  CURLYBRACKET_L stmts_opt CURLYBRACKET_R
       {
         $$ = $2;
       }
