@@ -128,6 +128,13 @@ node_st *PRTvarlet(node_st *node)
 node_st *PRTvar(node_st *node)
 {
   printf("%s", VAR_NAME(node));
+
+  if (VAR_INDICES(node) != NULL)
+  {
+    printf("[");
+    TRAVindices(node);
+    printf("]");
+  }
   return node;
 }
 
@@ -249,7 +256,7 @@ node_st *PRTreturn(node_st *node)
  */
 node_st *PRTfuncall(node_st *node)
 {
-  printf("%s(", FUNCALL_NAME(node));
+  printf("\n%s(", FUNCALL_NAME(node));
 
   TRAVchildren(node);
 
@@ -330,7 +337,7 @@ node_st *PRTfundef(node_st *node)
     printf("export ");
   }
 
-  printf("%s %s", tmp, FUNDEF_NAME(node));
+  printf("\n%s %s", tmp, FUNDEF_NAME(node));
 
   printf("(");
 
@@ -343,11 +350,11 @@ node_st *PRTfundef(node_st *node)
 
   if (FUNDEF_BODY(node) != NULL)
   {
-    printf(" {\n");
+    printf(" {");
 
     TRAVbody(node);
 
-    printf("\n}\n");
+    printf("\n}");
   }
   else
   {
@@ -451,7 +458,7 @@ node_st *PRTfor(node_st *node)
     TRAVstep(node);
   }
 
-  printf(") {\n ");
+  printf(") { ");
 
   TRAVblock(node);
 
@@ -616,7 +623,7 @@ node_st *PRTvardecl(node_st *node)
     DBUG_ASSERT(false, "unknown type detected!");
   }
 
-  printf("%s", tmp);
+  printf("\n%s", tmp);
 
   if (VARDECL_DIMS(node) != NULL)
   {

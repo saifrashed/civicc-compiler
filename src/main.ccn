@@ -279,10 +279,9 @@ node VarLet {
     }
 };
 
-
 node Var {
     children {
-        Exprs indices
+        Exprs indices { constructor }
     }, 
 
     attributes {

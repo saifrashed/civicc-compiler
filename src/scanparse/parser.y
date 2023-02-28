@@ -47,9 +47,10 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %token <id> ID
 
 %type <node> intval floatval boolval constant ids
-%type <node> stmts stmt assign varlet program
-%type <node> fundef fundefs funbody funcall vardecl vardecls vardecls_opt stmts_opt funheader
-%type <node> decl decls globdef globdecl args arg exprs_dims id_dims expr_dim id_dim param params block
+%type <node>  vardecl vardecls vardecls_opt stmt stmts stmts_opt localfundef localfundefs localfundefs_opt
+%type <node> assign varlet program block
+%type <node> fundef fundefs fundefs_opt funbody funcall funheader  
+%type <node> decl decls globdef globdecl exprs_dims id_dims expr_dim id_dim arg args param params params_opt
 %type <node> expr array_expr logical_expr arithmetic_expr unary_expr comparison_expr cast
 %type <cmonop> monop
 %type <cbinop> binop
@@ -172,36 +173,8 @@ globdef: datatype[type] ID SEMICOLON // example: int id;
 *************************************/
 
 
-// funbody: vardecls 
-//       {
-//         $$ = ASTfunbody($1, NULL, NULL);
-//       }
-//       | stmts
-//       {
-//         $$ = ASTfunbody(NULL, NULL, $1);
-//       }
-//       | vardecls stmts 
-//       {
-//         $$ = ASTfunbody($1, NULL, $2);
-//       };
 
-
-
-funheader: datatype[type] ID ROUNDBRACKET_L params ROUNDBRACKET_R 
-        {
-          $$ = ASTfundef(NULL, $4, $type, $2, false); 
-        }
-        | datatype[type] ID ROUNDBRACKET_L ROUNDBRACKET_R
-        {
-          $$ = ASTfundef(NULL, NULL, $type, $2, false); 
-        };
-
-funbody: CURLYBRACKET_L vardecls_opt stmts_opt CURLYBRACKET_R
-        {
-          $$ = ASTfunbody($2, NULL, $3); 
-        };        
-
-fundefs: fundef fundefs
+fundefs: fundefs fundef
       {
         $$ = ASTfundefs($1, $2);
       }
@@ -224,7 +197,63 @@ fundef: EXTERN funheader SEMICOLON // example:  int foo();
           FUNDEF_BODY($2) = $3;
           $$ = $2;
         }
-      
+
+
+localfundefs: fundefs fundef
+      {
+        $$ = ASTfundefs($2, $1);
+      }
+      | fundef
+      {
+        $$ = ASTfundefs($1, NULL);
+      }
+
+localfundef:
+        | funheader funbody // example:  int foo();
+        { 
+          FUNDEF_BODY($1) = $2;
+          $$ = $1;
+        };
+
+
+
+funheader: datatype[type] ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R 
+        {
+          $$ = ASTfundef(NULL, $4, $type, $2, false); 
+        };      
+
+funbody: CURLYBRACKET_L vardecls CURLYBRACKET_R
+        {
+          $$ = ASTfunbody($2, NULL, NULL); 
+        }
+        | CURLYBRACKET_L localfundefs CURLYBRACKET_R
+        {
+          $$ = ASTfunbody(NULL, $2, NULL); 
+        }
+        | CURLYBRACKET_L stmts CURLYBRACKET_R
+        {
+          $$ = ASTfunbody(NULL, NULL, $2); 
+        }
+        | CURLYBRACKET_L vardecls stmts CURLYBRACKET_R
+        {
+          $$ = ASTfunbody($2, NULL, $3); 
+        }    
+        | CURLYBRACKET_L localfundefs stmts CURLYBRACKET_R
+        {
+          $$ = ASTfunbody(NULL, $2, $3); 
+        }
+        | CURLYBRACKET_L vardecls localfundefs CURLYBRACKET_R
+        {
+          $$ = ASTfunbody($2, $3, NULL); 
+        }
+         | CURLYBRACKET_L vardecls localfundefs stmts CURLYBRACKET_R
+        {
+          $$ = ASTfunbody($2, $3, $4); 
+        }
+        | CURLYBRACKET_L CURLYBRACKET_R
+        {
+          $$ = ASTfunbody(NULL, NULL, NULL); 
+        };                   
 
 funcall: ID ROUNDBRACKET_L args ROUNDBRACKET_R  // example: foo(5, 3);
         {
@@ -236,34 +265,23 @@ funcall: ID ROUNDBRACKET_L args ROUNDBRACKET_R  // example: foo(5, 3);
         };
 
 
-vardecls_opt: vardecls 
-              {
-                $$ = $1;
-              }
-              | /* empty */ 
-              {
-                $$ = NULL;
-              }; 
-
-stmts_opt: stmts 
-              {
-                $$ = $1;
-              }
-              | /* empty */ 
-              {
-                $$ = NULL;
-              }; 
-
-
 /*************************************
   VAR DECLARATIONS, ARGUMENTS, PARAMETERS AND DIMENSIONS                  
 *************************************/
 
+vardecls_opt: vardecls // Optional variable declarations
+              {
+                $$ = $1;
+              }
+              | /* empty */ 
+              {
+                $$ = NULL;
+              }; 
 
-vardecls: vardecl vardecls // example: int a = 5; int b = 4; int c;
+vardecls: vardecls vardecl  // example: int a = 5; int b = 4; int c;
       {
-        VARDECL_NEXT($1) = $2;
-        $$ = $1;
+        VARDECL_NEXT($2) = $1;
+        $$ = $2;
       }
       | vardecl
       {
@@ -303,6 +321,16 @@ arg: expr // example: a
         {
           $$ = ASTexprs($1, NULL);
         } ;          
+
+
+params_opt: params // example: int a, int[a,b] b, float[a] b
+      {
+        $$ = $1;
+      }
+      | /* empty */
+      {
+        $$ = NULL;
+      };
 
 
 params: param COMMA params // example: int a, int[a,b] b, float[a] b
@@ -361,7 +389,17 @@ expr_dim: expr
 
 
 
-stmts: stmt stmts
+stmts_opt: stmts // Optional statement
+              {
+                $$ = $1;
+              }
+              | /* empty */ 
+              {
+                $$ = NULL;
+              }; 
+
+
+stmts: stmt stmts // One or many statements
       {
         $$ = ASTstmts($1, $2);
       }
@@ -447,9 +485,13 @@ expr:  ROUNDBRACKET_L expr ROUNDBRACKET_R
       {
         $$ = $1;
       } 
+      | ID SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R 
+      {
+        $$ = ASTvar($3, $1);
+      }     
       | ID 
       {
-        $$ = ASTvar($1);
+        $$ = ASTvar(NULL, $1);
       }     
       | cast
       {
