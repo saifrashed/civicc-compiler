@@ -37,6 +37,7 @@ node_st *PRTstmts(node_st *node)
 node_st *PRTassign(node_st *node)
 {
 
+  printf("\n");
   if (ASSIGN_LET(node) != NULL)
   {
     TRAVlet(node);
@@ -256,7 +257,8 @@ node_st *PRTreturn(node_st *node)
  */
 node_st *PRTfuncall(node_st *node)
 {
-  printf("\n%s(", FUNCALL_NAME(node));
+
+  printf("\n %s(", FUNCALL_NAME(node));
 
   TRAVchildren(node);
 
@@ -303,7 +305,8 @@ node_st *PRTcast(node_st *node)
  */
 node_st *PRTfundefs(node_st *node)
 {
-  TRAVchildren(node);
+  TRAVfundef(node);
+  TRAVnext(node);
   return node;
 }
 
@@ -372,7 +375,9 @@ node_st *PRTfundef(node_st *node)
 node_st *PRTfunbody(node_st *node)
 {
 
-  TRAVchildren(node);
+  TRAVdecls(node);
+  TRAVlocal_fundefs(node);
+  TRAVstmts(node);
 
   return node;
 }

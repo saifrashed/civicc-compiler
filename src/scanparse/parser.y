@@ -199,17 +199,16 @@ fundef: EXTERN funheader SEMICOLON // example:  int foo();
         }
 
 
-localfundefs: fundefs fundef
+localfundefs: localfundef localfundefs
       {
-        $$ = ASTfundefs($2, $1);
+        $$ = ASTfundefs($1, $2);
       }
-      | fundef
+      | localfundef
       {
         $$ = ASTfundefs($1, NULL);
       }
 
-localfundef:
-        | funheader funbody // example:  int foo();
+localfundef: funheader funbody // example:  int foo();
         { 
           FUNDEF_BODY($1) = $2;
           $$ = $1;
