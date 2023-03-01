@@ -23,7 +23,7 @@ char *getTabs()
   char *spaces = (char *)malloc((indent + 1) * sizeof(char));
 
   // Fill the string with n spaces
-  memset(spaces, '   ', indent);
+  memset(spaces, '\t', indent);
 
   // Add a null terminator at the end of the string
   spaces[indent] = '\0';
@@ -192,9 +192,9 @@ node_st *PRTbool(node_st *node)
 node_st *PRTdecls(node_st *node)
 {
   TRAVdecl(node);
-  TRAVnext(node);
-
   printf("\n");
+
+  TRAVnext(node);
 
   return node;
 }
@@ -336,6 +336,12 @@ node_st *PRTfundefs(node_st *node)
  */
 node_st *PRTfundef(node_st *node)
 {
+
+  if (FUNDEF_BODY(node) != NULL)
+  {
+    printf("\n");
+  }
+
   char *tmp = NULL;
 
   switch (FUNDEF_TYPE(node))
@@ -383,11 +389,7 @@ node_st *PRTfundef(node_st *node)
 
   if (FUNDEF_BODY(node) != NULL)
   {
-    printf(" {");
-
     TRAVbody(node);
-
-    printf("\n}");
   }
   else
   {
@@ -403,6 +405,8 @@ node_st *PRTfundef(node_st *node)
 node_st *PRTfunbody(node_st *node)
 {
 
+  printf(" {");
+
   indent++;
 
   TRAVdecls(node);
@@ -410,6 +414,8 @@ node_st *PRTfunbody(node_st *node)
   TRAVstmts(node);
 
   indent--;
+
+  printf("\n%s}", getTabs());
 
   return node;
 }
@@ -420,21 +426,22 @@ node_st *PRTfunbody(node_st *node)
 node_st *PRTifelse(node_st *node)
 {
 
-  printf("\nif(");
+  printf("\n%sif(", getTabs());
   TRAVcond(node);
-  printf(") { \n ");
 
+  printf(") { ");
+  indent++;
   TRAVthen(node);
-
-  printf(" \n}");
+  indent--;
+  printf("\n%s}", getTabs());
 
   if (IFELSE_ELSE_BLOCK(node) != NULL)
   {
-    printf(" else { \n ");
-
+    printf(" else { ");
+    indent++;
     TRAVelse_block(node);
-
-    printf("\n}");
+    indent--;
+    printf("\n%s}", getTabs());
   }
   return node;
 }
@@ -445,14 +452,14 @@ node_st *PRTifelse(node_st *node)
 node_st *PRTwhile(node_st *node)
 {
 
-  printf("\nwhile (");
+  printf("\n%swhile(", getTabs());
   TRAVcond(node);
-  printf(") { \n ");
+
+  printf(") { ");
   indent++;
-
   TRAVblock(node);
-
-  printf("\n}");
+  indent--;
+  printf("\n%s}", getTabs());
 
   return node;
 }
@@ -462,13 +469,13 @@ node_st *PRTwhile(node_st *node)
  */
 node_st *PRTdowhile(node_st *node)
 {
-  printf("\ndo {");
+
+  printf("\n%sdo { ", getTabs());
+  indent++;
   TRAVblock(node);
-
-  printf("} while (\n ");
-
+  indent--;
+  printf("\n%s} while (", getTabs());
   TRAVcond(node);
-
   printf("\n)");
 
   return node;
@@ -480,7 +487,7 @@ node_st *PRTdowhile(node_st *node)
 node_st *PRTfor(node_st *node)
 {
 
-  printf("\nfor(");
+  printf("\n%sfor(", getTabs());
 
   printf("%s = ", FOR_VAR(node));
 
@@ -498,9 +505,13 @@ node_st *PRTfor(node_st *node)
 
   printf(") { ");
 
+  indent++;
+
   TRAVblock(node);
 
-  printf("\n}");
+  indent--;
+
+  printf("\n%s}", getTabs());
 
   return node;
 }
@@ -572,16 +583,26 @@ node_st *PRTglobdef(node_st *node)
   }
 
   if (GLOBDEF_EXPORT(node) == true)
-  { // print for export
-    printf("export %s %s", tmp, GLOBDEF_NAME(node));
-  }
-  else
   {
-    // print for non-export
-    printf("%s %s", tmp, GLOBDEF_NAME(node));
+    printf("export ");
   }
 
-  TRAVchildren(node);
+  printf("%s", tmp);
+
+  if (GLOBDEF_DIMS(node) != NULL)
+  {
+    printf("[");
+    TRAVdims(node);
+    printf("]");
+  }
+
+  printf(" %s", GLOBDEF_NAME(node));
+
+  if (GLOBDEF_INIT(node) != NULL)
+  {
+    printf(" = ");
+    TRAVinit(node);
+  }
 
   printf(";\n");
 
