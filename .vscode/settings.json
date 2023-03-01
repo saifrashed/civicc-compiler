@@ -2,6 +2,7 @@
     "files.associations": {
         "trav_data.h": "c",
         "ast.h": "c",
-        "__node_handle": "c"
+        "__node_handle": "c",
+        "random": "c"
     }
 }

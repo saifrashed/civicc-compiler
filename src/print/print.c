@@ -7,10 +7,29 @@
  *
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "ccn/ccn.h"
 #include "ccngen/ast.h"
 #include "ccngen/trav.h"
 #include "palm/dbug.h"
+
+int indent = 0;
+
+char *getTabs()
+{
+  // Allocate a string with enough space for n spaces and a null terminator
+  char *spaces = (char *)malloc((indent + 1) * sizeof(char));
+
+  // Fill the string with n spaces
+  memset(spaces, '   ', indent);
+
+  // Add a null terminator at the end of the string
+  spaces[indent] = '\0';
+
+  return spaces;
+}
 
 /**
  * @fn PRTprogram
@@ -37,7 +56,7 @@ node_st *PRTstmts(node_st *node)
 node_st *PRTassign(node_st *node)
 {
 
-  printf("\n");
+  printf("\n%s", getTabs());
   if (ASSIGN_LET(node) != NULL)
   {
     TRAVlet(node);
@@ -175,6 +194,8 @@ node_st *PRTdecls(node_st *node)
   TRAVdecl(node);
   TRAVnext(node);
 
+  printf("\n");
+
   return node;
 }
 
@@ -239,7 +260,7 @@ node_st *PRTexprstmt(node_st *node)
 node_st *PRTreturn(node_st *node)
 {
 
-  printf("\nreturn");
+  printf("\n%sreturn", getTabs());
 
   if (RETURN_EXPR(node) != NULL)
   {
@@ -258,7 +279,7 @@ node_st *PRTreturn(node_st *node)
 node_st *PRTfuncall(node_st *node)
 {
 
-  printf("\n %s(", FUNCALL_NAME(node));
+  printf("\n%s%s(", getTabs(), FUNCALL_NAME(node));
 
   TRAVchildren(node);
 
@@ -335,12 +356,21 @@ node_st *PRTfundef(node_st *node)
     DBUG_ASSERT(false, "unknown type detected!");
   }
 
+  if (FUNDEF_BODY(node) == NULL)
+  {
+    printf("\nextern ");
+  }
+  else
+  {
+    printf("\n");
+  }
+
   if (FUNDEF_EXPORT(node) == true)
   {
     printf("export ");
   }
 
-  printf("\n%s %s", tmp, FUNDEF_NAME(node));
+  printf("%s%s %s", getTabs(), tmp, FUNDEF_NAME(node));
 
   printf("(");
 
@@ -364,8 +394,6 @@ node_st *PRTfundef(node_st *node)
     printf(";");
   }
 
-  printf("\n");
-
   return node;
 }
 
@@ -375,9 +403,13 @@ node_st *PRTfundef(node_st *node)
 node_st *PRTfunbody(node_st *node)
 {
 
+  indent++;
+
   TRAVdecls(node);
   TRAVlocal_fundefs(node);
   TRAVstmts(node);
+
+  indent--;
 
   return node;
 }
@@ -416,6 +448,7 @@ node_st *PRTwhile(node_st *node)
   printf("\nwhile (");
   TRAVcond(node);
   printf(") { \n ");
+  indent++;
 
   TRAVblock(node);
 
@@ -628,7 +661,7 @@ node_st *PRTvardecl(node_st *node)
     DBUG_ASSERT(false, "unknown type detected!");
   }
 
-  printf("\n%s", tmp);
+  printf("\n%s%s", getTabs(), tmp);
 
   if (VARDECL_DIMS(node) != NULL)
   {

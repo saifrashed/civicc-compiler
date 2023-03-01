@@ -4,21 +4,18 @@ Nonterminals useless in grammar
     floatval
     boolval
     ids
+    vardecls_opt
     localfundefs_opt
     fundefs_opt
     monop
     binop
-    localfundef
-    vardecls_opt
+    fundefs
 
 
 Rules useless in grammar
 
-  111 localfundef: ε
-  112            | funheader funbody
-
-  113 vardecls_opt: vardecls
-  114             | ε
+  111 fundefs: fundefs fundef
+  112        | fundef
 
 
 Grammar
@@ -46,37 +43,38 @@ Grammar
    15        | EXPORT datatype ID LET expr SEMICOLON
    16        | EXPORT datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON
 
-   17 fundefs: fundefs fundef
-   18        | fundef
+   17 fundef: EXTERN funheader SEMICOLON
+   18       | funheader funbody
+   19       | EXPORT funheader funbody
 
-   19 fundef: EXTERN funheader SEMICOLON
-   20       | funheader funbody
-   21       | EXPORT funheader funbody
+   20 localfundefs: localfundef localfundefs
+   21             | localfundef
 
-   22 localfundefs: fundefs fundef
-   23             | fundef
+   22 localfundef: funheader funbody
 
-   24 funheader: datatype ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R
+   23 vardecls: vardecls vardecl
+   24         | vardecl
 
-   25 funbody: CURLYBRACKET_L vardecls CURLYBRACKET_R
-   26        | CURLYBRACKET_L localfundefs CURLYBRACKET_R
-   27        | CURLYBRACKET_L stmts CURLYBRACKET_R
-   28        | CURLYBRACKET_L vardecls stmts CURLYBRACKET_R
-   29        | CURLYBRACKET_L localfundefs stmts CURLYBRACKET_R
-   30        | CURLYBRACKET_L vardecls localfundefs CURLYBRACKET_R
-   31        | CURLYBRACKET_L vardecls localfundefs stmts CURLYBRACKET_R
-   32        | CURLYBRACKET_L CURLYBRACKET_R
+   25 vardecl: datatype ID SEMICOLON
+   26        | datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON
+   27        | datatype ID LET expr SEMICOLON
+   28        | datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON
 
-   33 funcall: ID ROUNDBRACKET_L args ROUNDBRACKET_R
-   34        | ID ROUNDBRACKET_L ROUNDBRACKET_R
+   29 funheader: datatype ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R
 
-   35 vardecls: vardecls vardecl
-   36         | vardecl
+   30 funbody: CURLYBRACKET_L vardecls CURLYBRACKET_R
+   31        | CURLYBRACKET_L localfundefs CURLYBRACKET_R
+   32        | CURLYBRACKET_L stmts CURLYBRACKET_R
+   33        | CURLYBRACKET_L vardecls stmts CURLYBRACKET_R
+   34        | CURLYBRACKET_L localfundefs stmts CURLYBRACKET_R
+   35        | CURLYBRACKET_L vardecls localfundefs CURLYBRACKET_R
+   36        | CURLYBRACKET_L vardecls localfundefs stmts CURLYBRACKET_R
+   37        | CURLYBRACKET_L CURLYBRACKET_R
 
-   37 vardecl: datatype ID SEMICOLON
-   38        | datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON
-   39        | datatype ID LET expr SEMICOLON
-   40        | datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON
+   38 funcall: ID ROUNDBRACKET_L args_opt ROUNDBRACKET_R
+
+   39 args_opt: args
+   40         | ε
 
    41 args: arg COMMA args
    42     | arg
@@ -95,12 +93,12 @@ Grammar
    50 exprs_dims: expr_dim COMMA exprs_dims
    51           | expr_dim
 
-   52 id_dims: id_dim COMMA id_dims
-   53        | id_dim
+   52 expr_dim: expr
 
-   54 id_dim: ID
+   53 id_dims: id_dim COMMA id_dims
+   54        | id_dim
 
-   55 expr_dim: expr
+   55 id_dim: ID
 
    56 stmts_opt: stmts
    57          | ε
@@ -177,14 +175,14 @@ Terminals, with rules where they appear
 
     $end (0) 0
     error (256)
-    ROUNDBRACKET_L (258) 24 33 34 62 63 64 65 66 67 75 102
-    ROUNDBRACKET_R (259) 24 33 34 62 63 64 65 66 67 75 102
-    CURLYBRACKET_L (260) 25 26 27 28 29 30 31 32 71
-    CURLYBRACKET_R (261) 25 26 27 28 29 30 31 32 71
-    SQUAREBRACKET_L (262) 8 10 12 14 16 38 40 49 74 77 101
-    SQUAREBRACKET_R (263) 8 10 12 14 16 38 40 49 74 77 101
-    COMMA (264) 41 46 50 52 62 63
-    SEMICOLON (265) 7 8 9 10 11 12 13 14 15 16 19 37 38 39 40 61 64 68 69 70
+    ROUNDBRACKET_L (258) 29 38 62 63 64 65 66 67 75 102
+    ROUNDBRACKET_R (259) 29 38 62 63 64 65 66 67 75 102
+    CURLYBRACKET_L (260) 30 31 32 33 34 35 36 37 71
+    CURLYBRACKET_R (261) 30 31 32 33 34 35 36 37 71
+    SQUAREBRACKET_L (262) 8 10 12 14 16 26 28 49 74 77 101
+    SQUAREBRACKET_R (263) 8 10 12 14 16 26 28 49 74 77 101
+    COMMA (264) 41 46 50 53 62 63
+    SEMICOLON (265) 7 8 9 10 11 12 13 14 15 16 17 25 26 27 28 61 64 68 69 70
     MINUS (266) 86 89
     PLUS (267) 88
     STAR (268) 90
@@ -201,22 +199,22 @@ Terminals, with rules where they appear
     NEG (279) 87
     TRUEVAL (280) 105
     FALSEVAL (281) 106
-    LET (282) 11 12 15 16 39 40 62 63 70
+    LET (282) 11 12 15 16 27 28 62 63 70
     IF (283) 66 67
     ELSE (284) 67
     WHILE (285) 64 65
     DO (286) 64
     FOR (287) 62 63
     RETURN (288) 68 69
-    EXPORT (289) 13 14 15 16 21
-    EXTERN (290) 7 8 19
+    EXPORT (289) 13 14 15 16 19
+    EXTERN (290) 7 8 17
     BOOLTYPE (291) 110
     FLOATTYPE (292) 109
     INTTYPE (293) 108
     VOIDTYPE (294) 107
     NUM <cint> (295) 104
     FLOAT <cflt> (296) 103
-    ID <id> (297) 7 8 9 10 11 12 13 14 15 16 24 33 34 37 38 39 40 48 49 54 62 63 73 74 77 78
+    ID <id> (297) 7 8 9 10 11 12 13 14 15 16 25 26 27 28 29 38 48 49 55 62 63 73 74 77 78
     CAST (298)
     UMINUS (299)
     THEN (300)
@@ -241,102 +239,105 @@ Nonterminals, with rules where they appear
     globdef <node> (51)
         on left: 9 10 11 12 13 14 15 16
         on right: 4
-    fundefs <node> (52)
-        on left: 17 18
-        on right: 17 22
-    fundef <node> (53)
-        on left: 19 20 21
-        on right: 6 17 18 22 23
-    localfundefs <node> (54)
-        on left: 22 23
-        on right: 26 29 30 31
-    funheader <node> (55)
-        on left: 24
-        on right: 19 20 21
-    funbody <node> (56)
-        on left: 25 26 27 28 29 30 31 32
+    fundef <node> (52)
+        on left: 17 18 19
+        on right: 6
+    localfundefs <node> (53)
+        on left: 20 21
+        on right: 20 31 34 35 36
+    localfundef <node> (54)
+        on left: 22
         on right: 20 21
-    funcall <node> (57)
-        on left: 33 34
+    vardecls <node> (55)
+        on left: 23 24
+        on right: 23 30 33 35 36
+    vardecl <node> (56)
+        on left: 25 26 27 28
+        on right: 23 24
+    funheader <node> (57)
+        on left: 29
+        on right: 17 18 19 22
+    funbody <node> (58)
+        on left: 30 31 32 33 34 35 36 37
+        on right: 18 19 22
+    funcall <node> (59)
+        on left: 38
         on right: 61 80
-    vardecls <node> (58)
-        on left: 35 36
-        on right: 25 28 30 31 35
-    vardecl <node> (59)
-        on left: 37 38 39 40
-        on right: 35 36
-    args <node> (60)
+    args_opt <node> (60)
+        on left: 39 40
+        on right: 38
+    args <node> (61)
         on left: 41 42
-        on right: 33 41
-    arg <node> (61)
+        on right: 39 41
+    arg <node> (62)
         on left: 43
         on right: 41 42
-    params_opt <node> (62)
+    params_opt <node> (63)
         on left: 44 45
-        on right: 24
-    params <node> (63)
+        on right: 29
+    params <node> (64)
         on left: 46 47
         on right: 44 46
-    param <node> (64)
+    param <node> (65)
         on left: 48 49
         on right: 46 47
-    exprs_dims <node> (65)
+    exprs_dims <node> (66)
         on left: 50 51
-        on right: 10 12 14 16 38 40 50 74 77 101
-    id_dims <node> (66)
-        on left: 52 53
-        on right: 8 49 52
-    id_dim <node> (67)
-        on left: 54
-        on right: 52 53
-    expr_dim <node> (68)
-        on left: 55
+        on right: 10 12 14 16 26 28 50 74 77 101
+    expr_dim <node> (67)
+        on left: 52
         on right: 50 51
-    stmts_opt <node> (69)
+    id_dims <node> (68)
+        on left: 53 54
+        on right: 8 49 53
+    id_dim <node> (69)
+        on left: 55
+        on right: 53 54
+    stmts_opt <node> (70)
         on left: 56 57
         on right: 71
-    stmts <node> (70)
+    stmts <node> (71)
         on left: 58 59
-        on right: 27 28 29 31 56 58
-    stmt <node> (71)
+        on right: 32 33 34 36 56 58
+    stmt <node> (72)
         on left: 60 61 62 63 64 65 66 67 68 69
         on right: 58 59 72
-    assign <node> (72)
+    assign <node> (73)
         on left: 70
         on right: 60
-    block <node> (73)
+    block <node> (74)
         on left: 71 72
         on right: 62 63 64 65 66 67
-    varlet <node> (74)
+    varlet <node> (75)
         on left: 73 74
         on right: 70
-    expr <node> (75)
+    expr <node> (76)
         on left: 75 76 77 78 79 80 81 82 83 84 85
-        on right: 11 12 15 16 39 40 43 55 62 63 64 65 66 67 69 70 75 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 102
-    unary_expr <node> (76)
+        on right: 11 12 15 16 27 28 43 52 62 63 64 65 66 67 69 70 75 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 102
+    unary_expr <node> (77)
         on left: 86 87
         on right: 85
-    arithmetic_expr <node> (77)
+    arithmetic_expr <node> (78)
         on left: 88 89 90 91 92
         on right: 82
-    comparison_expr <node> (78)
+    comparison_expr <node> (79)
         on left: 93 94 95 96 97 98
         on right: 83
-    logical_expr <node> (79)
+    logical_expr <node> (80)
         on left: 99 100
         on right: 84
-    array_expr <node> (80)
+    array_expr <node> (81)
         on left: 101
         on right: 81
-    cast <node> (81)
+    cast <node> (82)
         on left: 102
         on right: 79
-    constant <node> (82)
+    constant <node> (83)
         on left: 103 104 105 106
         on right: 76
-    datatype <cdatatype> (83)
+    datatype <cdatatype> (84)
         on left: 107 108 109 110
-        on right: 7 8 9 10 11 12 13 14 15 16 24 37 38 39 40 48 49 62 63 102
+        on right: 7 8 9 10 11 12 13 14 15 16 25 26 27 28 29 48 49 62 63 102
 
 
 State 0
@@ -366,7 +367,7 @@ State 1
    14        | EXPORT • datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON
    15        | EXPORT • datatype ID LET expr SEMICOLON
    16        | EXPORT • datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON
-   21 fundef: EXPORT • funheader funbody
+   19 fundef: EXPORT • funheader funbody
 
     BOOLTYPE   shift, and go to state 3
     FLOATTYPE  shift, and go to state 4
@@ -381,7 +382,7 @@ State 2
 
     7 globdecl: EXTERN • datatype ID SEMICOLON
     8         | EXTERN • datatype SQUAREBRACKET_L id_dims SQUAREBRACKET_R ID SEMICOLON
-   19 fundef: EXTERN • funheader SEMICOLON
+   17 fundef: EXTERN • funheader SEMICOLON
 
     BOOLTYPE   shift, and go to state 3
     FLOATTYPE  shift, and go to state 4
@@ -480,7 +481,7 @@ State 12
 
 State 13
 
-   20 fundef: funheader • funbody
+   18 fundef: funheader • funbody
 
     CURLYBRACKET_L  shift, and go to state 21
 
@@ -493,7 +494,7 @@ State 14
    10        | datatype • SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON
    11        | datatype • ID LET expr SEMICOLON
    12        | datatype • SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON
-   24 funheader: datatype • ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R
+   29 funheader: datatype • ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R
 
     SQUAREBRACKET_L  shift, and go to state 23
     ID               shift, and go to state 24
@@ -501,7 +502,7 @@ State 14
 
 State 15
 
-   21 fundef: EXPORT funheader • funbody
+   19 fundef: EXPORT funheader • funbody
 
     CURLYBRACKET_L  shift, and go to state 21
 
@@ -514,7 +515,7 @@ State 16
    14        | EXPORT datatype • SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON
    15        | EXPORT datatype • ID LET expr SEMICOLON
    16        | EXPORT datatype • SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON
-   24 funheader: datatype • ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R
+   29 funheader: datatype • ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R
 
     SQUAREBRACKET_L  shift, and go to state 26
     ID               shift, and go to state 27
@@ -522,7 +523,7 @@ State 16
 
 State 17
 
-   19 fundef: EXTERN funheader • SEMICOLON
+   17 fundef: EXTERN funheader • SEMICOLON
 
     SEMICOLON  shift, and go to state 28
 
@@ -531,7 +532,7 @@ State 18
 
     7 globdecl: EXTERN datatype • ID SEMICOLON
     8         | EXTERN datatype • SQUAREBRACKET_L id_dims SQUAREBRACKET_R ID SEMICOLON
-   24 funheader: datatype • ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R
+   29 funheader: datatype • ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R
 
     SQUAREBRACKET_L  shift, and go to state 29
     ID               shift, and go to state 30
@@ -553,14 +554,14 @@ State 20
 
 State 21
 
-   25 funbody: CURLYBRACKET_L • vardecls CURLYBRACKET_R
-   26        | CURLYBRACKET_L • localfundefs CURLYBRACKET_R
-   27        | CURLYBRACKET_L • stmts CURLYBRACKET_R
-   28        | CURLYBRACKET_L • vardecls stmts CURLYBRACKET_R
-   29        | CURLYBRACKET_L • localfundefs stmts CURLYBRACKET_R
-   30        | CURLYBRACKET_L • vardecls localfundefs CURLYBRACKET_R
-   31        | CURLYBRACKET_L • vardecls localfundefs stmts CURLYBRACKET_R
-   32        | CURLYBRACKET_L • CURLYBRACKET_R
+   30 funbody: CURLYBRACKET_L • vardecls CURLYBRACKET_R
+   31        | CURLYBRACKET_L • localfundefs CURLYBRACKET_R
+   32        | CURLYBRACKET_L • stmts CURLYBRACKET_R
+   33        | CURLYBRACKET_L • vardecls stmts CURLYBRACKET_R
+   34        | CURLYBRACKET_L • localfundefs stmts CURLYBRACKET_R
+   35        | CURLYBRACKET_L • vardecls localfundefs CURLYBRACKET_R
+   36        | CURLYBRACKET_L • vardecls localfundefs stmts CURLYBRACKET_R
+   37        | CURLYBRACKET_L • CURLYBRACKET_R
 
     CURLYBRACKET_R  shift, and go to state 31
     IF              shift, and go to state 32
@@ -568,33 +569,30 @@ State 21
     DO              shift, and go to state 34
     FOR             shift, and go to state 35
     RETURN          shift, and go to state 36
-    EXPORT          shift, and go to state 37
-    EXTERN          shift, and go to state 38
     BOOLTYPE        shift, and go to state 3
     FLOATTYPE       shift, and go to state 4
     INTTYPE         shift, and go to state 5
     VOIDTYPE        shift, and go to state 6
-    ID              shift, and go to state 39
+    ID              shift, and go to state 37
 
-    fundefs       go to state 40
-    fundef        go to state 41
-    localfundefs  go to state 42
-    funheader     go to state 13
+    localfundefs  go to state 38
+    localfundef   go to state 39
+    vardecls      go to state 40
+    vardecl       go to state 41
+    funheader     go to state 42
     funcall       go to state 43
-    vardecls      go to state 44
-    vardecl       go to state 45
-    stmts         go to state 46
-    stmt          go to state 47
-    assign        go to state 48
-    varlet        go to state 49
-    datatype      go to state 50
+    stmts         go to state 44
+    stmt          go to state 45
+    assign        go to state 46
+    varlet        go to state 47
+    datatype      go to state 48
 
 
 State 22
 
-   20 fundef: funheader funbody •
+   18 fundef: funheader funbody •
 
-    $default  reduce using rule 20 (fundef)
+    $default  reduce using rule 18 (fundef)
 
 
 State 23
@@ -602,45 +600,45 @@ State 23
    10 globdef: datatype SQUAREBRACKET_L • exprs_dims SQUAREBRACKET_R ID SEMICOLON
    12        | datatype SQUAREBRACKET_L • exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    exprs_dims       go to state 61
-    expr_dim         go to state 62
-    expr             go to state 63
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    exprs_dims       go to state 59
+    expr_dim         go to state 60
+    expr             go to state 61
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 24
 
     9 globdef: datatype ID • SEMICOLON
    11        | datatype ID • LET expr SEMICOLON
-   24 funheader: datatype ID • ROUNDBRACKET_L params_opt ROUNDBRACKET_R
+   29 funheader: datatype ID • ROUNDBRACKET_L params_opt ROUNDBRACKET_R
 
-    ROUNDBRACKET_L  shift, and go to state 71
-    SEMICOLON       shift, and go to state 72
-    LET             shift, and go to state 73
+    ROUNDBRACKET_L  shift, and go to state 69
+    SEMICOLON       shift, and go to state 70
+    LET             shift, and go to state 71
 
 
 State 25
 
-   21 fundef: EXPORT funheader funbody •
+   19 fundef: EXPORT funheader funbody •
 
-    $default  reduce using rule 21 (fundef)
+    $default  reduce using rule 19 (fundef)
 
 
 State 26
@@ -648,71 +646,71 @@ State 26
    14 globdef: EXPORT datatype SQUAREBRACKET_L • exprs_dims SQUAREBRACKET_R ID SEMICOLON
    16        | EXPORT datatype SQUAREBRACKET_L • exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    exprs_dims       go to state 74
-    expr_dim         go to state 62
-    expr             go to state 63
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    exprs_dims       go to state 72
+    expr_dim         go to state 60
+    expr             go to state 61
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 27
 
    13 globdef: EXPORT datatype ID • SEMICOLON
    15        | EXPORT datatype ID • LET expr SEMICOLON
-   24 funheader: datatype ID • ROUNDBRACKET_L params_opt ROUNDBRACKET_R
+   29 funheader: datatype ID • ROUNDBRACKET_L params_opt ROUNDBRACKET_R
 
-    ROUNDBRACKET_L  shift, and go to state 71
-    SEMICOLON       shift, and go to state 75
-    LET             shift, and go to state 76
+    ROUNDBRACKET_L  shift, and go to state 69
+    SEMICOLON       shift, and go to state 73
+    LET             shift, and go to state 74
 
 
 State 28
 
-   19 fundef: EXTERN funheader SEMICOLON •
+   17 fundef: EXTERN funheader SEMICOLON •
 
-    $default  reduce using rule 19 (fundef)
+    $default  reduce using rule 17 (fundef)
 
 
 State 29
 
     8 globdecl: EXTERN datatype SQUAREBRACKET_L • id_dims SQUAREBRACKET_R ID SEMICOLON
 
-    ID  shift, and go to state 77
+    ID  shift, and go to state 75
 
-    id_dims  go to state 78
-    id_dim   go to state 79
+    id_dims  go to state 76
+    id_dim   go to state 77
 
 
 State 30
 
     7 globdecl: EXTERN datatype ID • SEMICOLON
-   24 funheader: datatype ID • ROUNDBRACKET_L params_opt ROUNDBRACKET_R
+   29 funheader: datatype ID • ROUNDBRACKET_L params_opt ROUNDBRACKET_R
 
-    ROUNDBRACKET_L  shift, and go to state 71
-    SEMICOLON       shift, and go to state 80
+    ROUNDBRACKET_L  shift, and go to state 69
+    SEMICOLON       shift, and go to state 78
 
 
 State 31
 
-   32 funbody: CURLYBRACKET_L CURLYBRACKET_R •
+   37 funbody: CURLYBRACKET_L CURLYBRACKET_R •
 
-    $default  reduce using rule 32 (funbody)
+    $default  reduce using rule 37 (funbody)
 
 
 State 32
@@ -720,33 +718,33 @@ State 32
    66 stmt: IF • ROUNDBRACKET_L expr ROUNDBRACKET_R block
    67     | IF • ROUNDBRACKET_L expr ROUNDBRACKET_R block ELSE block
 
-    ROUNDBRACKET_L  shift, and go to state 81
+    ROUNDBRACKET_L  shift, and go to state 79
 
 
 State 33
 
    65 stmt: WHILE • ROUNDBRACKET_L expr ROUNDBRACKET_R block
 
-    ROUNDBRACKET_L  shift, and go to state 82
+    ROUNDBRACKET_L  shift, and go to state 80
 
 
 State 34
 
    64 stmt: DO • block WHILE ROUNDBRACKET_L expr ROUNDBRACKET_R SEMICOLON
 
-    CURLYBRACKET_L  shift, and go to state 83
+    CURLYBRACKET_L  shift, and go to state 81
     IF              shift, and go to state 32
     WHILE           shift, and go to state 33
     DO              shift, and go to state 34
     FOR             shift, and go to state 35
     RETURN          shift, and go to state 36
-    ID              shift, and go to state 39
+    ID              shift, and go to state 37
 
     funcall  go to state 43
-    stmt     go to state 84
-    assign   go to state 48
-    block    go to state 85
-    varlet   go to state 49
+    stmt     go to state 82
+    assign   go to state 46
+    block    go to state 83
+    varlet   go to state 47
 
 
 State 35
@@ -754,7 +752,7 @@ State 35
    62 stmt: FOR • ROUNDBRACKET_L datatype ID LET expr COMMA expr ROUNDBRACKET_R block
    63     | FOR • ROUNDBRACKET_L datatype ID LET expr COMMA expr COMMA expr ROUNDBRACKET_R block
 
-    ROUNDBRACKET_L  shift, and go to state 86
+    ROUNDBRACKET_L  shift, and go to state 84
 
 
 State 36
@@ -762,102 +760,85 @@ State 36
    68 stmt: RETURN • SEMICOLON
    69     | RETURN • expr SEMICOLON
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    SEMICOLON        shift, and go to state 87
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    SEMICOLON        shift, and go to state 85
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    expr             go to state 88
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 86
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 37
 
-   21 fundef: EXPORT • funheader funbody
-
-    BOOLTYPE   shift, and go to state 3
-    FLOATTYPE  shift, and go to state 4
-    INTTYPE    shift, and go to state 5
-    VOIDTYPE   shift, and go to state 6
-
-    funheader  go to state 15
-    datatype   go to state 89
-
-
-State 38
-
-   19 fundef: EXTERN • funheader SEMICOLON
-
-    BOOLTYPE   shift, and go to state 3
-    FLOATTYPE  shift, and go to state 4
-    INTTYPE    shift, and go to state 5
-    VOIDTYPE   shift, and go to state 6
-
-    funheader  go to state 17
-    datatype   go to state 89
-
-
-State 39
-
-   33 funcall: ID • ROUNDBRACKET_L args ROUNDBRACKET_R
-   34        | ID • ROUNDBRACKET_L ROUNDBRACKET_R
+   38 funcall: ID • ROUNDBRACKET_L args_opt ROUNDBRACKET_R
    73 varlet: ID •
    74       | ID • SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R
 
-    ROUNDBRACKET_L   shift, and go to state 90
-    SQUAREBRACKET_L  shift, and go to state 91
+    ROUNDBRACKET_L   shift, and go to state 87
+    SQUAREBRACKET_L  shift, and go to state 88
 
     $default  reduce using rule 73 (varlet)
 
 
-State 40
+State 38
 
-   17 fundefs: fundefs • fundef
-   22 localfundefs: fundefs • fundef
+   31 funbody: CURLYBRACKET_L localfundefs • CURLYBRACKET_R
+   34        | CURLYBRACKET_L localfundefs • stmts CURLYBRACKET_R
 
-    EXPORT     shift, and go to state 37
-    EXTERN     shift, and go to state 38
+    CURLYBRACKET_R  shift, and go to state 89
+    IF              shift, and go to state 32
+    WHILE           shift, and go to state 33
+    DO              shift, and go to state 34
+    FOR             shift, and go to state 35
+    RETURN          shift, and go to state 36
+    ID              shift, and go to state 37
+
+    funcall  go to state 43
+    stmts    go to state 90
+    stmt     go to state 45
+    assign   go to state 46
+    varlet   go to state 47
+
+
+State 39
+
+   20 localfundefs: localfundef • localfundefs
+   21             | localfundef •
+
     BOOLTYPE   shift, and go to state 3
     FLOATTYPE  shift, and go to state 4
     INTTYPE    shift, and go to state 5
     VOIDTYPE   shift, and go to state 6
 
-    fundef     go to state 92
-    funheader  go to state 13
-    datatype   go to state 89
+    $default  reduce using rule 21 (localfundefs)
+
+    localfundefs  go to state 91
+    localfundef   go to state 39
+    funheader     go to state 42
+    datatype      go to state 92
 
 
-State 41
+State 40
 
-   18 fundefs: fundef •
-   23 localfundefs: fundef •
-
-    EXPORT     reduce using rule 18 (fundefs)
-    EXTERN     reduce using rule 18 (fundefs)
-    BOOLTYPE   reduce using rule 18 (fundefs)
-    FLOATTYPE  reduce using rule 18 (fundefs)
-    INTTYPE    reduce using rule 18 (fundefs)
-    VOIDTYPE   reduce using rule 18 (fundefs)
-    $default   reduce using rule 23 (localfundefs)
-
-
-State 42
-
-   26 funbody: CURLYBRACKET_L localfundefs • CURLYBRACKET_R
-   29        | CURLYBRACKET_L localfundefs • stmts CURLYBRACKET_R
+   23 vardecls: vardecls • vardecl
+   30 funbody: CURLYBRACKET_L vardecls • CURLYBRACKET_R
+   33        | CURLYBRACKET_L vardecls • stmts CURLYBRACKET_R
+   35        | CURLYBRACKET_L vardecls • localfundefs CURLYBRACKET_R
+   36        | CURLYBRACKET_L vardecls • localfundefs stmts CURLYBRACKET_R
 
     CURLYBRACKET_R  shift, and go to state 93
     IF              shift, and go to state 32
@@ -865,72 +846,55 @@ State 42
     DO              shift, and go to state 34
     FOR             shift, and go to state 35
     RETURN          shift, and go to state 36
-    ID              shift, and go to state 39
+    BOOLTYPE        shift, and go to state 3
+    FLOATTYPE       shift, and go to state 4
+    INTTYPE         shift, and go to state 5
+    VOIDTYPE        shift, and go to state 6
+    ID              shift, and go to state 37
 
-    funcall  go to state 43
-    stmts    go to state 94
-    stmt     go to state 47
-    assign   go to state 48
-    varlet   go to state 49
+    localfundefs  go to state 94
+    localfundef   go to state 39
+    vardecl       go to state 95
+    funheader     go to state 42
+    funcall       go to state 43
+    stmts         go to state 96
+    stmt          go to state 45
+    assign        go to state 46
+    varlet        go to state 47
+    datatype      go to state 48
+
+
+State 41
+
+   24 vardecls: vardecl •
+
+    $default  reduce using rule 24 (vardecls)
+
+
+State 42
+
+   22 localfundef: funheader • funbody
+
+    CURLYBRACKET_L  shift, and go to state 21
+
+    funbody  go to state 97
 
 
 State 43
 
    61 stmt: funcall • SEMICOLON
 
-    SEMICOLON  shift, and go to state 95
+    SEMICOLON  shift, and go to state 98
 
 
 State 44
 
-   25 funbody: CURLYBRACKET_L vardecls • CURLYBRACKET_R
-   28        | CURLYBRACKET_L vardecls • stmts CURLYBRACKET_R
-   30        | CURLYBRACKET_L vardecls • localfundefs CURLYBRACKET_R
-   31        | CURLYBRACKET_L vardecls • localfundefs stmts CURLYBRACKET_R
-   35 vardecls: vardecls • vardecl
+   32 funbody: CURLYBRACKET_L stmts • CURLYBRACKET_R
 
-    CURLYBRACKET_R  shift, and go to state 96
-    IF              shift, and go to state 32
-    WHILE           shift, and go to state 33
-    DO              shift, and go to state 34
-    FOR             shift, and go to state 35
-    RETURN          shift, and go to state 36
-    EXPORT          shift, and go to state 37
-    EXTERN          shift, and go to state 38
-    BOOLTYPE        shift, and go to state 3
-    FLOATTYPE       shift, and go to state 4
-    INTTYPE         shift, and go to state 5
-    VOIDTYPE        shift, and go to state 6
-    ID              shift, and go to state 39
-
-    fundefs       go to state 40
-    fundef        go to state 41
-    localfundefs  go to state 97
-    funheader     go to state 13
-    funcall       go to state 43
-    vardecl       go to state 98
-    stmts         go to state 99
-    stmt          go to state 47
-    assign        go to state 48
-    varlet        go to state 49
-    datatype      go to state 50
+    CURLYBRACKET_R  shift, and go to state 99
 
 
 State 45
-
-   36 vardecls: vardecl •
-
-    $default  reduce using rule 36 (vardecls)
-
-
-State 46
-
-   27 funbody: CURLYBRACKET_L stmts • CURLYBRACKET_R
-
-    CURLYBRACKET_R  shift, and go to state 100
-
-
-State 47
 
    58 stmts: stmt • stmts
    59      | stmt •
@@ -940,220 +904,219 @@ State 47
     DO      shift, and go to state 34
     FOR     shift, and go to state 35
     RETURN  shift, and go to state 36
-    ID      shift, and go to state 39
+    ID      shift, and go to state 37
 
     $default  reduce using rule 59 (stmts)
 
     funcall  go to state 43
-    stmts    go to state 101
-    stmt     go to state 47
-    assign   go to state 48
-    varlet   go to state 49
+    stmts    go to state 100
+    stmt     go to state 45
+    assign   go to state 46
+    varlet   go to state 47
 
 
-State 48
+State 46
 
    60 stmt: assign •
 
     $default  reduce using rule 60 (stmt)
 
 
-State 49
+State 47
 
    70 assign: varlet • LET expr SEMICOLON
 
-    LET  shift, and go to state 102
+    LET  shift, and go to state 101
 
 
-State 50
+State 48
 
-   24 funheader: datatype • ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R
-   37 vardecl: datatype • ID SEMICOLON
-   38        | datatype • SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON
-   39        | datatype • ID LET expr SEMICOLON
-   40        | datatype • SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON
+   25 vardecl: datatype • ID SEMICOLON
+   26        | datatype • SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON
+   27        | datatype • ID LET expr SEMICOLON
+   28        | datatype • SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON
+   29 funheader: datatype • ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R
 
-    SQUAREBRACKET_L  shift, and go to state 103
-    ID               shift, and go to state 104
+    SQUAREBRACKET_L  shift, and go to state 102
+    ID               shift, and go to state 103
 
 
-State 51
+State 49
 
    75 expr: ROUNDBRACKET_L • expr ROUNDBRACKET_R
   102 cast: ROUNDBRACKET_L • datatype ROUNDBRACKET_R expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
     BOOLTYPE         shift, and go to state 3
     FLOATTYPE        shift, and go to state 4
     INTTYPE          shift, and go to state 5
     VOIDTYPE         shift, and go to state 6
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    expr             go to state 105
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
-    datatype         go to state 106
+    funcall          go to state 58
+    expr             go to state 104
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
+    datatype         go to state 105
+
+
+State 50
+
+  101 array_expr: SQUAREBRACKET_L • exprs_dims SQUAREBRACKET_R
+
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
+
+    funcall          go to state 58
+    exprs_dims       go to state 106
+    expr_dim         go to state 60
+    expr             go to state 61
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
+
+
+State 51
+
+   86 unary_expr: MINUS • expr
+
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
+
+    funcall          go to state 58
+    expr             go to state 107
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 52
 
-  101 array_expr: SQUAREBRACKET_L • exprs_dims SQUAREBRACKET_R
+   87 unary_expr: NEG • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    exprs_dims       go to state 107
-    expr_dim         go to state 62
-    expr             go to state 63
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 108
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 53
-
-   86 unary_expr: MINUS • expr
-
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
-
-    funcall          go to state 60
-    expr             go to state 108
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
-
-
-State 54
-
-   87 unary_expr: NEG • expr
-
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
-
-    funcall          go to state 60
-    expr             go to state 109
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
-
-
-State 55
 
   105 constant: TRUEVAL •
 
     $default  reduce using rule 105 (constant)
 
 
-State 56
+State 54
 
   106 constant: FALSEVAL •
 
     $default  reduce using rule 106 (constant)
 
 
-State 57
+State 55
 
   104 constant: NUM •
 
     $default  reduce using rule 104 (constant)
 
 
-State 58
+State 56
 
   103 constant: FLOAT •
 
     $default  reduce using rule 103 (constant)
 
 
-State 59
+State 57
 
-   33 funcall: ID • ROUNDBRACKET_L args ROUNDBRACKET_R
-   34        | ID • ROUNDBRACKET_L ROUNDBRACKET_R
+   38 funcall: ID • ROUNDBRACKET_L args_opt ROUNDBRACKET_R
    77 expr: ID • SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R
    78     | ID •
 
-    ROUNDBRACKET_L   shift, and go to state 90
-    SQUAREBRACKET_L  shift, and go to state 110
+    ROUNDBRACKET_L   shift, and go to state 87
+    SQUAREBRACKET_L  shift, and go to state 109
 
     $default  reduce using rule 78 (expr)
 
 
-State 60
+State 58
 
    80 expr: funcall •
 
     $default  reduce using rule 80 (expr)
 
 
-State 61
+State 59
 
    10 globdef: datatype SQUAREBRACKET_L exprs_dims • SQUAREBRACKET_R ID SEMICOLON
    12        | datatype SQUAREBRACKET_L exprs_dims • SQUAREBRACKET_R ID LET expr SEMICOLON
 
-    SQUAREBRACKET_R  shift, and go to state 111
+    SQUAREBRACKET_R  shift, and go to state 110
 
 
-State 62
+State 60
 
    50 exprs_dims: expr_dim • COMMA exprs_dims
    51           | expr_dim •
 
-    COMMA  shift, and go to state 112
+    COMMA  shift, and go to state 111
 
     $default  reduce using rule 51 (exprs_dims)
 
 
-State 63
+State 61
 
-   55 expr_dim: expr •
+   52 expr_dim: expr •
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
    90                | expr • STAR expr
@@ -1168,75 +1131,75 @@ State 63
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    MINUS    shift, and go to state 113
-    PLUS     shift, and go to state 114
-    STAR     shift, and go to state 115
-    SLASH    shift, and go to state 116
-    PERCENT  shift, and go to state 117
-    LE       shift, and go to state 118
-    LT       shift, and go to state 119
-    GE       shift, and go to state 120
-    GT       shift, and go to state 121
-    EQ       shift, and go to state 122
-    NE       shift, and go to state 123
-    OR       shift, and go to state 124
-    AND      shift, and go to state 125
+    MINUS    shift, and go to state 112
+    PLUS     shift, and go to state 113
+    STAR     shift, and go to state 114
+    SLASH    shift, and go to state 115
+    PERCENT  shift, and go to state 116
+    LE       shift, and go to state 117
+    LT       shift, and go to state 118
+    GE       shift, and go to state 119
+    GT       shift, and go to state 120
+    EQ       shift, and go to state 121
+    NE       shift, and go to state 122
+    OR       shift, and go to state 123
+    AND      shift, and go to state 124
 
-    $default  reduce using rule 55 (expr_dim)
+    $default  reduce using rule 52 (expr_dim)
 
 
-State 64
+State 62
 
    85 expr: unary_expr •
 
     $default  reduce using rule 85 (expr)
 
 
-State 65
+State 63
 
    82 expr: arithmetic_expr •
 
     $default  reduce using rule 82 (expr)
 
 
-State 66
+State 64
 
    83 expr: comparison_expr •
 
     $default  reduce using rule 83 (expr)
 
 
-State 67
+State 65
 
    84 expr: logical_expr •
 
     $default  reduce using rule 84 (expr)
 
 
-State 68
+State 66
 
    81 expr: array_expr •
 
     $default  reduce using rule 81 (expr)
 
 
-State 69
+State 67
 
    79 expr: cast •
 
     $default  reduce using rule 79 (expr)
 
 
-State 70
+State 68
 
    76 expr: constant •
 
     $default  reduce using rule 76 (expr)
 
 
-State 71
+State 69
 
-   24 funheader: datatype ID ROUNDBRACKET_L • params_opt ROUNDBRACKET_R
+   29 funheader: datatype ID ROUNDBRACKET_L • params_opt ROUNDBRACKET_R
 
     BOOLTYPE   shift, and go to state 3
     FLOATTYPE  shift, and go to state 4
@@ -1245,167 +1208,167 @@ State 71
 
     $default  reduce using rule 45 (params_opt)
 
-    params_opt  go to state 126
-    params      go to state 127
-    param       go to state 128
-    datatype    go to state 129
+    params_opt  go to state 125
+    params      go to state 126
+    param       go to state 127
+    datatype    go to state 128
 
 
-State 72
+State 70
 
     9 globdef: datatype ID SEMICOLON •
 
     $default  reduce using rule 9 (globdef)
 
 
-State 73
+State 71
 
    11 globdef: datatype ID LET • expr SEMICOLON
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    expr             go to state 130
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 129
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
-State 74
+State 72
 
    14 globdef: EXPORT datatype SQUAREBRACKET_L exprs_dims • SQUAREBRACKET_R ID SEMICOLON
    16        | EXPORT datatype SQUAREBRACKET_L exprs_dims • SQUAREBRACKET_R ID LET expr SEMICOLON
 
-    SQUAREBRACKET_R  shift, and go to state 131
+    SQUAREBRACKET_R  shift, and go to state 130
 
 
-State 75
+State 73
 
    13 globdef: EXPORT datatype ID SEMICOLON •
 
     $default  reduce using rule 13 (globdef)
 
 
-State 76
+State 74
 
    15 globdef: EXPORT datatype ID LET • expr SEMICOLON
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    expr             go to state 132
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 131
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
+
+
+State 75
+
+   55 id_dim: ID •
+
+    $default  reduce using rule 55 (id_dim)
+
+
+State 76
+
+    8 globdecl: EXTERN datatype SQUAREBRACKET_L id_dims • SQUAREBRACKET_R ID SEMICOLON
+
+    SQUAREBRACKET_R  shift, and go to state 132
 
 
 State 77
 
-   54 id_dim: ID •
+   53 id_dims: id_dim • COMMA id_dims
+   54        | id_dim •
 
-    $default  reduce using rule 54 (id_dim)
+    COMMA  shift, and go to state 133
+
+    $default  reduce using rule 54 (id_dims)
 
 
 State 78
-
-    8 globdecl: EXTERN datatype SQUAREBRACKET_L id_dims • SQUAREBRACKET_R ID SEMICOLON
-
-    SQUAREBRACKET_R  shift, and go to state 133
-
-
-State 79
-
-   52 id_dims: id_dim • COMMA id_dims
-   53        | id_dim •
-
-    COMMA  shift, and go to state 134
-
-    $default  reduce using rule 53 (id_dims)
-
-
-State 80
 
     7 globdecl: EXTERN datatype ID SEMICOLON •
 
     $default  reduce using rule 7 (globdecl)
 
 
-State 81
+State 79
 
    66 stmt: IF ROUNDBRACKET_L • expr ROUNDBRACKET_R block
    67     | IF ROUNDBRACKET_L • expr ROUNDBRACKET_R block ELSE block
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    expr             go to state 135
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 134
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
-State 82
+State 80
 
    65 stmt: WHILE ROUNDBRACKET_L • expr ROUNDBRACKET_R block
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    expr             go to state 136
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 135
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
-State 83
+State 81
 
    71 block: CURLYBRACKET_L • stmts_opt CURLYBRACKET_R
 
@@ -1414,33 +1377,33 @@ State 83
     DO      shift, and go to state 34
     FOR     shift, and go to state 35
     RETURN  shift, and go to state 36
-    ID      shift, and go to state 39
+    ID      shift, and go to state 37
 
     $default  reduce using rule 57 (stmts_opt)
 
     funcall    go to state 43
-    stmts_opt  go to state 137
-    stmts      go to state 138
-    stmt       go to state 47
-    assign     go to state 48
-    varlet     go to state 49
+    stmts_opt  go to state 136
+    stmts      go to state 137
+    stmt       go to state 45
+    assign     go to state 46
+    varlet     go to state 47
 
 
-State 84
+State 82
 
    72 block: stmt •
 
     $default  reduce using rule 72 (block)
 
 
-State 85
+State 83
 
    64 stmt: DO block • WHILE ROUNDBRACKET_L expr ROUNDBRACKET_R SEMICOLON
 
-    WHILE  shift, and go to state 139
+    WHILE  shift, and go to state 138
 
 
-State 86
+State 84
 
    62 stmt: FOR ROUNDBRACKET_L • datatype ID LET expr COMMA expr ROUNDBRACKET_R block
    63     | FOR ROUNDBRACKET_L • datatype ID LET expr COMMA expr COMMA expr ROUNDBRACKET_R block
@@ -1450,17 +1413,17 @@ State 86
     INTTYPE    shift, and go to state 5
     VOIDTYPE   shift, and go to state 6
 
-    datatype  go to state 140
+    datatype  go to state 139
 
 
-State 87
+State 85
 
    68 stmt: RETURN SEMICOLON •
 
     $default  reduce using rule 68 (stmt)
 
 
-State 88
+State 86
 
    69 stmt: RETURN expr • SEMICOLON
    88 arithmetic_expr: expr • PLUS expr
@@ -1477,240 +1440,241 @@ State 88
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    SEMICOLON  shift, and go to state 141
-    MINUS      shift, and go to state 113
-    PLUS       shift, and go to state 114
-    STAR       shift, and go to state 115
-    SLASH      shift, and go to state 116
-    PERCENT    shift, and go to state 117
-    LE         shift, and go to state 118
-    LT         shift, and go to state 119
-    GE         shift, and go to state 120
-    GT         shift, and go to state 121
-    EQ         shift, and go to state 122
-    NE         shift, and go to state 123
-    OR         shift, and go to state 124
-    AND        shift, and go to state 125
+    SEMICOLON  shift, and go to state 140
+    MINUS      shift, and go to state 112
+    PLUS       shift, and go to state 113
+    STAR       shift, and go to state 114
+    SLASH      shift, and go to state 115
+    PERCENT    shift, and go to state 116
+    LE         shift, and go to state 117
+    LT         shift, and go to state 118
+    GE         shift, and go to state 119
+    GT         shift, and go to state 120
+    EQ         shift, and go to state 121
+    NE         shift, and go to state 122
+    OR         shift, and go to state 123
+    AND        shift, and go to state 124
+
+
+State 87
+
+   38 funcall: ID ROUNDBRACKET_L • args_opt ROUNDBRACKET_R
+
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
+
+    $default  reduce using rule 40 (args_opt)
+
+    funcall          go to state 58
+    args_opt         go to state 141
+    args             go to state 142
+    arg              go to state 143
+    expr             go to state 144
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
+
+
+State 88
+
+   74 varlet: ID SQUAREBRACKET_L • exprs_dims SQUAREBRACKET_R
+
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
+
+    funcall          go to state 58
+    exprs_dims       go to state 145
+    expr_dim         go to state 60
+    expr             go to state 61
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 89
 
-   24 funheader: datatype • ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R
+   31 funbody: CURLYBRACKET_L localfundefs CURLYBRACKET_R •
 
-    ID  shift, and go to state 142
+    $default  reduce using rule 31 (funbody)
 
 
 State 90
 
-   33 funcall: ID ROUNDBRACKET_L • args ROUNDBRACKET_R
-   34        | ID ROUNDBRACKET_L • ROUNDBRACKET_R
+   34 funbody: CURLYBRACKET_L localfundefs stmts • CURLYBRACKET_R
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    ROUNDBRACKET_R   shift, and go to state 143
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
-
-    funcall          go to state 60
-    args             go to state 144
-    arg              go to state 145
-    expr             go to state 146
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    CURLYBRACKET_R  shift, and go to state 146
 
 
 State 91
 
-   74 varlet: ID SQUAREBRACKET_L • exprs_dims SQUAREBRACKET_R
+   20 localfundefs: localfundef localfundefs •
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
-
-    funcall          go to state 60
-    exprs_dims       go to state 147
-    expr_dim         go to state 62
-    expr             go to state 63
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    $default  reduce using rule 20 (localfundefs)
 
 
 State 92
 
-   17 fundefs: fundefs fundef •
-   22 localfundefs: fundefs fundef •
+   29 funheader: datatype • ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R
 
-    EXPORT     reduce using rule 17 (fundefs)
-    EXTERN     reduce using rule 17 (fundefs)
-    BOOLTYPE   reduce using rule 17 (fundefs)
-    FLOATTYPE  reduce using rule 17 (fundefs)
-    INTTYPE    reduce using rule 17 (fundefs)
-    VOIDTYPE   reduce using rule 17 (fundefs)
-    $default   reduce using rule 22 (localfundefs)
+    ID  shift, and go to state 147
 
 
 State 93
 
-   26 funbody: CURLYBRACKET_L localfundefs CURLYBRACKET_R •
+   30 funbody: CURLYBRACKET_L vardecls CURLYBRACKET_R •
 
-    $default  reduce using rule 26 (funbody)
+    $default  reduce using rule 30 (funbody)
 
 
 State 94
 
-   29 funbody: CURLYBRACKET_L localfundefs stmts • CURLYBRACKET_R
+   35 funbody: CURLYBRACKET_L vardecls localfundefs • CURLYBRACKET_R
+   36        | CURLYBRACKET_L vardecls localfundefs • stmts CURLYBRACKET_R
 
     CURLYBRACKET_R  shift, and go to state 148
+    IF              shift, and go to state 32
+    WHILE           shift, and go to state 33
+    DO              shift, and go to state 34
+    FOR             shift, and go to state 35
+    RETURN          shift, and go to state 36
+    ID              shift, and go to state 37
+
+    funcall  go to state 43
+    stmts    go to state 149
+    stmt     go to state 45
+    assign   go to state 46
+    varlet   go to state 47
 
 
 State 95
+
+   23 vardecls: vardecls vardecl •
+
+    $default  reduce using rule 23 (vardecls)
+
+
+State 96
+
+   33 funbody: CURLYBRACKET_L vardecls stmts • CURLYBRACKET_R
+
+    CURLYBRACKET_R  shift, and go to state 150
+
+
+State 97
+
+   22 localfundef: funheader funbody •
+
+    $default  reduce using rule 22 (localfundef)
+
+
+State 98
 
    61 stmt: funcall SEMICOLON •
 
     $default  reduce using rule 61 (stmt)
 
 
-State 96
-
-   25 funbody: CURLYBRACKET_L vardecls CURLYBRACKET_R •
-
-    $default  reduce using rule 25 (funbody)
-
-
-State 97
-
-   30 funbody: CURLYBRACKET_L vardecls localfundefs • CURLYBRACKET_R
-   31        | CURLYBRACKET_L vardecls localfundefs • stmts CURLYBRACKET_R
-
-    CURLYBRACKET_R  shift, and go to state 149
-    IF              shift, and go to state 32
-    WHILE           shift, and go to state 33
-    DO              shift, and go to state 34
-    FOR             shift, and go to state 35
-    RETURN          shift, and go to state 36
-    ID              shift, and go to state 39
-
-    funcall  go to state 43
-    stmts    go to state 150
-    stmt     go to state 47
-    assign   go to state 48
-    varlet   go to state 49
-
-
-State 98
-
-   35 vardecls: vardecls vardecl •
-
-    $default  reduce using rule 35 (vardecls)
-
-
 State 99
 
-   28 funbody: CURLYBRACKET_L vardecls stmts • CURLYBRACKET_R
+   32 funbody: CURLYBRACKET_L stmts CURLYBRACKET_R •
 
-    CURLYBRACKET_R  shift, and go to state 151
+    $default  reduce using rule 32 (funbody)
 
 
 State 100
-
-   27 funbody: CURLYBRACKET_L stmts CURLYBRACKET_R •
-
-    $default  reduce using rule 27 (funbody)
-
-
-State 101
 
    58 stmts: stmt stmts •
 
     $default  reduce using rule 58 (stmts)
 
 
-State 102
+State 101
 
    70 assign: varlet LET • expr SEMICOLON
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    expr             go to state 152
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 151
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
+
+
+State 102
+
+   26 vardecl: datatype SQUAREBRACKET_L • exprs_dims SQUAREBRACKET_R ID SEMICOLON
+   28        | datatype SQUAREBRACKET_L • exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON
+
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
+
+    funcall          go to state 58
+    exprs_dims       go to state 152
+    expr_dim         go to state 60
+    expr             go to state 61
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 103
 
-   38 vardecl: datatype SQUAREBRACKET_L • exprs_dims SQUAREBRACKET_R ID SEMICOLON
-   40        | datatype SQUAREBRACKET_L • exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON
+   25 vardecl: datatype ID • SEMICOLON
+   27        | datatype ID • LET expr SEMICOLON
+   29 funheader: datatype ID • ROUNDBRACKET_L params_opt ROUNDBRACKET_R
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
-
-    funcall          go to state 60
-    exprs_dims       go to state 153
-    expr_dim         go to state 62
-    expr             go to state 63
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    ROUNDBRACKET_L  shift, and go to state 69
+    SEMICOLON       shift, and go to state 153
+    LET             shift, and go to state 154
 
 
 State 104
-
-   24 funheader: datatype ID • ROUNDBRACKET_L params_opt ROUNDBRACKET_R
-   37 vardecl: datatype ID • SEMICOLON
-   39        | datatype ID • LET expr SEMICOLON
-
-    ROUNDBRACKET_L  shift, and go to state 71
-    SEMICOLON       shift, and go to state 154
-    LET             shift, and go to state 155
-
-
-State 105
 
    75 expr: ROUNDBRACKET_L expr • ROUNDBRACKET_R
    88 arithmetic_expr: expr • PLUS expr
@@ -1727,37 +1691,37 @@ State 105
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
+    ROUNDBRACKET_R  shift, and go to state 155
+    MINUS           shift, and go to state 112
+    PLUS            shift, and go to state 113
+    STAR            shift, and go to state 114
+    SLASH           shift, and go to state 115
+    PERCENT         shift, and go to state 116
+    LE              shift, and go to state 117
+    LT              shift, and go to state 118
+    GE              shift, and go to state 119
+    GT              shift, and go to state 120
+    EQ              shift, and go to state 121
+    NE              shift, and go to state 122
+    OR              shift, and go to state 123
+    AND             shift, and go to state 124
+
+
+State 105
+
+  102 cast: ROUNDBRACKET_L datatype • ROUNDBRACKET_R expr
+
     ROUNDBRACKET_R  shift, and go to state 156
-    MINUS           shift, and go to state 113
-    PLUS            shift, and go to state 114
-    STAR            shift, and go to state 115
-    SLASH           shift, and go to state 116
-    PERCENT         shift, and go to state 117
-    LE              shift, and go to state 118
-    LT              shift, and go to state 119
-    GE              shift, and go to state 120
-    GT              shift, and go to state 121
-    EQ              shift, and go to state 122
-    NE              shift, and go to state 123
-    OR              shift, and go to state 124
-    AND             shift, and go to state 125
 
 
 State 106
 
-  102 cast: ROUNDBRACKET_L datatype • ROUNDBRACKET_R expr
+  101 array_expr: SQUAREBRACKET_L exprs_dims • SQUAREBRACKET_R
 
-    ROUNDBRACKET_R  shift, and go to state 157
+    SQUAREBRACKET_R  shift, and go to state 157
 
 
 State 107
-
-  101 array_expr: SQUAREBRACKET_L exprs_dims • SQUAREBRACKET_R
-
-    SQUAREBRACKET_R  shift, and go to state 158
-
-
-State 108
 
    86 unary_expr: MINUS expr •
    88 arithmetic_expr: expr • PLUS expr
@@ -1777,7 +1741,7 @@ State 108
     $default  reduce using rule 86 (unary_expr)
 
 
-State 109
+State 108
 
    87 unary_expr: NEG expr •
    88 arithmetic_expr: expr • PLUS expr
@@ -1797,427 +1761,427 @@ State 109
     $default  reduce using rule 87 (unary_expr)
 
 
-State 110
+State 109
 
    77 expr: ID SQUAREBRACKET_L • exprs_dims SQUAREBRACKET_R
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    exprs_dims       go to state 159
-    expr_dim         go to state 62
-    expr             go to state 63
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    exprs_dims       go to state 158
+    expr_dim         go to state 60
+    expr             go to state 61
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
-State 111
+State 110
 
    10 globdef: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R • ID SEMICOLON
    12        | datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R • ID LET expr SEMICOLON
 
-    ID  shift, and go to state 160
+    ID  shift, and go to state 159
+
+
+State 111
+
+   50 exprs_dims: expr_dim COMMA • exprs_dims
+
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
+
+    funcall          go to state 58
+    exprs_dims       go to state 160
+    expr_dim         go to state 60
+    expr             go to state 61
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 112
 
-   50 exprs_dims: expr_dim COMMA • exprs_dims
+   89 arithmetic_expr: expr MINUS • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    exprs_dims       go to state 161
-    expr_dim         go to state 62
-    expr             go to state 63
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 161
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 113
 
-   89 arithmetic_expr: expr MINUS • expr
+   88 arithmetic_expr: expr PLUS • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
+    funcall          go to state 58
     expr             go to state 162
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 114
 
-   88 arithmetic_expr: expr PLUS • expr
+   90 arithmetic_expr: expr STAR • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
+    funcall          go to state 58
     expr             go to state 163
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 115
 
-   90 arithmetic_expr: expr STAR • expr
+   91 arithmetic_expr: expr SLASH • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
+    funcall          go to state 58
     expr             go to state 164
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 116
 
-   91 arithmetic_expr: expr SLASH • expr
+   92 arithmetic_expr: expr PERCENT • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
+    funcall          go to state 58
     expr             go to state 165
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 117
 
-   92 arithmetic_expr: expr PERCENT • expr
+   94 comparison_expr: expr LE • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
+    funcall          go to state 58
     expr             go to state 166
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 118
 
-   94 comparison_expr: expr LE • expr
+   93 comparison_expr: expr LT • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
+    funcall          go to state 58
     expr             go to state 167
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 119
 
-   93 comparison_expr: expr LT • expr
+   96 comparison_expr: expr GE • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
+    funcall          go to state 58
     expr             go to state 168
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 120
 
-   96 comparison_expr: expr GE • expr
+   95 comparison_expr: expr GT • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
+    funcall          go to state 58
     expr             go to state 169
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 121
 
-   95 comparison_expr: expr GT • expr
+   97 comparison_expr: expr EQ • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
+    funcall          go to state 58
     expr             go to state 170
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 122
 
-   97 comparison_expr: expr EQ • expr
+   98 comparison_expr: expr NE • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
+    funcall          go to state 58
     expr             go to state 171
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 123
 
-   98 comparison_expr: expr NE • expr
+   99 logical_expr: expr OR • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
+    funcall          go to state 58
     expr             go to state 172
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 124
 
-   99 logical_expr: expr OR • expr
+  100 logical_expr: expr AND • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
+    funcall          go to state 58
     expr             go to state 173
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 125
 
-  100 logical_expr: expr AND • expr
+   29 funheader: datatype ID ROUNDBRACKET_L params_opt • ROUNDBRACKET_R
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
-
-    funcall          go to state 60
-    expr             go to state 174
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    ROUNDBRACKET_R  shift, and go to state 174
 
 
 State 126
-
-   24 funheader: datatype ID ROUNDBRACKET_L params_opt • ROUNDBRACKET_R
-
-    ROUNDBRACKET_R  shift, and go to state 175
-
-
-State 127
 
    44 params_opt: params •
 
     $default  reduce using rule 44 (params_opt)
 
 
-State 128
+State 127
 
    46 params: param • COMMA params
    47       | param •
 
-    COMMA  shift, and go to state 176
+    COMMA  shift, and go to state 175
 
     $default  reduce using rule 47 (params)
 
 
-State 129
+State 128
 
    48 param: datatype • ID
    49      | datatype • SQUAREBRACKET_L id_dims SQUAREBRACKET_R ID
 
-    SQUAREBRACKET_L  shift, and go to state 177
-    ID               shift, and go to state 178
+    SQUAREBRACKET_L  shift, and go to state 176
+    ID               shift, and go to state 177
 
 
-State 130
+State 129
 
    11 globdef: datatype ID LET expr • SEMICOLON
    88 arithmetic_expr: expr • PLUS expr
@@ -2234,31 +2198,31 @@ State 130
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    SEMICOLON  shift, and go to state 179
-    MINUS      shift, and go to state 113
-    PLUS       shift, and go to state 114
-    STAR       shift, and go to state 115
-    SLASH      shift, and go to state 116
-    PERCENT    shift, and go to state 117
-    LE         shift, and go to state 118
-    LT         shift, and go to state 119
-    GE         shift, and go to state 120
-    GT         shift, and go to state 121
-    EQ         shift, and go to state 122
-    NE         shift, and go to state 123
-    OR         shift, and go to state 124
-    AND        shift, and go to state 125
+    SEMICOLON  shift, and go to state 178
+    MINUS      shift, and go to state 112
+    PLUS       shift, and go to state 113
+    STAR       shift, and go to state 114
+    SLASH      shift, and go to state 115
+    PERCENT    shift, and go to state 116
+    LE         shift, and go to state 117
+    LT         shift, and go to state 118
+    GE         shift, and go to state 119
+    GT         shift, and go to state 120
+    EQ         shift, and go to state 121
+    NE         shift, and go to state 122
+    OR         shift, and go to state 123
+    AND        shift, and go to state 124
 
 
-State 131
+State 130
 
    14 globdef: EXPORT datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R • ID SEMICOLON
    16        | EXPORT datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R • ID LET expr SEMICOLON
 
-    ID  shift, and go to state 180
+    ID  shift, and go to state 179
 
 
-State 132
+State 131
 
    15 globdef: EXPORT datatype ID LET expr • SEMICOLON
    88 arithmetic_expr: expr • PLUS expr
@@ -2275,40 +2239,40 @@ State 132
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    SEMICOLON  shift, and go to state 181
-    MINUS      shift, and go to state 113
-    PLUS       shift, and go to state 114
-    STAR       shift, and go to state 115
-    SLASH      shift, and go to state 116
-    PERCENT    shift, and go to state 117
-    LE         shift, and go to state 118
-    LT         shift, and go to state 119
-    GE         shift, and go to state 120
-    GT         shift, and go to state 121
-    EQ         shift, and go to state 122
-    NE         shift, and go to state 123
-    OR         shift, and go to state 124
-    AND        shift, and go to state 125
+    SEMICOLON  shift, and go to state 180
+    MINUS      shift, and go to state 112
+    PLUS       shift, and go to state 113
+    STAR       shift, and go to state 114
+    SLASH      shift, and go to state 115
+    PERCENT    shift, and go to state 116
+    LE         shift, and go to state 117
+    LT         shift, and go to state 118
+    GE         shift, and go to state 119
+    GT         shift, and go to state 120
+    EQ         shift, and go to state 121
+    NE         shift, and go to state 122
+    OR         shift, and go to state 123
+    AND        shift, and go to state 124
+
+
+State 132
+
+    8 globdecl: EXTERN datatype SQUAREBRACKET_L id_dims SQUAREBRACKET_R • ID SEMICOLON
+
+    ID  shift, and go to state 181
 
 
 State 133
 
-    8 globdecl: EXTERN datatype SQUAREBRACKET_L id_dims SQUAREBRACKET_R • ID SEMICOLON
+   53 id_dims: id_dim COMMA • id_dims
 
-    ID  shift, and go to state 182
+    ID  shift, and go to state 75
+
+    id_dims  go to state 182
+    id_dim   go to state 77
 
 
 State 134
-
-   52 id_dims: id_dim COMMA • id_dims
-
-    ID  shift, and go to state 77
-
-    id_dims  go to state 183
-    id_dim   go to state 79
-
-
-State 135
 
    66 stmt: IF ROUNDBRACKET_L expr • ROUNDBRACKET_R block
    67     | IF ROUNDBRACKET_L expr • ROUNDBRACKET_R block ELSE block
@@ -2326,23 +2290,23 @@ State 135
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    ROUNDBRACKET_R  shift, and go to state 184
-    MINUS           shift, and go to state 113
-    PLUS            shift, and go to state 114
-    STAR            shift, and go to state 115
-    SLASH           shift, and go to state 116
-    PERCENT         shift, and go to state 117
-    LE              shift, and go to state 118
-    LT              shift, and go to state 119
-    GE              shift, and go to state 120
-    GT              shift, and go to state 121
-    EQ              shift, and go to state 122
-    NE              shift, and go to state 123
-    OR              shift, and go to state 124
-    AND             shift, and go to state 125
+    ROUNDBRACKET_R  shift, and go to state 183
+    MINUS           shift, and go to state 112
+    PLUS            shift, and go to state 113
+    STAR            shift, and go to state 114
+    SLASH           shift, and go to state 115
+    PERCENT         shift, and go to state 116
+    LE              shift, and go to state 117
+    LT              shift, and go to state 118
+    GE              shift, and go to state 119
+    GT              shift, and go to state 120
+    EQ              shift, and go to state 121
+    NE              shift, and go to state 122
+    OR              shift, and go to state 123
+    AND             shift, and go to state 124
 
 
-State 136
+State 135
 
    65 stmt: WHILE ROUNDBRACKET_L expr • ROUNDBRACKET_R block
    88 arithmetic_expr: expr • PLUS expr
@@ -2359,90 +2323,83 @@ State 136
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    ROUNDBRACKET_R  shift, and go to state 185
-    MINUS           shift, and go to state 113
-    PLUS            shift, and go to state 114
-    STAR            shift, and go to state 115
-    SLASH           shift, and go to state 116
-    PERCENT         shift, and go to state 117
-    LE              shift, and go to state 118
-    LT              shift, and go to state 119
-    GE              shift, and go to state 120
-    GT              shift, and go to state 121
-    EQ              shift, and go to state 122
-    NE              shift, and go to state 123
-    OR              shift, and go to state 124
-    AND             shift, and go to state 125
+    ROUNDBRACKET_R  shift, and go to state 184
+    MINUS           shift, and go to state 112
+    PLUS            shift, and go to state 113
+    STAR            shift, and go to state 114
+    SLASH           shift, and go to state 115
+    PERCENT         shift, and go to state 116
+    LE              shift, and go to state 117
+    LT              shift, and go to state 118
+    GE              shift, and go to state 119
+    GT              shift, and go to state 120
+    EQ              shift, and go to state 121
+    NE              shift, and go to state 122
+    OR              shift, and go to state 123
+    AND             shift, and go to state 124
 
 
-State 137
+State 136
 
    71 block: CURLYBRACKET_L stmts_opt • CURLYBRACKET_R
 
-    CURLYBRACKET_R  shift, and go to state 186
+    CURLYBRACKET_R  shift, and go to state 185
 
 
-State 138
+State 137
 
    56 stmts_opt: stmts •
 
     $default  reduce using rule 56 (stmts_opt)
 
 
-State 139
+State 138
 
    64 stmt: DO block WHILE • ROUNDBRACKET_L expr ROUNDBRACKET_R SEMICOLON
 
-    ROUNDBRACKET_L  shift, and go to state 187
+    ROUNDBRACKET_L  shift, and go to state 186
 
 
-State 140
+State 139
 
    62 stmt: FOR ROUNDBRACKET_L datatype • ID LET expr COMMA expr ROUNDBRACKET_R block
    63     | FOR ROUNDBRACKET_L datatype • ID LET expr COMMA expr COMMA expr ROUNDBRACKET_R block
 
-    ID  shift, and go to state 188
+    ID  shift, and go to state 187
 
 
-State 141
+State 140
 
    69 stmt: RETURN expr SEMICOLON •
 
     $default  reduce using rule 69 (stmt)
 
 
+State 141
+
+   38 funcall: ID ROUNDBRACKET_L args_opt • ROUNDBRACKET_R
+
+    ROUNDBRACKET_R  shift, and go to state 188
+
+
 State 142
 
-   24 funheader: datatype ID • ROUNDBRACKET_L params_opt ROUNDBRACKET_R
+   39 args_opt: args •
 
-    ROUNDBRACKET_L  shift, and go to state 71
+    $default  reduce using rule 39 (args_opt)
 
 
 State 143
 
-   34 funcall: ID ROUNDBRACKET_L ROUNDBRACKET_R •
-
-    $default  reduce using rule 34 (funcall)
-
-
-State 144
-
-   33 funcall: ID ROUNDBRACKET_L args • ROUNDBRACKET_R
-
-    ROUNDBRACKET_R  shift, and go to state 189
-
-
-State 145
-
    41 args: arg • COMMA args
    42     | arg •
 
-    COMMA  shift, and go to state 190
+    COMMA  shift, and go to state 189
 
     $default  reduce using rule 42 (args)
 
 
-State 146
+State 144
 
    43 arg: expr •
    88 arithmetic_expr: expr • PLUS expr
@@ -2459,59 +2416,66 @@ State 146
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    MINUS    shift, and go to state 113
-    PLUS     shift, and go to state 114
-    STAR     shift, and go to state 115
-    SLASH    shift, and go to state 116
-    PERCENT  shift, and go to state 117
-    LE       shift, and go to state 118
-    LT       shift, and go to state 119
-    GE       shift, and go to state 120
-    GT       shift, and go to state 121
-    EQ       shift, and go to state 122
-    NE       shift, and go to state 123
-    OR       shift, and go to state 124
-    AND      shift, and go to state 125
+    MINUS    shift, and go to state 112
+    PLUS     shift, and go to state 113
+    STAR     shift, and go to state 114
+    SLASH    shift, and go to state 115
+    PERCENT  shift, and go to state 116
+    LE       shift, and go to state 117
+    LT       shift, and go to state 118
+    GE       shift, and go to state 119
+    GT       shift, and go to state 120
+    EQ       shift, and go to state 121
+    NE       shift, and go to state 122
+    OR       shift, and go to state 123
+    AND      shift, and go to state 124
 
     $default  reduce using rule 43 (arg)
 
 
-State 147
+State 145
 
    74 varlet: ID SQUAREBRACKET_L exprs_dims • SQUAREBRACKET_R
 
-    SQUAREBRACKET_R  shift, and go to state 191
+    SQUAREBRACKET_R  shift, and go to state 190
+
+
+State 146
+
+   34 funbody: CURLYBRACKET_L localfundefs stmts CURLYBRACKET_R •
+
+    $default  reduce using rule 34 (funbody)
+
+
+State 147
+
+   29 funheader: datatype ID • ROUNDBRACKET_L params_opt ROUNDBRACKET_R
+
+    ROUNDBRACKET_L  shift, and go to state 69
 
 
 State 148
 
-   29 funbody: CURLYBRACKET_L localfundefs stmts CURLYBRACKET_R •
+   35 funbody: CURLYBRACKET_L vardecls localfundefs CURLYBRACKET_R •
 
-    $default  reduce using rule 29 (funbody)
+    $default  reduce using rule 35 (funbody)
 
 
 State 149
 
-   30 funbody: CURLYBRACKET_L vardecls localfundefs CURLYBRACKET_R •
+   36 funbody: CURLYBRACKET_L vardecls localfundefs stmts • CURLYBRACKET_R
 
-    $default  reduce using rule 30 (funbody)
+    CURLYBRACKET_R  shift, and go to state 191
 
 
 State 150
 
-   31 funbody: CURLYBRACKET_L vardecls localfundefs stmts • CURLYBRACKET_R
+   33 funbody: CURLYBRACKET_L vardecls stmts CURLYBRACKET_R •
 
-    CURLYBRACKET_R  shift, and go to state 192
+    $default  reduce using rule 33 (funbody)
 
 
 State 151
-
-   28 funbody: CURLYBRACKET_L vardecls stmts CURLYBRACKET_R •
-
-    $default  reduce using rule 28 (funbody)
-
-
-State 152
 
    70 assign: varlet LET expr • SEMICOLON
    88 arithmetic_expr: expr • PLUS expr
@@ -2528,125 +2492,125 @@ State 152
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    SEMICOLON  shift, and go to state 193
-    MINUS      shift, and go to state 113
-    PLUS       shift, and go to state 114
-    STAR       shift, and go to state 115
-    SLASH      shift, and go to state 116
-    PERCENT    shift, and go to state 117
-    LE         shift, and go to state 118
-    LT         shift, and go to state 119
-    GE         shift, and go to state 120
-    GT         shift, and go to state 121
-    EQ         shift, and go to state 122
-    NE         shift, and go to state 123
-    OR         shift, and go to state 124
-    AND        shift, and go to state 125
+    SEMICOLON  shift, and go to state 192
+    MINUS      shift, and go to state 112
+    PLUS       shift, and go to state 113
+    STAR       shift, and go to state 114
+    SLASH      shift, and go to state 115
+    PERCENT    shift, and go to state 116
+    LE         shift, and go to state 117
+    LT         shift, and go to state 118
+    GE         shift, and go to state 119
+    GT         shift, and go to state 120
+    EQ         shift, and go to state 121
+    NE         shift, and go to state 122
+    OR         shift, and go to state 123
+    AND        shift, and go to state 124
+
+
+State 152
+
+   26 vardecl: datatype SQUAREBRACKET_L exprs_dims • SQUAREBRACKET_R ID SEMICOLON
+   28        | datatype SQUAREBRACKET_L exprs_dims • SQUAREBRACKET_R ID LET expr SEMICOLON
+
+    SQUAREBRACKET_R  shift, and go to state 193
 
 
 State 153
 
-   38 vardecl: datatype SQUAREBRACKET_L exprs_dims • SQUAREBRACKET_R ID SEMICOLON
-   40        | datatype SQUAREBRACKET_L exprs_dims • SQUAREBRACKET_R ID LET expr SEMICOLON
+   25 vardecl: datatype ID SEMICOLON •
 
-    SQUAREBRACKET_R  shift, and go to state 194
+    $default  reduce using rule 25 (vardecl)
 
 
 State 154
 
-   37 vardecl: datatype ID SEMICOLON •
+   27 vardecl: datatype ID LET • expr SEMICOLON
 
-    $default  reduce using rule 37 (vardecl)
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
+
+    funcall          go to state 58
+    expr             go to state 194
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 155
-
-   39 vardecl: datatype ID LET • expr SEMICOLON
-
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
-
-    funcall          go to state 60
-    expr             go to state 195
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
-
-
-State 156
 
    75 expr: ROUNDBRACKET_L expr ROUNDBRACKET_R •
 
     $default  reduce using rule 75 (expr)
 
 
-State 157
+State 156
 
   102 cast: ROUNDBRACKET_L datatype ROUNDBRACKET_R • expr
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    expr             go to state 196
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 195
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
-State 158
+State 157
 
   101 array_expr: SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R •
 
     $default  reduce using rule 101 (array_expr)
 
 
-State 159
+State 158
 
    77 expr: ID SQUAREBRACKET_L exprs_dims • SQUAREBRACKET_R
 
-    SQUAREBRACKET_R  shift, and go to state 197
+    SQUAREBRACKET_R  shift, and go to state 196
 
 
-State 160
+State 159
 
    10 globdef: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID • SEMICOLON
    12        | datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID • LET expr SEMICOLON
 
-    SEMICOLON  shift, and go to state 198
-    LET        shift, and go to state 199
+    SEMICOLON  shift, and go to state 197
+    LET        shift, and go to state 198
 
 
-State 161
+State 160
 
    50 exprs_dims: expr_dim COMMA exprs_dims •
 
     $default  reduce using rule 50 (exprs_dims)
 
 
-State 162
+State 161
 
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
@@ -2663,14 +2627,14 @@ State 162
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    STAR     shift, and go to state 115
-    SLASH    shift, and go to state 116
-    PERCENT  shift, and go to state 117
+    STAR     shift, and go to state 114
+    SLASH    shift, and go to state 115
+    PERCENT  shift, and go to state 116
 
     $default  reduce using rule 89 (arithmetic_expr)
 
 
-State 163
+State 162
 
    88 arithmetic_expr: expr • PLUS expr
    88                | expr PLUS expr •
@@ -2687,14 +2651,14 @@ State 163
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    STAR     shift, and go to state 115
-    SLASH    shift, and go to state 116
-    PERCENT  shift, and go to state 117
+    STAR     shift, and go to state 114
+    SLASH    shift, and go to state 115
+    PERCENT  shift, and go to state 116
 
     $default  reduce using rule 88 (arithmetic_expr)
 
 
-State 164
+State 163
 
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
@@ -2714,7 +2678,7 @@ State 164
     $default  reduce using rule 90 (arithmetic_expr)
 
 
-State 165
+State 164
 
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
@@ -2734,7 +2698,7 @@ State 165
     $default  reduce using rule 91 (arithmetic_expr)
 
 
-State 166
+State 165
 
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
@@ -2754,7 +2718,7 @@ State 166
     $default  reduce using rule 92 (arithmetic_expr)
 
 
-State 167
+State 166
 
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
@@ -2771,16 +2735,16 @@ State 167
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    MINUS    shift, and go to state 113
-    PLUS     shift, and go to state 114
-    STAR     shift, and go to state 115
-    SLASH    shift, and go to state 116
-    PERCENT  shift, and go to state 117
+    MINUS    shift, and go to state 112
+    PLUS     shift, and go to state 113
+    STAR     shift, and go to state 114
+    SLASH    shift, and go to state 115
+    PERCENT  shift, and go to state 116
 
     $default  reduce using rule 94 (comparison_expr)
 
 
-State 168
+State 167
 
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
@@ -2797,16 +2761,16 @@ State 168
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    MINUS    shift, and go to state 113
-    PLUS     shift, and go to state 114
-    STAR     shift, and go to state 115
-    SLASH    shift, and go to state 116
-    PERCENT  shift, and go to state 117
+    MINUS    shift, and go to state 112
+    PLUS     shift, and go to state 113
+    STAR     shift, and go to state 114
+    SLASH    shift, and go to state 115
+    PERCENT  shift, and go to state 116
 
     $default  reduce using rule 93 (comparison_expr)
 
 
-State 169
+State 168
 
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
@@ -2823,16 +2787,16 @@ State 169
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    MINUS    shift, and go to state 113
-    PLUS     shift, and go to state 114
-    STAR     shift, and go to state 115
-    SLASH    shift, and go to state 116
-    PERCENT  shift, and go to state 117
+    MINUS    shift, and go to state 112
+    PLUS     shift, and go to state 113
+    STAR     shift, and go to state 114
+    SLASH    shift, and go to state 115
+    PERCENT  shift, and go to state 116
 
     $default  reduce using rule 96 (comparison_expr)
 
 
-State 170
+State 169
 
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
@@ -2849,16 +2813,16 @@ State 170
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    MINUS    shift, and go to state 113
-    PLUS     shift, and go to state 114
-    STAR     shift, and go to state 115
-    SLASH    shift, and go to state 116
-    PERCENT  shift, and go to state 117
+    MINUS    shift, and go to state 112
+    PLUS     shift, and go to state 113
+    STAR     shift, and go to state 114
+    SLASH    shift, and go to state 115
+    PERCENT  shift, and go to state 116
 
     $default  reduce using rule 95 (comparison_expr)
 
 
-State 171
+State 170
 
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
@@ -2875,20 +2839,20 @@ State 171
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    MINUS    shift, and go to state 113
-    PLUS     shift, and go to state 114
-    STAR     shift, and go to state 115
-    SLASH    shift, and go to state 116
-    PERCENT  shift, and go to state 117
-    LE       shift, and go to state 118
-    LT       shift, and go to state 119
-    GE       shift, and go to state 120
-    GT       shift, and go to state 121
+    MINUS    shift, and go to state 112
+    PLUS     shift, and go to state 113
+    STAR     shift, and go to state 114
+    SLASH    shift, and go to state 115
+    PERCENT  shift, and go to state 116
+    LE       shift, and go to state 117
+    LT       shift, and go to state 118
+    GE       shift, and go to state 119
+    GT       shift, and go to state 120
 
     $default  reduce using rule 97 (comparison_expr)
 
 
-State 172
+State 171
 
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
@@ -2905,20 +2869,20 @@ State 172
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    MINUS    shift, and go to state 113
-    PLUS     shift, and go to state 114
-    STAR     shift, and go to state 115
-    SLASH    shift, and go to state 116
-    PERCENT  shift, and go to state 117
-    LE       shift, and go to state 118
-    LT       shift, and go to state 119
-    GE       shift, and go to state 120
-    GT       shift, and go to state 121
+    MINUS    shift, and go to state 112
+    PLUS     shift, and go to state 113
+    STAR     shift, and go to state 114
+    SLASH    shift, and go to state 115
+    PERCENT  shift, and go to state 116
+    LE       shift, and go to state 117
+    LT       shift, and go to state 118
+    GE       shift, and go to state 119
+    GT       shift, and go to state 120
 
     $default  reduce using rule 98 (comparison_expr)
 
 
-State 173
+State 172
 
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
@@ -2935,23 +2899,23 @@ State 173
    99             | expr OR expr •
   100             | expr • AND expr
 
-    MINUS    shift, and go to state 113
-    PLUS     shift, and go to state 114
-    STAR     shift, and go to state 115
-    SLASH    shift, and go to state 116
-    PERCENT  shift, and go to state 117
-    LE       shift, and go to state 118
-    LT       shift, and go to state 119
-    GE       shift, and go to state 120
-    GT       shift, and go to state 121
-    EQ       shift, and go to state 122
-    NE       shift, and go to state 123
-    AND      shift, and go to state 125
+    MINUS    shift, and go to state 112
+    PLUS     shift, and go to state 113
+    STAR     shift, and go to state 114
+    SLASH    shift, and go to state 115
+    PERCENT  shift, and go to state 116
+    LE       shift, and go to state 117
+    LT       shift, and go to state 118
+    GE       shift, and go to state 119
+    GT       shift, and go to state 120
+    EQ       shift, and go to state 121
+    NE       shift, and go to state 122
+    AND      shift, and go to state 124
 
     $default  reduce using rule 99 (logical_expr)
 
 
-State 174
+State 173
 
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
@@ -2968,29 +2932,29 @@ State 174
   100             | expr • AND expr
   100             | expr AND expr •
 
-    MINUS    shift, and go to state 113
-    PLUS     shift, and go to state 114
-    STAR     shift, and go to state 115
-    SLASH    shift, and go to state 116
-    PERCENT  shift, and go to state 117
-    LE       shift, and go to state 118
-    LT       shift, and go to state 119
-    GE       shift, and go to state 120
-    GT       shift, and go to state 121
-    EQ       shift, and go to state 122
-    NE       shift, and go to state 123
+    MINUS    shift, and go to state 112
+    PLUS     shift, and go to state 113
+    STAR     shift, and go to state 114
+    SLASH    shift, and go to state 115
+    PERCENT  shift, and go to state 116
+    LE       shift, and go to state 117
+    LT       shift, and go to state 118
+    GE       shift, and go to state 119
+    GT       shift, and go to state 120
+    EQ       shift, and go to state 121
+    NE       shift, and go to state 122
 
     $default  reduce using rule 100 (logical_expr)
 
 
+State 174
+
+   29 funheader: datatype ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R •
+
+    $default  reduce using rule 29 (funheader)
+
+
 State 175
-
-   24 funheader: datatype ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R •
-
-    $default  reduce using rule 24 (funheader)
-
-
-State 176
 
    46 params: param COMMA • params
 
@@ -2999,210 +2963,210 @@ State 176
     INTTYPE    shift, and go to state 5
     VOIDTYPE   shift, and go to state 6
 
-    params    go to state 200
-    param     go to state 128
-    datatype  go to state 129
+    params    go to state 199
+    param     go to state 127
+    datatype  go to state 128
 
 
-State 177
+State 176
 
    49 param: datatype SQUAREBRACKET_L • id_dims SQUAREBRACKET_R ID
 
-    ID  shift, and go to state 77
+    ID  shift, and go to state 75
 
-    id_dims  go to state 201
-    id_dim   go to state 79
+    id_dims  go to state 200
+    id_dim   go to state 77
 
 
-State 178
+State 177
 
    48 param: datatype ID •
 
     $default  reduce using rule 48 (param)
 
 
-State 179
+State 178
 
    11 globdef: datatype ID LET expr SEMICOLON •
 
     $default  reduce using rule 11 (globdef)
 
 
-State 180
+State 179
 
    14 globdef: EXPORT datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID • SEMICOLON
    16        | EXPORT datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID • LET expr SEMICOLON
 
-    SEMICOLON  shift, and go to state 202
-    LET        shift, and go to state 203
+    SEMICOLON  shift, and go to state 201
+    LET        shift, and go to state 202
 
 
-State 181
+State 180
 
    15 globdef: EXPORT datatype ID LET expr SEMICOLON •
 
     $default  reduce using rule 15 (globdef)
 
 
-State 182
+State 181
 
     8 globdecl: EXTERN datatype SQUAREBRACKET_L id_dims SQUAREBRACKET_R ID • SEMICOLON
 
-    SEMICOLON  shift, and go to state 204
+    SEMICOLON  shift, and go to state 203
+
+
+State 182
+
+   53 id_dims: id_dim COMMA id_dims •
+
+    $default  reduce using rule 53 (id_dims)
 
 
 State 183
 
-   52 id_dims: id_dim COMMA id_dims •
+   66 stmt: IF ROUNDBRACKET_L expr ROUNDBRACKET_R • block
+   67     | IF ROUNDBRACKET_L expr ROUNDBRACKET_R • block ELSE block
 
-    $default  reduce using rule 52 (id_dims)
+    CURLYBRACKET_L  shift, and go to state 81
+    IF              shift, and go to state 32
+    WHILE           shift, and go to state 33
+    DO              shift, and go to state 34
+    FOR             shift, and go to state 35
+    RETURN          shift, and go to state 36
+    ID              shift, and go to state 37
+
+    funcall  go to state 43
+    stmt     go to state 82
+    assign   go to state 46
+    block    go to state 204
+    varlet   go to state 47
 
 
 State 184
 
-   66 stmt: IF ROUNDBRACKET_L expr ROUNDBRACKET_R • block
-   67     | IF ROUNDBRACKET_L expr ROUNDBRACKET_R • block ELSE block
+   65 stmt: WHILE ROUNDBRACKET_L expr ROUNDBRACKET_R • block
 
-    CURLYBRACKET_L  shift, and go to state 83
+    CURLYBRACKET_L  shift, and go to state 81
     IF              shift, and go to state 32
     WHILE           shift, and go to state 33
     DO              shift, and go to state 34
     FOR             shift, and go to state 35
     RETURN          shift, and go to state 36
-    ID              shift, and go to state 39
+    ID              shift, and go to state 37
 
     funcall  go to state 43
-    stmt     go to state 84
-    assign   go to state 48
+    stmt     go to state 82
+    assign   go to state 46
     block    go to state 205
-    varlet   go to state 49
+    varlet   go to state 47
 
 
 State 185
-
-   65 stmt: WHILE ROUNDBRACKET_L expr ROUNDBRACKET_R • block
-
-    CURLYBRACKET_L  shift, and go to state 83
-    IF              shift, and go to state 32
-    WHILE           shift, and go to state 33
-    DO              shift, and go to state 34
-    FOR             shift, and go to state 35
-    RETURN          shift, and go to state 36
-    ID              shift, and go to state 39
-
-    funcall  go to state 43
-    stmt     go to state 84
-    assign   go to state 48
-    block    go to state 206
-    varlet   go to state 49
-
-
-State 186
 
    71 block: CURLYBRACKET_L stmts_opt CURLYBRACKET_R •
 
     $default  reduce using rule 71 (block)
 
 
-State 187
+State 186
 
    64 stmt: DO block WHILE ROUNDBRACKET_L • expr ROUNDBRACKET_R SEMICOLON
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    expr             go to state 207
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 206
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
-State 188
+State 187
 
    62 stmt: FOR ROUNDBRACKET_L datatype ID • LET expr COMMA expr ROUNDBRACKET_R block
    63     | FOR ROUNDBRACKET_L datatype ID • LET expr COMMA expr COMMA expr ROUNDBRACKET_R block
 
-    LET  shift, and go to state 208
+    LET  shift, and go to state 207
+
+
+State 188
+
+   38 funcall: ID ROUNDBRACKET_L args_opt ROUNDBRACKET_R •
+
+    $default  reduce using rule 38 (funcall)
 
 
 State 189
 
-   33 funcall: ID ROUNDBRACKET_L args ROUNDBRACKET_R •
+   41 args: arg COMMA • args
 
-    $default  reduce using rule 33 (funcall)
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
+
+    funcall          go to state 58
+    args             go to state 208
+    arg              go to state 143
+    expr             go to state 144
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 190
-
-   41 args: arg COMMA • args
-
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
-
-    funcall          go to state 60
-    args             go to state 209
-    arg              go to state 145
-    expr             go to state 146
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
-
-
-State 191
 
    74 varlet: ID SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R •
 
     $default  reduce using rule 74 (varlet)
 
 
+State 191
+
+   36 funbody: CURLYBRACKET_L vardecls localfundefs stmts CURLYBRACKET_R •
+
+    $default  reduce using rule 36 (funbody)
+
+
 State 192
-
-   31 funbody: CURLYBRACKET_L vardecls localfundefs stmts CURLYBRACKET_R •
-
-    $default  reduce using rule 31 (funbody)
-
-
-State 193
 
    70 assign: varlet LET expr SEMICOLON •
 
     $default  reduce using rule 70 (assign)
 
 
+State 193
+
+   26 vardecl: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R • ID SEMICOLON
+   28        | datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R • ID LET expr SEMICOLON
+
+    ID  shift, and go to state 209
+
+
 State 194
 
-   38 vardecl: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R • ID SEMICOLON
-   40        | datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R • ID LET expr SEMICOLON
-
-    ID  shift, and go to state 210
-
-
-State 195
-
-   39 vardecl: datatype ID LET expr • SEMICOLON
+   27 vardecl: datatype ID LET expr • SEMICOLON
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
    90                | expr • STAR expr
@@ -3217,23 +3181,23 @@ State 195
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    SEMICOLON  shift, and go to state 211
-    MINUS      shift, and go to state 113
-    PLUS       shift, and go to state 114
-    STAR       shift, and go to state 115
-    SLASH      shift, and go to state 116
-    PERCENT    shift, and go to state 117
-    LE         shift, and go to state 118
-    LT         shift, and go to state 119
-    GE         shift, and go to state 120
-    GT         shift, and go to state 121
-    EQ         shift, and go to state 122
-    NE         shift, and go to state 123
-    OR         shift, and go to state 124
-    AND        shift, and go to state 125
+    SEMICOLON  shift, and go to state 210
+    MINUS      shift, and go to state 112
+    PLUS       shift, and go to state 113
+    STAR       shift, and go to state 114
+    SLASH      shift, and go to state 115
+    PERCENT    shift, and go to state 116
+    LE         shift, and go to state 117
+    LT         shift, and go to state 118
+    GE         shift, and go to state 119
+    GT         shift, and go to state 120
+    EQ         shift, and go to state 121
+    NE         shift, and go to state 122
+    OR         shift, and go to state 123
+    AND        shift, and go to state 124
 
 
-State 196
+State 195
 
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
@@ -3253,116 +3217,116 @@ State 196
     $default  reduce using rule 102 (cast)
 
 
-State 197
+State 196
 
    77 expr: ID SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R •
 
     $default  reduce using rule 77 (expr)
 
 
-State 198
+State 197
 
    10 globdef: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON •
 
     $default  reduce using rule 10 (globdef)
 
 
-State 199
+State 198
 
    12 globdef: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET • expr SEMICOLON
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    expr             go to state 212
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 211
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
-State 200
+State 199
 
    46 params: param COMMA params •
 
     $default  reduce using rule 46 (params)
 
 
-State 201
+State 200
 
    49 param: datatype SQUAREBRACKET_L id_dims • SQUAREBRACKET_R ID
 
-    SQUAREBRACKET_R  shift, and go to state 213
+    SQUAREBRACKET_R  shift, and go to state 212
 
 
-State 202
+State 201
 
    14 globdef: EXPORT datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON •
 
     $default  reduce using rule 14 (globdef)
 
 
-State 203
+State 202
 
    16 globdef: EXPORT datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET • expr SEMICOLON
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    expr             go to state 214
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 213
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
-State 204
+State 203
 
     8 globdecl: EXTERN datatype SQUAREBRACKET_L id_dims SQUAREBRACKET_R ID SEMICOLON •
 
     $default  reduce using rule 8 (globdecl)
 
 
-State 205
+State 204
 
    66 stmt: IF ROUNDBRACKET_L expr ROUNDBRACKET_R block •
    67     | IF ROUNDBRACKET_L expr ROUNDBRACKET_R block • ELSE block
 
-    ELSE  shift, and go to state 215
+    ELSE  shift, and go to state 214
 
     $default  reduce using rule 66 (stmt)
 
 
-State 206
+State 205
 
    65 stmt: WHILE ROUNDBRACKET_L expr ROUNDBRACKET_R block •
 
     $default  reduce using rule 65 (stmt)
 
 
-State 207
+State 206
 
    64 stmt: DO block WHILE ROUNDBRACKET_L expr • ROUNDBRACKET_R SEMICOLON
    88 arithmetic_expr: expr • PLUS expr
@@ -3379,72 +3343,72 @@ State 207
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    ROUNDBRACKET_R  shift, and go to state 216
-    MINUS           shift, and go to state 113
-    PLUS            shift, and go to state 114
-    STAR            shift, and go to state 115
-    SLASH           shift, and go to state 116
-    PERCENT         shift, and go to state 117
-    LE              shift, and go to state 118
-    LT              shift, and go to state 119
-    GE              shift, and go to state 120
-    GT              shift, and go to state 121
-    EQ              shift, and go to state 122
-    NE              shift, and go to state 123
-    OR              shift, and go to state 124
-    AND             shift, and go to state 125
+    ROUNDBRACKET_R  shift, and go to state 215
+    MINUS           shift, and go to state 112
+    PLUS            shift, and go to state 113
+    STAR            shift, and go to state 114
+    SLASH           shift, and go to state 115
+    PERCENT         shift, and go to state 116
+    LE              shift, and go to state 117
+    LT              shift, and go to state 118
+    GE              shift, and go to state 119
+    GT              shift, and go to state 120
+    EQ              shift, and go to state 121
+    NE              shift, and go to state 122
+    OR              shift, and go to state 123
+    AND             shift, and go to state 124
 
 
-State 208
+State 207
 
    62 stmt: FOR ROUNDBRACKET_L datatype ID LET • expr COMMA expr ROUNDBRACKET_R block
    63     | FOR ROUNDBRACKET_L datatype ID LET • expr COMMA expr COMMA expr ROUNDBRACKET_R block
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    expr             go to state 217
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 216
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
-State 209
+State 208
 
    41 args: arg COMMA args •
 
     $default  reduce using rule 41 (args)
 
 
+State 209
+
+   26 vardecl: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID • SEMICOLON
+   28        | datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID • LET expr SEMICOLON
+
+    SEMICOLON  shift, and go to state 217
+    LET        shift, and go to state 218
+
+
 State 210
 
-   38 vardecl: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID • SEMICOLON
-   40        | datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID • LET expr SEMICOLON
+   27 vardecl: datatype ID LET expr SEMICOLON •
 
-    SEMICOLON  shift, and go to state 218
-    LET        shift, and go to state 219
+    $default  reduce using rule 27 (vardecl)
 
 
 State 211
-
-   39 vardecl: datatype ID LET expr SEMICOLON •
-
-    $default  reduce using rule 39 (vardecl)
-
-
-State 212
 
    12 globdef: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr • SEMICOLON
    88 arithmetic_expr: expr • PLUS expr
@@ -3461,30 +3425,30 @@ State 212
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    SEMICOLON  shift, and go to state 220
-    MINUS      shift, and go to state 113
-    PLUS       shift, and go to state 114
-    STAR       shift, and go to state 115
-    SLASH      shift, and go to state 116
-    PERCENT    shift, and go to state 117
-    LE         shift, and go to state 118
-    LT         shift, and go to state 119
-    GE         shift, and go to state 120
-    GT         shift, and go to state 121
-    EQ         shift, and go to state 122
-    NE         shift, and go to state 123
-    OR         shift, and go to state 124
-    AND        shift, and go to state 125
+    SEMICOLON  shift, and go to state 219
+    MINUS      shift, and go to state 112
+    PLUS       shift, and go to state 113
+    STAR       shift, and go to state 114
+    SLASH      shift, and go to state 115
+    PERCENT    shift, and go to state 116
+    LE         shift, and go to state 117
+    LT         shift, and go to state 118
+    GE         shift, and go to state 119
+    GT         shift, and go to state 120
+    EQ         shift, and go to state 121
+    NE         shift, and go to state 122
+    OR         shift, and go to state 123
+    AND        shift, and go to state 124
 
 
-State 213
+State 212
 
    49 param: datatype SQUAREBRACKET_L id_dims SQUAREBRACKET_R • ID
 
-    ID  shift, and go to state 221
+    ID  shift, and go to state 220
 
 
-State 214
+State 213
 
    16 globdef: EXPORT datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr • SEMICOLON
    88 arithmetic_expr: expr • PLUS expr
@@ -3501,49 +3465,49 @@ State 214
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    SEMICOLON  shift, and go to state 222
-    MINUS      shift, and go to state 113
-    PLUS       shift, and go to state 114
-    STAR       shift, and go to state 115
-    SLASH      shift, and go to state 116
-    PERCENT    shift, and go to state 117
-    LE         shift, and go to state 118
-    LT         shift, and go to state 119
-    GE         shift, and go to state 120
-    GT         shift, and go to state 121
-    EQ         shift, and go to state 122
-    NE         shift, and go to state 123
-    OR         shift, and go to state 124
-    AND        shift, and go to state 125
+    SEMICOLON  shift, and go to state 221
+    MINUS      shift, and go to state 112
+    PLUS       shift, and go to state 113
+    STAR       shift, and go to state 114
+    SLASH      shift, and go to state 115
+    PERCENT    shift, and go to state 116
+    LE         shift, and go to state 117
+    LT         shift, and go to state 118
+    GE         shift, and go to state 119
+    GT         shift, and go to state 120
+    EQ         shift, and go to state 121
+    NE         shift, and go to state 122
+    OR         shift, and go to state 123
+    AND        shift, and go to state 124
 
 
-State 215
+State 214
 
    67 stmt: IF ROUNDBRACKET_L expr ROUNDBRACKET_R block ELSE • block
 
-    CURLYBRACKET_L  shift, and go to state 83
+    CURLYBRACKET_L  shift, and go to state 81
     IF              shift, and go to state 32
     WHILE           shift, and go to state 33
     DO              shift, and go to state 34
     FOR             shift, and go to state 35
     RETURN          shift, and go to state 36
-    ID              shift, and go to state 39
+    ID              shift, and go to state 37
 
     funcall  go to state 43
-    stmt     go to state 84
-    assign   go to state 48
-    block    go to state 223
-    varlet   go to state 49
+    stmt     go to state 82
+    assign   go to state 46
+    block    go to state 222
+    varlet   go to state 47
 
 
-State 216
+State 215
 
    64 stmt: DO block WHILE ROUNDBRACKET_L expr ROUNDBRACKET_R • SEMICOLON
 
-    SEMICOLON  shift, and go to state 224
+    SEMICOLON  shift, and go to state 223
 
 
-State 217
+State 216
 
    62 stmt: FOR ROUNDBRACKET_L datatype ID LET expr • COMMA expr ROUNDBRACKET_R block
    63     | FOR ROUNDBRACKET_L datatype ID LET expr • COMMA expr COMMA expr ROUNDBRACKET_R block
@@ -3561,118 +3525,118 @@ State 217
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    COMMA    shift, and go to state 225
-    MINUS    shift, and go to state 113
-    PLUS     shift, and go to state 114
-    STAR     shift, and go to state 115
-    SLASH    shift, and go to state 116
-    PERCENT  shift, and go to state 117
-    LE       shift, and go to state 118
-    LT       shift, and go to state 119
-    GE       shift, and go to state 120
-    GT       shift, and go to state 121
-    EQ       shift, and go to state 122
-    NE       shift, and go to state 123
-    OR       shift, and go to state 124
-    AND      shift, and go to state 125
+    COMMA    shift, and go to state 224
+    MINUS    shift, and go to state 112
+    PLUS     shift, and go to state 113
+    STAR     shift, and go to state 114
+    SLASH    shift, and go to state 115
+    PERCENT  shift, and go to state 116
+    LE       shift, and go to state 117
+    LT       shift, and go to state 118
+    GE       shift, and go to state 119
+    GT       shift, and go to state 120
+    EQ       shift, and go to state 121
+    NE       shift, and go to state 122
+    OR       shift, and go to state 123
+    AND      shift, and go to state 124
+
+
+State 217
+
+   26 vardecl: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON •
+
+    $default  reduce using rule 26 (vardecl)
 
 
 State 218
 
-   38 vardecl: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON •
+   28 vardecl: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET • expr SEMICOLON
 
-    $default  reduce using rule 38 (vardecl)
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
+
+    funcall          go to state 58
+    expr             go to state 225
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
 State 219
-
-   40 vardecl: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET • expr SEMICOLON
-
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
-
-    funcall          go to state 60
-    expr             go to state 226
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
-
-
-State 220
 
    12 globdef: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON •
 
     $default  reduce using rule 12 (globdef)
 
 
-State 221
+State 220
 
    49 param: datatype SQUAREBRACKET_L id_dims SQUAREBRACKET_R ID •
 
     $default  reduce using rule 49 (param)
 
 
-State 222
+State 221
 
    16 globdef: EXPORT datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON •
 
     $default  reduce using rule 16 (globdef)
 
 
-State 223
+State 222
 
    67 stmt: IF ROUNDBRACKET_L expr ROUNDBRACKET_R block ELSE block •
 
     $default  reduce using rule 67 (stmt)
 
 
-State 224
+State 223
 
    64 stmt: DO block WHILE ROUNDBRACKET_L expr ROUNDBRACKET_R SEMICOLON •
 
     $default  reduce using rule 64 (stmt)
 
 
-State 225
+State 224
 
    62 stmt: FOR ROUNDBRACKET_L datatype ID LET expr COMMA • expr ROUNDBRACKET_R block
    63     | FOR ROUNDBRACKET_L datatype ID LET expr COMMA • expr COMMA expr ROUNDBRACKET_R block
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    expr             go to state 227
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 226
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
-State 226
+State 225
 
-   40 vardecl: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr • SEMICOLON
+   28 vardecl: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr • SEMICOLON
    88 arithmetic_expr: expr • PLUS expr
    89                | expr • MINUS expr
    90                | expr • STAR expr
@@ -3687,23 +3651,23 @@ State 226
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    SEMICOLON  shift, and go to state 228
-    MINUS      shift, and go to state 113
-    PLUS       shift, and go to state 114
-    STAR       shift, and go to state 115
-    SLASH      shift, and go to state 116
-    PERCENT    shift, and go to state 117
-    LE         shift, and go to state 118
-    LT         shift, and go to state 119
-    GE         shift, and go to state 120
-    GT         shift, and go to state 121
-    EQ         shift, and go to state 122
-    NE         shift, and go to state 123
-    OR         shift, and go to state 124
-    AND        shift, and go to state 125
+    SEMICOLON  shift, and go to state 227
+    MINUS      shift, and go to state 112
+    PLUS       shift, and go to state 113
+    STAR       shift, and go to state 114
+    SLASH      shift, and go to state 115
+    PERCENT    shift, and go to state 116
+    LE         shift, and go to state 117
+    LT         shift, and go to state 118
+    GE         shift, and go to state 119
+    GT         shift, and go to state 120
+    EQ         shift, and go to state 121
+    NE         shift, and go to state 122
+    OR         shift, and go to state 123
+    AND        shift, and go to state 124
 
 
-State 227
+State 226
 
    62 stmt: FOR ROUNDBRACKET_L datatype ID LET expr COMMA expr • ROUNDBRACKET_R block
    63     | FOR ROUNDBRACKET_L datatype ID LET expr COMMA expr • COMMA expr ROUNDBRACKET_R block
@@ -3721,82 +3685,82 @@ State 227
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    ROUNDBRACKET_R  shift, and go to state 229
-    COMMA           shift, and go to state 230
-    MINUS           shift, and go to state 113
-    PLUS            shift, and go to state 114
-    STAR            shift, and go to state 115
-    SLASH           shift, and go to state 116
-    PERCENT         shift, and go to state 117
-    LE              shift, and go to state 118
-    LT              shift, and go to state 119
-    GE              shift, and go to state 120
-    GT              shift, and go to state 121
-    EQ              shift, and go to state 122
-    NE              shift, and go to state 123
-    OR              shift, and go to state 124
-    AND             shift, and go to state 125
+    ROUNDBRACKET_R  shift, and go to state 228
+    COMMA           shift, and go to state 229
+    MINUS           shift, and go to state 112
+    PLUS            shift, and go to state 113
+    STAR            shift, and go to state 114
+    SLASH           shift, and go to state 115
+    PERCENT         shift, and go to state 116
+    LE              shift, and go to state 117
+    LT              shift, and go to state 118
+    GE              shift, and go to state 119
+    GT              shift, and go to state 120
+    EQ              shift, and go to state 121
+    NE              shift, and go to state 122
+    OR              shift, and go to state 123
+    AND             shift, and go to state 124
+
+
+State 227
+
+   28 vardecl: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON •
+
+    $default  reduce using rule 28 (vardecl)
 
 
 State 228
 
-   40 vardecl: datatype SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON •
-
-    $default  reduce using rule 40 (vardecl)
-
-
-State 229
-
    62 stmt: FOR ROUNDBRACKET_L datatype ID LET expr COMMA expr ROUNDBRACKET_R • block
 
-    CURLYBRACKET_L  shift, and go to state 83
+    CURLYBRACKET_L  shift, and go to state 81
     IF              shift, and go to state 32
     WHILE           shift, and go to state 33
     DO              shift, and go to state 34
     FOR             shift, and go to state 35
     RETURN          shift, and go to state 36
-    ID              shift, and go to state 39
+    ID              shift, and go to state 37
 
     funcall  go to state 43
-    stmt     go to state 84
-    assign   go to state 48
-    block    go to state 231
-    varlet   go to state 49
+    stmt     go to state 82
+    assign   go to state 46
+    block    go to state 230
+    varlet   go to state 47
 
 
-State 230
+State 229
 
    63 stmt: FOR ROUNDBRACKET_L datatype ID LET expr COMMA expr COMMA • expr ROUNDBRACKET_R block
 
-    ROUNDBRACKET_L   shift, and go to state 51
-    SQUAREBRACKET_L  shift, and go to state 52
-    MINUS            shift, and go to state 53
-    NEG              shift, and go to state 54
-    TRUEVAL          shift, and go to state 55
-    FALSEVAL         shift, and go to state 56
-    NUM              shift, and go to state 57
-    FLOAT            shift, and go to state 58
-    ID               shift, and go to state 59
+    ROUNDBRACKET_L   shift, and go to state 49
+    SQUAREBRACKET_L  shift, and go to state 50
+    MINUS            shift, and go to state 51
+    NEG              shift, and go to state 52
+    TRUEVAL          shift, and go to state 53
+    FALSEVAL         shift, and go to state 54
+    NUM              shift, and go to state 55
+    FLOAT            shift, and go to state 56
+    ID               shift, and go to state 57
 
-    funcall          go to state 60
-    expr             go to state 232
-    unary_expr       go to state 64
-    arithmetic_expr  go to state 65
-    comparison_expr  go to state 66
-    logical_expr     go to state 67
-    array_expr       go to state 68
-    cast             go to state 69
-    constant         go to state 70
+    funcall          go to state 58
+    expr             go to state 231
+    unary_expr       go to state 62
+    arithmetic_expr  go to state 63
+    comparison_expr  go to state 64
+    logical_expr     go to state 65
+    array_expr       go to state 66
+    cast             go to state 67
+    constant         go to state 68
 
 
-State 231
+State 230
 
    62 stmt: FOR ROUNDBRACKET_L datatype ID LET expr COMMA expr ROUNDBRACKET_R block •
 
     $default  reduce using rule 62 (stmt)
 
 
-State 232
+State 231
 
    63 stmt: FOR ROUNDBRACKET_L datatype ID LET expr COMMA expr COMMA expr • ROUNDBRACKET_R block
    88 arithmetic_expr: expr • PLUS expr
@@ -3813,42 +3777,42 @@ State 232
    99 logical_expr: expr • OR expr
   100             | expr • AND expr
 
-    ROUNDBRACKET_R  shift, and go to state 233
-    MINUS           shift, and go to state 113
-    PLUS            shift, and go to state 114
-    STAR            shift, and go to state 115
-    SLASH           shift, and go to state 116
-    PERCENT         shift, and go to state 117
-    LE              shift, and go to state 118
-    LT              shift, and go to state 119
-    GE              shift, and go to state 120
-    GT              shift, and go to state 121
-    EQ              shift, and go to state 122
-    NE              shift, and go to state 123
-    OR              shift, and go to state 124
-    AND             shift, and go to state 125
+    ROUNDBRACKET_R  shift, and go to state 232
+    MINUS           shift, and go to state 112
+    PLUS            shift, and go to state 113
+    STAR            shift, and go to state 114
+    SLASH           shift, and go to state 115
+    PERCENT         shift, and go to state 116
+    LE              shift, and go to state 117
+    LT              shift, and go to state 118
+    GE              shift, and go to state 119
+    GT              shift, and go to state 120
+    EQ              shift, and go to state 121
+    NE              shift, and go to state 122
+    OR              shift, and go to state 123
+    AND             shift, and go to state 124
 
 
-State 233
+State 232
 
    63 stmt: FOR ROUNDBRACKET_L datatype ID LET expr COMMA expr COMMA expr ROUNDBRACKET_R • block
 
-    CURLYBRACKET_L  shift, and go to state 83
+    CURLYBRACKET_L  shift, and go to state 81
     IF              shift, and go to state 32
     WHILE           shift, and go to state 33
     DO              shift, and go to state 34
     FOR             shift, and go to state 35
     RETURN          shift, and go to state 36
-    ID              shift, and go to state 39
+    ID              shift, and go to state 37
 
     funcall  go to state 43
-    stmt     go to state 84
-    assign   go to state 48
-    block    go to state 234
-    varlet   go to state 49
+    stmt     go to state 82
+    assign   go to state 46
+    block    go to state 233
+    varlet   go to state 47
 
 
-State 234
+State 233
 
    63 stmt: FOR ROUNDBRACKET_L datatype ID LET expr COMMA expr COMMA expr ROUNDBRACKET_R block •
 
