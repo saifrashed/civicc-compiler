@@ -215,14 +215,14 @@ localfundef: funheader funbody // example:  int foo();
 
 vardecls: vardecls vardecl  // example: int a = 5; int b = 4; int c;
       {
-        node_st *current = $1;
+        node_st *current = $1; // take head of vardecls
 
-        while(VARDECL_NEXT(current) != NULL) {
+        while(VARDECL_NEXT(current) != NULL) { // traverse it till the end
           current = VARDECL_NEXT(current);
         }
 
-      // reverse a linked list 
-      VARDECL_NEXT(current) = $2;
+        VARDECL_NEXT(current) = $2; // in the end we place the given vardecl 
+
 
         $$ = $1;
       }
