@@ -3,12 +3,25 @@ start phase EntryPoint {
     
     actions {
         pass SPdoScanParse;
+        Semantic;
         Print;
     }
 };
 
 traversal Print {
     uid = PRT
+};
+
+
+/*** Semantic phase ***/
+
+phase Semantic {
+    actions { 
+        traversal SymbolTable {
+            uid = CST,
+            nodes = {Program, VarDecl, Var, VarLet}
+        };
+    }
 };
 
 /*** AST ***/
@@ -306,3 +319,15 @@ node Bool {
         bool val { constructor }
     }
 };
+
+/* Symbol table entry
+node Ste {
+    children {
+        Ste next { constructor }
+    },
+    attributes {
+        string name { constructor, mandatory },
+        Link decl,
+        int scope
+    }
+}

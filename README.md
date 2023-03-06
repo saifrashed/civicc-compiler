@@ -17,6 +17,11 @@ Graphviz (for creating a diagram)
 
 ## Additional commands
 
+### Running compiler:
+- cd build-debug/
+- make
+- ./civicc ../test/test1.cvc
+
 ### Running flex:
 - flex -d lexer.l
 - clang -ll lex.yy.c -o scanner

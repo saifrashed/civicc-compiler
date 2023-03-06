@@ -64,7 +64,7 @@ node_st *PRTassign(node_st *node)
   }
 
   TRAVexpr(node);
-  printf(";\n");
+  printf("\n");
 
   return node;
 }
@@ -138,7 +138,15 @@ node_st *PRTbinop(node_st *node)
  */
 node_st *PRTvarlet(node_st *node)
 {
-  printf("%s(%d:%d)", VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
+  printf("%s", VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
+
+  if (VAR_INDICES(node) != NULL)
+  {
+    printf("[");
+    TRAVindices(node);
+    printf("]");
+  }
+
   return node;
 }
 
