@@ -128,7 +128,7 @@ node_st *PRTbinop(node_st *node)
 
   TRAVright(node);
 
-  printf(")(%d:%d-%d)", NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
+  printf(")");
 
   return node;
 }
@@ -748,5 +748,13 @@ node_st *PRTmonop(node_st *node)
 
   TRAVoperand(node);
 
+  return node;
+}
+
+/**
+ * @fn PRTste
+ */
+node_st *PRTste(node_st *node)
+{
   return node;
 }

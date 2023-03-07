@@ -18,8 +18,11 @@ traversal Print {
 phase Semantic {
     actions {
         traversal SymbolTable {
-            uid = CST,
-            nodes = {Program, VarDecl, Var, VarLet}
+            uid = ST,
+            nodes = {Program, GlobDef, GlobDecl, FunDef, VarDecl, Var, VarLet},
+            travdata {
+                user node_ptr st_stack
+            }
         };
     }
 };
@@ -64,7 +67,7 @@ nodeset Stmt = {Assign, ExprStmt, IfElse, While, DoWhile, For, Return};
 // In the old framework it points to node* (so can be everything).
 // You need to adapt it when working with the symbol tables.
 // I put it as a decl now, because an empty nodeset is not allowed.
-nodeset Link = Decl;
+nodeset Link = {VarDecl, GlobDef, GlobDecl, FunDef, Param};
 
 root node Program {
     children {
@@ -120,7 +123,7 @@ node FunCall {
     },
     attributes {
         string name { constructor },
-        Link decl
+        Ste entry
     }
 };
 
@@ -189,7 +192,6 @@ node For {
         Expr step { constructor },
         Stmts block { constructor }
     },
-
     attributes {
         string var { constructor }
     }
@@ -199,7 +201,6 @@ node GlobDecl {
     children {
         Ids dims { constructor }
     },
-
     attributes {
         Type type { constructor },
         string name { constructor }
@@ -211,7 +212,6 @@ node GlobDef {
         Exprs dims { constructor },
         Expr init { constructor }
     },
-
     attributes {
         Type type { constructor },
         string name { constructor, mandatory },
@@ -224,7 +224,6 @@ node Param {
         Ids dims { constructor },
         Param next { constructor }
     },
-
     attributes {
         string name { constructor, mandatory },
         Type type { constructor }
@@ -263,7 +262,6 @@ node Binop {
         Expr left { constructor, mandatory },
         Expr right { constructor, mandatory }
     },
-
     attributes {
         BinOpEnum op { constructor }
     }
@@ -273,7 +271,6 @@ node Monop {
     children {
         Expr operand { constructor, mandatory }
     },
-
     attributes {
         MonOpEnum op { constructor }
     }
@@ -283,10 +280,9 @@ node VarLet {
     children {
         Exprs indices { constructor }
     },
-
     attributes {
         string name { constructor },
-        Link decl
+        Ste entry
     }
 };
 
@@ -294,10 +290,9 @@ node Var {
     children {
         Exprs indices { constructor }
     },
-
     attributes {
         string name { constructor },
-        Link decl
+        Ste entry
     }
 };
 
@@ -319,14 +314,13 @@ node Bool {
     }
 };
 
-/* Symbol table entry
 node Ste {
     children {
+        Ste parent,
         Ste next { constructor }
     },
     attributes {
         string name { constructor, mandatory },
-        Link decl,
-        int scope
+        Link decl
     }
 }

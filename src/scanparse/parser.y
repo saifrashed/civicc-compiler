@@ -128,44 +128,54 @@ globdecl:
      EXTERN datatype[type] ID SEMICOLON // example: extern int id;
        {
          $$ =  ASTglobdecl(NULL, $type, $3);
+         AddLocToNode($$, &@3, &@3);
        }
     |
       EXTERN datatype[type] SQUAREBRACKET_L id_dims SQUAREBRACKET_R ID SEMICOLON // example: extern int[a, b] id;
        {
          $$ =  ASTglobdecl($4, $type, $6);
+         AddLocToNode($$, &@6, &@6);
        };
 
 globdef: datatype[type] ID SEMICOLON // example: int id;
         {
           $$ =  ASTglobdef(NULL, NULL, $type, $2, false);
+          AddLocToNode($$, &@2, &@2);
         }
         | datatype[type] SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON // example: int[1, 2] id;
         {
           $$ =  ASTglobdef($3, NULL, $type, $5, false);
+          AddLocToNode($$, &@5, &@5);
         }
         | datatype[type] ID LET expr SEMICOLON // example: int id = 123;
         {
           $$ =  ASTglobdef(NULL, $4, $type, $2, false);
+          AddLocToNode($$, &@2, &@2);
         }
         | datatype[type] SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON // example: int[1, 2] id = 123;
         {
           $$ =  ASTglobdef($3, $7, $type, $5, false);
+          AddLocToNode($$, &@5, &@5);
         }
         | EXPORT datatype[type] ID SEMICOLON // example: export int id;
         {
           $$ =  ASTglobdef(NULL, NULL, $type, $3, true);
+          AddLocToNode($$, &@3, &@3);
         }
         | EXPORT datatype[type] SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON // example: export int[1, 2] id;
         {
           $$ =  ASTglobdef($4, NULL, $type, $6, true);
+          AddLocToNode($$, &@6, &@6);
         }
         | EXPORT datatype[type] ID LET expr SEMICOLON // example: export int id = 123;
         {
           $$ =  ASTglobdef(NULL, $5, $type, $3, true);
+          AddLocToNode($$, &@3, &@3);
         }
         | EXPORT datatype[type] SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON // example: export int[1, 2] id = 123;
         {
           $$ =  ASTglobdef($4, $8, $type, $6, true);
+          AddLocToNode($$, &@6, &@6);
         };
 
 /*************************************
@@ -223,7 +233,6 @@ vardecls: vardecls vardecl  // example: int a = 5; int b = 4; int c;
 
         VARDECL_NEXT(current) = $2; // in the end we place the given vardecl
 
-
         $$ = $1;
       }
       | vardecl
@@ -234,23 +243,28 @@ vardecls: vardecls vardecl  // example: int a = 5; int b = 4; int c;
 vardecl: datatype[type] ID SEMICOLON  // example: int a;
         {
           $$ = ASTvardecl(NULL, NULL, NULL, $2, $type);
+          AddLocToNode($$, &@2, &@2);
         }
         | datatype[type] SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID SEMICOLON  // example: int a;
         {
           $$ = ASTvardecl($3, NULL, NULL, $5, $type);
+          AddLocToNode($$, &@3, &@5);
         }
         | datatype[type] ID LET expr SEMICOLON  // example: int a = 5;
         {
           $$ = ASTvardecl(NULL, $4, NULL, $2, $type);
+          AddLocToNode($$, &@2, &@2);
         }
         | datatype[type] SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R ID LET expr SEMICOLON  // example: int a = 5;
         {
           $$ = ASTvardecl($3, $7, NULL, $5, $type);
+          AddLocToNode($$, &@5, &@5);
         };
 
 funheader: datatype[type] ID ROUNDBRACKET_L params_opt ROUNDBRACKET_R
         {
           $$ = ASTfundef(NULL, $4, $type, $2, false);
+          AddLocToNode($$, &@2, &@2);
         };
 
 funbody: CURLYBRACKET_L vardecls CURLYBRACKET_R
@@ -468,6 +482,7 @@ block:  CURLYBRACKET_L stmts_opt CURLYBRACKET_R
 varlet: ID
         {
           $$ = ASTvarlet(NULL, $1);
+          AddLocToNode($$, &@1, &@1);
         }
         | ID SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R
         {
@@ -486,6 +501,7 @@ expr:  ROUNDBRACKET_L expr ROUNDBRACKET_R
       | ID SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R
       {
         $$ = ASTvar($3, $1);
+        AddLocToNode($$, &@1, &@1);
       }
       | ID
       {

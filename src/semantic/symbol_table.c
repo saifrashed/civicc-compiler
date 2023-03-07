@@ -2,53 +2,86 @@
  * @file
  *
  * This file contains the code for the SymbolTable traversal.
- * The traversal has the uid: CST
+ * The traversal has the uid: ST
  *
  *
  */
 
 #include <stdio.h>
-
 #include "ccn/ccn.h"
 #include "ccngen/ast.h"
+#include "ccngen/trav_data.h"
+
+void STinit() { return; }
+void STfini() { return; }
 
 /**
- * @fn CSTprogram
+ * @fn STprogram
  */
-node_st *CSTprogram(node_st *node)
+node_st *STprogram(node_st *node)
 {
-    printf("Program \n");
+    printf("STprogram \n");
 
     return node;
 }
 
 /**
- * @fn CSTprogram
+ * @fn STglobdef
  */
-node_st *CSTvardecl(node_st *node)
+node_st *STglobdef(node_st *node)
 {
-    printf("Vardecl \n");
+    printf("STglobdef \n");
 
     return node;
 }
 
 /**
- * @fn CSTprogram
+ * @fn STglobdecl
  */
-node_st *CSTvar(node_st *node)
+node_st *STglobdecl(node_st *node)
 {
-    printf("Var \n");
+    printf("STglobdecl \n");
 
     return node;
 }
 
 /**
- * @fn CSTprogram
+ * @fn STfundef
  */
-node_st *CSTvarlet(node_st *node)
+node_st *STfundef(node_st *node)
+{
+    printf("STfundef \n");
+
+    return node;
+}
+
+/**
+ * @fn STvardecl
+ */
+node_st *STvardecl(node_st *node)
+{
+    printf("STvardecl \n");
+
+    return node;
+}
+
+/**
+ * @fn STvar
+ */
+node_st *STvar(node_st *node)
+{
+    printf("STvar \n");
+
+    return node;
+}
+
+/**
+ * @fn STvarlet
+ */
+node_st *STvarlet(node_st *node)
 {
 
-    printf("VarLet \n");
+    printf("STvarlet \n");
 
     return node;
 }
