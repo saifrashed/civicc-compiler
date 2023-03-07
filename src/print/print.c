@@ -413,7 +413,7 @@ node_st *PRTfundef(node_st *node)
 node_st *PRTfunbody(node_st *node)
 {
 
-  printf(" {");
+  printf("\n%s{", getTabs());
 
   indent++;
 
@@ -494,10 +494,21 @@ node_st *PRTdowhile(node_st *node)
  */
 node_st *PRTfor(node_st *node)
 {
+  char *tmp = NULL;
+
+  if (NODE_TYPE(FOR_START_EXPR(node)) == NT_FLOAT)
+  {
+    tmp = "float";
+  }
+
+  if (NODE_TYPE(FOR_START_EXPR(node)) == NT_NUM)
+  {
+    tmp = "int";
+  }
 
   printf("\n%sfor(", getTabs());
 
-  printf("%s = ", FOR_VAR(node));
+  printf("%s %s = ", tmp, FOR_VAR(node));
 
   TRAVstart_expr(node);
 

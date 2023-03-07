@@ -1,6 +1,6 @@
 start phase EntryPoint {
     info = "Denotes the entry point of your compiler",
-    
+
     actions {
         pass SPdoScanParse;
         Semantic;
@@ -16,7 +16,7 @@ traversal Print {
 /*** Semantic phase ***/
 
 phase Semantic {
-    actions { 
+    actions {
         traversal SymbolTable {
             uid = CST,
             nodes = {Program, VarDecl, Var, VarLet}
@@ -47,7 +47,6 @@ enum BinOpEnum {
         and, or
     }
 };
-
 
 nodeset Constants = {Float, Bool, Num};
 
@@ -128,7 +127,7 @@ node FunCall {
 node Cast {
     children {
         Expr expr {constructor, mandatory }
-    }, 
+    },
     attributes {
         Type type {constructor}
     }
@@ -191,7 +190,7 @@ node For {
         Stmts block { constructor }
     },
 
-    attributes { 
+    attributes {
         string var { constructor }
     }
 };
@@ -263,7 +262,7 @@ node Binop {
     children {
         Expr left { constructor, mandatory },
         Expr right { constructor, mandatory }
-    }, 
+    },
 
     attributes {
         BinOpEnum op { constructor }
@@ -283,7 +282,7 @@ node Monop {
 node VarLet {
     children {
         Exprs indices { constructor }
-    }, 
+    },
 
     attributes {
         string name { constructor },
@@ -294,7 +293,7 @@ node VarLet {
 node Var {
     children {
         Exprs indices { constructor }
-    }, 
+    },
 
     attributes {
         string name { constructor },

@@ -17,7 +17,6 @@
  */
 node_st *CSTprogram(node_st *node)
 {
-
     printf("Program \n");
 
     return node;
