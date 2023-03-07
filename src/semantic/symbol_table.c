@@ -22,6 +22,8 @@ node_st *STprogram(node_st *node)
 {
     printf("STprogram \n");
 
+    TRAVchildren(node);
+
     return node;
 }
 
@@ -31,6 +33,8 @@ node_st *STprogram(node_st *node)
 node_st *STglobdef(node_st *node)
 {
     printf("STglobdef \n");
+
+    TRAVchildren(node);
 
     return node;
 }
@@ -42,6 +46,8 @@ node_st *STglobdecl(node_st *node)
 {
     printf("STglobdecl \n");
 
+    TRAVchildren(node);
+
     return node;
 }
 
@@ -51,6 +57,20 @@ node_st *STglobdecl(node_st *node)
 node_st *STfundef(node_st *node)
 {
     printf("STfundef \n");
+
+    TRAVchildren(node);
+
+    return node;
+}
+
+/**
+ * @fn STparam
+ */
+node_st *STparam(node_st *node)
+{
+    printf("STparam \n");
+
+    TRAVchildren(node);
 
     return node;
 }
@@ -62,6 +82,8 @@ node_st *STvardecl(node_st *node)
 {
     printf("STvardecl \n");
 
+    TRAVchildren(node);
+
     return node;
 }
 
@@ -72,6 +94,8 @@ node_st *STvar(node_st *node)
 {
     printf("STvar \n");
 
+    TRAVchildren(node);
+
     return node;
 }
 
@@ -80,8 +104,9 @@ node_st *STvar(node_st *node)
  */
 node_st *STvarlet(node_st *node)
 {
-
     printf("STvarlet \n");
+
+    TRAVchildren(node);
 
     return node;
 }

@@ -19,7 +19,7 @@ phase Semantic {
     actions {
         traversal SymbolTable {
             uid = ST,
-            nodes = {Program, GlobDef, GlobDecl, FunDef, VarDecl, Var, VarLet},
+            nodes = {Program, GlobDef, GlobDecl, FunDef, Param, VarDecl, Var, VarLet},
             travdata {
                 user node_ptr st_stack
             }
