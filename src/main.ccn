@@ -19,9 +19,9 @@ phase Semantic {
     actions {
         traversal SymbolTable {
             uid = ST,
-            nodes = {Program, GlobDef, GlobDecl, FunDef, Param, VarDecl, Var, VarLet},
+            nodes = {Program, GlobDef, GlobDecl, FunDef, Param, VarDecl, Funcall, Var, VarLet, Ids},
             travdata {
-                user node_ptr st_stack
+                user node_ptr current_scope
             }
         };
     }
@@ -73,6 +73,9 @@ root node Program {
     children {
         Decl decl { constructor, mandatory },
         Decls next { constructor }
+    },
+     attributes {
+        Symtbl symtbl
     }
 };
 
@@ -151,7 +154,8 @@ node FunDef {
     attributes {
         Type type { constructor },
         string name { constructor, mandatory },
-        bool export { constructor }
+        bool export { constructor },
+        Symtbl symtbl
     }
 };
 
@@ -199,7 +203,8 @@ node For {
 
 node GlobDecl {
     children {
-        Ids dims { constructor }
+        Ids dims { constructor },
+        Ste head
     },
     attributes {
         Type type { constructor },
@@ -314,13 +319,20 @@ node Bool {
     }
 };
 
+
+node Symtbl {
+    children {
+        Symtbl parent { constructor },
+        Ste head { constructor }
+    }
+};
+
 node Ste {
     children {
-        Ste parent,
         Ste next { constructor }
     },
     attributes {
         string name { constructor, mandatory },
         Link decl
     }
-}
+};

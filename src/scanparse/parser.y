@@ -81,9 +81,9 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
 %%
 
-program: decls
+program: decl decls
          {
-           parseresult = $1;
+           parseresult = ASTprogram($1, $2);
          }
          ;
 

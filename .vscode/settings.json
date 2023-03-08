@@ -3,6 +3,11 @@
         "trav_data.h": "c",
         "ast.h": "c",
         "__node_handle": "c",
-        "random": "c"
+        "random": "c",
+        "typeinfo": "c",
+        "typeindex": "c",
+        "ccn_defs.h": "c",
+        "ccn_types.h": "c",
+        "__locale": "c"
     }
 }

@@ -36,6 +36,12 @@ char *getTabs()
  */
 node_st *PRTprogram(node_st *node)
 {
+
+  TRAVdo(PROGRAM_SYMTBL(node)); // Taverse symbol table for programs
+
+  TRAVdecl(node);
+  TRAVnext(node);
+
   return node;
 }
 
@@ -344,7 +350,6 @@ node_st *PRTfundefs(node_st *node)
  */
 node_st *PRTfundef(node_st *node)
 {
-
   if (FUNDEF_BODY(node) != NULL)
   {
     printf("\n");
@@ -403,6 +408,9 @@ node_st *PRTfundef(node_st *node)
   {
     printf(";");
   }
+
+  if (FUNDEF_SYMTBL(node) != NULL)
+    TRAVdo(FUNDEF_SYMTBL(node)); // Taverse symbol table for fundefs
 
   return node;
 }
@@ -748,6 +756,15 @@ node_st *PRTmonop(node_st *node)
 
   TRAVoperand(node);
 
+  return node;
+}
+
+/**
+ * @fn PRTsymtbl
+ */
+node_st *PRTsymtbl(node_st *node)
+{
+  printf("\n%s**SYMBOL TABLE**", getTabs());
   return node;
 }
 
