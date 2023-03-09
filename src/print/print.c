@@ -513,12 +513,6 @@ node_st *PRTfor(node_st *node)
 
   printf("\n%sfor(", getTabs());
 
-  printf("%s = ", FOR_VAR(node));
-
-  TRAVstart_expr(node);
-
-  printf(", ");
-
   TRAVstop(node);
 
   if (FOR_STEP(node) != NULL)
@@ -768,7 +762,7 @@ node_st *PRTsymtbl(node_st *node)
     TRAVdo(SYMTBL_HEAD(node)); // Taverse symbol table for programs
   }
 
-  printf("\n%s**END SYMBOL TABLE**", getTabs());
+  printf("\n%s**END SYMBOL TABLE** \n\n", getTabs());
 
   return node;
 }

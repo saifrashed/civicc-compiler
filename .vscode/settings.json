@@ -12,6 +12,9 @@
         "cstring": "c",
         "enum.h": "c",
         "trav.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "queue": "c",
+        "stack": "c",
+        "str.h": "c"
     }
 }

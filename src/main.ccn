@@ -18,16 +18,18 @@ phase ContextAnalysis {
     actions {
         traversal SymbolTable {
             uid = ST,
-            nodes = {Program, GlobDef, GlobDecl, FunDef, Param, VarDecl, Funcall, Var, VarLet, Ids},
+            nodes = {Program, GlobDef, GlobDecl, FunDef, Param, VarDecl, Ids},
             travdata {
                 user node_ptr current_scope
             }
         };
          traversal InductionRemoval {
             uid = IR,
-            nodes = {Fundef, For},
+            nodes = {Program, Fundef, For, Var, VarLet},
             travdata {
-                user node_ptr current_scope
+                user node_ptr current_scope,
+                string search,
+                string suffix
             }
         };
           traversal FunctionOverloading {
@@ -342,7 +344,7 @@ node Bool {
 
 node Symtbl {
     children {
-        Symtbl parent { constructor },
+        Symtbl outer { constructor },
         Ste head { constructor }
     }
 };

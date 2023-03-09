@@ -22,7 +22,7 @@ void STfini() { return; }
  * This function takes a declaration and traverses it's STE nodes and attaches the new node to the tail.
  * This function returns the node if storing has succeeded and returns NULL if this has failed.
  **/
-node_st *store(node_st *symtbl, char *identifier, node_st *link)
+node_st *STstore(node_st *symtbl, char *identifier, node_st *link)
 {
     if (!symtbl || !identifier || !link)
     { // check for null pointers
@@ -79,12 +79,12 @@ node_st *STfundef(node_st *node)
     if (outer_type == NT_PROGRAM)
     {
         FUNDEF_SYMTBL(node) = ASTsymtbl(PROGRAM_SYMTBL(outer), NULL);
-        store(PROGRAM_SYMTBL(outer), FUNDEF_NAME(node), node);
+        STstore(PROGRAM_SYMTBL(outer), FUNDEF_NAME(node), node);
     }
     else if (outer_type == NT_FUNDEF)
     {
         FUNDEF_SYMTBL(node) = ASTsymtbl(FUNDEF_SYMTBL(outer), NULL);
-        store(FUNDEF_SYMTBL(outer), FUNDEF_NAME(node), node);
+        STstore(FUNDEF_SYMTBL(outer), FUNDEF_NAME(node), node);
     }
 
     // Set this node as the current scope
@@ -113,7 +113,7 @@ node_st *STglobdecl(node_st *node)
 
     node_st *outer = data->current_scope; // we get the current scope.
 
-    store(PROGRAM_SYMTBL(outer), GLOBDECL_NAME(node), node);
+    STstore(PROGRAM_SYMTBL(outer), GLOBDECL_NAME(node), node);
 
     printf("STglobdef \n");
 
@@ -132,7 +132,7 @@ node_st *STglobdef(node_st *node)
 
     node_st *outer = data->current_scope; // we get the current scope.
 
-    store(PROGRAM_SYMTBL(outer), GLOBDEF_NAME(node), node);
+    STstore(PROGRAM_SYMTBL(outer), GLOBDEF_NAME(node), node);
 
     printf("STglobdef \n");
 
@@ -150,7 +150,7 @@ node_st *STvardecl(node_st *node)
 
     node_st *outer = data->current_scope; // we get the current scope.
 
-    store(FUNDEF_SYMTBL(outer), VARDECL_NAME(node), node);
+    STstore(FUNDEF_SYMTBL(outer), VARDECL_NAME(node), node);
 
     printf("STvardecl \n");
 
@@ -172,7 +172,7 @@ node_st *STparam(node_st *node)
 
     TRAVchildren(node); // We first traverse possible dimensions
 
-    store(FUNDEF_SYMTBL(outer), PARAM_NAME(node), node);
+    STstore(FUNDEF_SYMTBL(outer), PARAM_NAME(node), node);
 
     return node;
 }
@@ -186,7 +186,7 @@ node_st *STids(node_st *node)
 
     node_st *outer = data->current_scope; // we get the current scope.
 
-    store(FUNDEF_SYMTBL(outer), IDS_NAME(node), node);
+    STstore(FUNDEF_SYMTBL(outer), IDS_NAME(node), node);
 
     printf("STids \n");
 

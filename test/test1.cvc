@@ -16,9 +16,15 @@ void scan_vector(float [m] a)
 void scan_matrix(float [m,n] a)
 {
     for (int i = 0, m) {
+        b = i;
+    }
+
     for (int j = 0, n) {
         a[i,j] = scanFloat();
     }
+
+    for (int x = 0, n) {
+        a[j,j] = scanFloat();
     }
 }
 
@@ -37,23 +43,6 @@ export int main()
     void do_matrix()
     {
     float [m,n] M;
-
-    scan_matrix(M);
-    }
-
-    void do_matrix()
-    {
-    float [m,n] M;
-    float [m,n] C;
-
-
-    void do_matrix()
-    {
-    float [m,n] M;
-    float [m,n] C;
-
-    scan_matrix(M);
-    }
 
     scan_matrix(M);
     }
