@@ -251,7 +251,15 @@ node_st *PRTarrexpr(node_st *node)
  */
 node_st *PRTids(node_st *node)
 {
-  printf("%s", IDS_NAME(node));
+
+  if (IDS_NEXT(node) != NULL)
+  {
+    printf("%s, ", IDS_NAME(node));
+  }
+  else
+  {
+    printf("%s", IDS_NAME(node));
+  }
 
   TRAVnext(node);
   return node;
@@ -502,21 +510,10 @@ node_st *PRTdowhile(node_st *node)
  */
 node_st *PRTfor(node_st *node)
 {
-  char *tmp = NULL;
-
-  if (NODE_TYPE(FOR_START_EXPR(node)) == NT_FLOAT)
-  {
-    tmp = "float";
-  }
-
-  if (NODE_TYPE(FOR_START_EXPR(node)) == NT_NUM)
-  {
-    tmp = "int";
-  }
 
   printf("\n%sfor(", getTabs());
 
-  printf("%s %s = ", tmp, FOR_VAR(node));
+  printf("%s = ", FOR_VAR(node));
 
   TRAVstart_expr(node);
 
@@ -765,6 +762,14 @@ node_st *PRTmonop(node_st *node)
 node_st *PRTsymtbl(node_st *node)
 {
   printf("\n%s**SYMBOL TABLE**", getTabs());
+
+  if (SYMTBL_HEAD(node) != NULL)
+  {
+    TRAVdo(SYMTBL_HEAD(node)); // Taverse symbol table for programs
+  }
+
+  printf("\n%s**END SYMBOL TABLE**", getTabs());
+
   return node;
 }
 
@@ -773,5 +778,10 @@ node_st *PRTsymtbl(node_st *node)
  */
 node_st *PRTste(node_st *node)
 {
+
+  printf("\n%s%s", getTabs(), STE_NAME(node));
+
+  TRAVnext(node);
+
   return node;
 }

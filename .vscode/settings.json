@@ -8,6 +8,10 @@
         "typeindex": "c",
         "ccn_defs.h": "c",
         "ccn_types.h": "c",
-        "__locale": "c"
+        "__locale": "c",
+        "cstring": "c",
+        "enum.h": "c",
+        "trav.h": "c",
+        "stdio.h": "c"
     }
 }

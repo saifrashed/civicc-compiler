@@ -3,7 +3,7 @@ start phase EntryPoint {
 
     actions {
         pass SPdoScanParse;
-        Semantic;
+        ContextAnalysis;
         Print;
     }
 };
@@ -12,14 +12,34 @@ traversal Print {
     uid = PRT
 };
 
-
 /*** Semantic phase ***/
 
-phase Semantic {
+phase ContextAnalysis {
     actions {
         traversal SymbolTable {
             uid = ST,
             nodes = {Program, GlobDef, GlobDecl, FunDef, Param, VarDecl, Funcall, Var, VarLet, Ids},
+            travdata {
+                user node_ptr current_scope
+            }
+        };
+         traversal InductionRemoval {
+            uid = IR,
+            nodes = {Fundef, For},
+            travdata {
+                user node_ptr current_scope
+            }
+        };
+          traversal FunctionOverloading {
+            uid = FO,
+            nodes = {FunDef},
+            travdata {
+                user node_ptr current_scope
+            }
+        };
+          traversal LamdaLifting {
+            uid = LL,
+            nodes = {FunDef},
             travdata {
                 user node_ptr current_scope
             }
@@ -191,7 +211,7 @@ node DoWhile {
 
 node For {
     children {
-        Expr start_expr { constructor, mandatory },
+        Expr start_expr { constructor },
         Expr stop { constructor, mandatory },
         Expr step { constructor },
         Stmts block { constructor }
@@ -333,6 +353,6 @@ node Ste {
     },
     attributes {
         string name { constructor, mandatory },
-        Link decl
+        Link decl {constructor, mandatory}
     }
 };
