@@ -39,7 +39,6 @@ node_st *PRTprogram(node_st *node)
 
   TRAVdo(PROGRAM_SYMTBL(node)); // Taverse symbol table for programs
 
-  TRAVdecl(node);
   TRAVnext(node);
 
   return node;
@@ -755,14 +754,22 @@ node_st *PRTmonop(node_st *node)
  */
 node_st *PRTsymtbl(node_st *node)
 {
-  printf("\n%s**SYMBOL TABLE**", getTabs());
+
+  if (SYMTBL_OUTER(node) == NULL)
+  {
+    printf("\n%s****************************** GLOBAL SYMBOL TABLE ******************************", getTabs());
+  }
+  else
+  {
+    printf("\n%s****************************** START SYMBOL TABLE ******************************", getTabs());
+  }
 
   if (SYMTBL_HEAD(node) != NULL)
   {
     TRAVdo(SYMTBL_HEAD(node)); // Taverse symbol table for programs
   }
 
-  printf("\n%s**END SYMBOL TABLE** \n\n", getTabs());
+  printf("\n%s****************************** END SYMBOL TABLE ******************************** \n\n", getTabs());
 
   return node;
 }
@@ -773,7 +780,27 @@ node_st *PRTsymtbl(node_st *node)
 node_st *PRTste(node_st *node)
 {
 
-  printf("\n%s%s", getTabs(), STE_NAME(node));
+  char *tmp = NULL;
+
+  switch (STE_TYPE(node))
+  {
+  case CT_bool:
+    tmp = "bool";
+    break;
+  case CT_float:
+    tmp = "float";
+    break;
+  case CT_int:
+    tmp = "int";
+    break;
+  case CT_void:
+    tmp = "void";
+    break;
+  case CT_NULL:
+    DBUG_ASSERT(false, "unknown type detected!");
+  }
+
+  printf("\n%s%s (%s)", getTabs(), STE_NAME(node), tmp);
 
   TRAVnext(node);
 

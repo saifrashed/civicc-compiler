@@ -81,17 +81,15 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
 %%
 
-program: decl decls
+program: decls
          {
-           parseresult = ASTprogram($1, $2);
-         }
-         ;
+           parseresult = ASTprogram($1);
+         };
 
 
 /*************************************
   TOP LEVEL DECLARATIONS & DEFINITIONS
 *************************************/
-
 
 decls: decl decls
         {

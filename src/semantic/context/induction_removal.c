@@ -25,7 +25,7 @@ void IRfini() { return; }
  * This function takes a declaration and traverses it's STE nodes and attaches the new node to the tail.
  * This function returns the node if storing has succeeded and returns NULL if this has failed.
  **/
-node_st *IRstore(node_st *symtbl, char *identifier, node_st *link)
+node_st *IRstore(node_st *symtbl, char *identifier, enum Type type, node_st *link)
 {
     if (!symtbl || !identifier || !link)
     { // check for null pointers
@@ -42,28 +42,32 @@ node_st *IRstore(node_st *symtbl, char *identifier, node_st *link)
     }
     else
     { // otherwise, set the head
-        SYMTBL_HEAD(symtbl) = ASTste(NULL, identifier, link);
+        SYMTBL_HEAD(symtbl) = ASTste(NULL, identifier, type, link);
         return symtbl;
     }
 
-    STE_NEXT(tail) = ASTste(NULL, identifier, link); // add new entry to the tail
+    STE_NEXT(tail) = ASTste(NULL, identifier, type, link); // add new entry to the tail
     return symtbl;
 }
 
-char *rand_string(size_t size)
+/**
+ * Generates a unique suffix.
+ * the probability of a collision is approximately 5.5*10^-15 or 0.000000000000055%.
+ **/
+char *IRrandsuffix(size_t size)
 {
-    char *newstr = malloc(size + 1); // Allocate memory for the new string
-    const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJK123456789";
+    char *newstr = malloc(size + 11); // Allocate memory for the new string
+    const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
     if (newstr)
     {
         newstr[0] = '_'; // Set the first character to '_'
 
-        for (size_t n = 1; n < size; n++)
+        for (size_t n = 1; n < size + 10; n++)
         {
             int key = rand() % (int)(sizeof charset - 1);
             newstr[n] = charset[key];
         }
-        newstr[size + 1] = '\0';
+        newstr[size + 10] = '\0';
     }
     return newstr;
 }
@@ -112,7 +116,7 @@ node_st *IRfor(node_st *node)
     node_st *outer_scope = data->current_scope;
 
     // Generate unique suffix for variable name
-    char *suffix = rand_string(10);
+    char *suffix = IRrandsuffix(10);
 
     // Create variable declaration for induction variable, if present
     char *name = FOR_VAR(node);
@@ -139,11 +143,11 @@ node_st *IRfor(node_st *node)
         }
 
         // Store new declaration in symbol table for outer function
-        IRstore(FUNDEF_SYMTBL(outer_scope), new_name, new_decl);
+        IRstore(FUNDEF_SYMTBL(outer_scope), new_name, VARDECL_TYPE(new_decl), new_decl);
     }
 
     // Traverse block inside loop if search and replace operation is still ongoing
-    if (data->search != NULL)
+    if (data->search != NULL && strcmp(data->search, FOR_VAR(node)) != 0) // if var names are the same new variable overshadows previous one
     {
         TRAVdo(FOR_BLOCK(node));
     }
