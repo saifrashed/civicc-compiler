@@ -148,3 +148,52 @@ node_st *LLfundef(node_st *node)
 // }
 
 //  node_st *result = lookup(PROGRAM_SYMTBL(outer), FUNDEF_NAME(node)); // We search for an occurance.
+
+// /**
+//  * Generates a signature for a given function for the context analysis.
+//  * The function takes a fundef node and infers the type, number of parameters and parameter types
+//  * to generate a function name like funtype_funname_arity.
+//  **/
+// char *FOgeneratesignature(node_st *fundef)
+// {
+//     char *signature = STRcpy(FUNDEF_NAME(fundef)); // First we copy the string in memory
+
+//     if (FUNDEF_PARAMS(fundef) != NULL) // We check if there are any parameters
+//     {
+//         node_st *param = FUNDEF_PARAMS(fundef);
+
+//         while (param != NULL) // While there are parameters we append to our signature string.
+//         {
+//             char *tmp = NULL;
+
+//             switch (PARAM_TYPE(param))
+//             {
+//             case CT_bool:
+//                 tmp = "bool";
+//                 break;
+//             case CT_float:
+//                 tmp = "float";
+//                 break;
+//             case CT_int:
+//                 tmp = "int";
+//                 break;
+//             case CT_void:
+//                 tmp = "void";
+//                 break;
+//             case CT_NULL:
+//                 DBUG_ASSERT(false, "unknown type detected!");
+//             }
+
+//             if (PARAM_DIMS(param) != NULL)
+//             {
+//                 tmp = STRcat(tmp, "arr");
+//             }
+
+//             signature = STRcat(signature, "_");
+//             signature = STRcat(signature, tmp);
+//             param = PARAM_NEXT(param);
+//         }
+//     }
+
+//     return signature;
+// }

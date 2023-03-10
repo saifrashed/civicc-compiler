@@ -301,6 +301,7 @@ funbody: CURLYBRACKET_L vardecls CURLYBRACKET_R
 funcall: ID ROUNDBRACKET_L args_opt ROUNDBRACKET_R  // example: foo(5, 3);
         {
           $$ = ASTfuncall($3, $1);
+          AddLocToNode($$, &@1, &@1);
         };
 
 
@@ -485,6 +486,7 @@ varlet: ID
         | ID SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R
         {
           $$ = ASTvarlet($3, $1);
+          AddLocToNode($$, &@1, &@1);
         };
 
 
@@ -504,6 +506,7 @@ expr:  ROUNDBRACKET_L expr ROUNDBRACKET_R
       | ID
       {
         $$ = ASTvar(NULL, $1);
+        AddLocToNode($$, &@1, &@1);
       }
       | cast
       {
@@ -661,8 +664,8 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc)
 
 static int yyerror( char *error)
 {
-  CTI(CTI_ERROR, true, "line %d, col %d\nError parsing source code: %s\n",
-            global.line, global.col, error);
+  CTI(CTI_ERROR, true, "\n%s at '%s' see: line: %d col: %d\n",
+             error, yylval, global.line, global.col);
   CTIabortOnError();
   return( 0);
 }

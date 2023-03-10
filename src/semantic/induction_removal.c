@@ -3,8 +3,6 @@
  *
  * This file contains the code for the InductionRemoval traversal.
  * The traversal has the uid: IR
- *
- *
  */
 
 #include <stdio.h>

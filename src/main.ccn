@@ -32,9 +32,9 @@ phase ContextAnalysis {
                 string suffix
             }
         };
-          traversal FunctionOverloading {
-            uid = FO,
-            nodes = {FunDef, FunCall},
+          traversal NameBinding {
+            uid = NB,
+            nodes = {Program, Fundef, VarLet, Var, FunCall},
             travdata {
                 user node_ptr current_scope
             }

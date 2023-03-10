@@ -802,6 +802,38 @@ node_st *PRTste(node_st *node)
 
   printf("\n%s%s (%s)", getTabs(), STE_NAME(node), tmp);
 
+  if (NODE_TYPE(STE_DECL(node)) == NT_FUNDEF)
+  {
+    printf(" (");
+
+    node_st *tmp = FUNDEF_PARAMS(STE_DECL(node));
+
+    while (tmp != NULL && PARAM_NEXT(tmp) != NULL)
+    {
+      switch (PARAM_TYPE(tmp))
+      {
+      case CT_bool:
+        printf("bool ");
+        break;
+      case CT_float:
+        printf("float ");
+        break;
+      case CT_int:
+        printf("int ");
+        break;
+      case CT_void:
+        printf("void ");
+        break;
+      case CT_NULL:
+        DBUG_ASSERT(false, "unknown unary detected!");
+      }
+
+      tmp = PARAM_NEXT(tmp);
+    }
+
+    printf(")");
+  }
+
   TRAVnext(node);
 
   return node;

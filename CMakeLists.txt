@@ -35,10 +35,10 @@ add_executable(civicc ${FLEX_CivicLexer_OUTPUTS} ${BISON_CivicParser_OUTPUTS}
     src/global/globals.h
 
     # Youre free to remove the demo directory and these entries.
-    src/semantic/context/symbol_table.c
-    src/semantic/context/induction_removal.c
-    src/semantic/context/function_overloading.c
-    src/semantic/context/lamda_lifting.c
+    src/semantic/symbol_table.c
+    src/semantic/induction_removal.c
+    src/semantic/name_binding.c
+    src/semantic/lamda_lifting.c
 
 )
 
