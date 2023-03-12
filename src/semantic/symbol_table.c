@@ -22,6 +22,30 @@
 void STinit() { return; }
 void STfini() { return; }
 
+char *STgeneratesignature(node_st *fundef)
+{
+    char *signature = STRcpy(FUNDEF_NAME(fundef)); // First we copy the string in memory
+    int count = 0;                                 // Initialize a counter variable
+
+    if (FUNDEF_PARAMS(fundef) != NULL) // We check if there are any parameters
+    {
+        node_st *param = FUNDEF_PARAMS(fundef);
+
+        while (param != NULL) // While there are parameters we increment our counter.
+        {
+            count++;
+            param = PARAM_NEXT(param);
+        }
+    }
+
+    // Append the counter value to the signature string
+    char count_str[10];
+    snprintf(count_str, 10, "_%d", count);
+    signature = STRcat(signature, count_str);
+
+    return signature;
+}
+
 /**
  * Searches the specified symbol table for an identifier and returns its corresponding
  * symbol table entry (STE) if found. If the identifier is not found, returns NULL.
@@ -99,7 +123,11 @@ node_st *STprogram(node_st *node)
 
     data->current_scope = node;
 
-    PROGRAM_SYMTBL(node) = ASTsymtbl(NULL, NULL); // Create a blank symbol table for global scope.
+    node_st *init = ASTfundef(NULL, NULL, CT_void, "__init", false);
+
+    FUNDEF_SYMTBL(init) = ASTsymtbl(NULL, NULL);
+
+    PROGRAM_SYMTBL(node) = ASTsymtbl(NULL, init); // Create a blank symbol table with a init fundef for global scope.
 
     TRAVchildren(node);
 
@@ -123,14 +151,14 @@ node_st *STfundef(node_st *node)
     // Create a new symbol table for the node
     if (outer_type == NT_PROGRAM)
     {
-
         FUNDEF_SYMTBL(node) = ASTsymtbl(PROGRAM_SYMTBL(outer), NULL);
 
-        node_st *entry = STlookup(PROGRAM_SYMTBL(outer), FUNDEF_NAME(node));
+        char *signature = STgeneratesignature(node);
+        node_st *entry = STlookup(PROGRAM_SYMTBL(outer), signature);
 
         if (entry == NULL)
         {
-            STstore(PROGRAM_SYMTBL(outer), FUNDEF_NAME(node), FUNDEF_TYPE(node), node);
+            STstore(PROGRAM_SYMTBL(outer), signature, FUNDEF_TYPE(node), node);
         }
 
         if (entry != NULL)
@@ -143,11 +171,12 @@ node_st *STfundef(node_st *node)
     {
         FUNDEF_SYMTBL(node) = ASTsymtbl(FUNDEF_SYMTBL(outer), NULL);
 
-        node_st *entry = STlookup(FUNDEF_SYMTBL(outer), FUNDEF_NAME(node));
+        char *signature = STgeneratesignature(node);
+        node_st *entry = STlookup(FUNDEF_SYMTBL(outer), signature);
 
         if (entry == NULL)
         {
-            STstore(FUNDEF_SYMTBL(outer), FUNDEF_NAME(node), FUNDEF_TYPE(node), node);
+            STstore(FUNDEF_SYMTBL(outer), signature, FUNDEF_TYPE(node), node);
         }
 
         if (entry != NULL)
@@ -267,9 +296,9 @@ node_st *STparam(node_st *node)
 
     node_st *outer = data->current_scope; // we get the current scope.
 
-    node_st *entry = STlookup(FUNDEF_SYMTBL(outer), PARAM_NAME(node));
+    TRAVdims(node); // We first traverse possible  dimensions
 
-    TRAVdims(node); // We first traverse possible dimensions
+    node_st *entry = STlookup(FUNDEF_SYMTBL(outer), PARAM_NAME(node));
 
     if (entry == NULL)
     {
@@ -333,58 +362,3 @@ node_st *STids(node_st *node)
 
     return node;
 }
-
-// /**
-//  * Generates a unique function signature based on a given function definition node and its parameters.
-//  * The function infers the return type, name, and number of parameters of the function to create a
-//  * signature with the format funtype_funname_arity. The signature is used to distinguish the function
-//  * from others with the same name but different types or parameters.
-//  *
-//  * @param fundef A pointer to a fundef node representing the function definition.
-//  *
-//  * @return A pointer to a string containing the function signature, or NULL if the signature cannot be generated.
-//  **/
-
-// char *STgeneratesignature(node_st *fundef)
-// {
-//     char *signature = STRcpy(FUNDEF_NAME(fundef)); // First we copy the string in memory
-
-//     if (FUNDEF_PARAMS(fundef) != NULL) // We check if there are any parameters
-//     {
-//         node_st *param = FUNDEF_PARAMS(fundef);
-
-//         while (param != NULL) // While there are parameters we append to our signature string.
-//         {
-//             char *tmp = NULL;
-
-//             switch (PARAM_TYPE(param))
-//             {
-//             case CT_bool:
-//                 tmp = "bool";
-//                 break;
-//             case CT_float:
-//                 tmp = "float";
-//                 break;
-//             case CT_int:
-//                 tmp = "int";
-//                 break;
-//             case CT_void:
-//                 tmp = "void";
-//                 break;
-//             case CT_NULL:
-//                 DBUG_ASSERT(false, "unknown type detected!");
-//             }
-
-//             if (PARAM_DIMS(param) != NULL)
-//             {
-//                 tmp = STRcat(tmp, "arr");
-//             }
-
-//             signature = STRcat(signature, "_");
-//             signature = STRcat(signature, tmp);
-//             param = PARAM_NEXT(param);
-//         }
-//     }
-
-//     return signature;
-// }

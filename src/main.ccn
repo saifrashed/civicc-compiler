@@ -39,11 +39,11 @@ phase ContextAnalysis {
                 user node_ptr current_scope
             }
         };
-        traversal LamdaLifting {
-            uid = LL,
-            nodes = {FunDef},
+        traversal TypeChecker {
+            uid = TC,
+            nodes = {Assign, IfElse, While, DoWhile, For, Return, Cast, FunCall, Var, ArrExpr, Binop, Monop, Float, Bool, Num},
             travdata {
-                user node_ptr current_scope
+                Type inferred
             }
         };
     }

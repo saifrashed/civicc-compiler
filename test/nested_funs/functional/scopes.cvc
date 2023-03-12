@@ -6,7 +6,6 @@ extern void printInt(int val);
 extern void printSpaces(int num);
 extern void printNewlines(int num);
 
-
 export int main()
 {
     // this variable will be escaped below

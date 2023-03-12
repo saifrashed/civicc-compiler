@@ -38,8 +38,7 @@ add_executable(civicc ${FLEX_CivicLexer_OUTPUTS} ${BISON_CivicParser_OUTPUTS}
     src/semantic/symbol_table.c
     src/semantic/induction_removal.c
     src/semantic/name_binding.c
-    src/semantic/lamda_lifting.c
-
+    src/semantic/type_checker.c
 )
 
 target_compile_options(civicc PRIVATE

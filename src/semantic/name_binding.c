@@ -23,6 +23,29 @@
 void NBinit() { return; }
 void NBfini() { return; }
 
+char *NBgeneratesignature(node_st *funcall, node_st *symtbl)
+{
+    char *signature = STRcpy(FUNCALL_NAME(funcall));
+    int count = 0; // Initialize a counter variable
+
+    if (FUNCALL_ARGS(funcall) != NULL)
+    {
+        node_st *arg = FUNCALL_ARGS(funcall);
+        while (arg != NULL)
+        {
+            count++; // Increment the counter
+            arg = EXPRS_NEXT(arg);
+        }
+    }
+
+    // Append the counter value to the signature string
+    char count_str[10];
+    snprintf(count_str, 10, "_%d", count);
+    signature = STRcat(signature, count_str);
+
+    return signature;
+}
+
 /**
  * This function searches all SYMTBL's from inner to outer for an identifier.
  * Returns STE if found.
@@ -160,7 +183,8 @@ node_st *NBfuncall(node_st *node)
 
     node_st *scope = data->current_scope;
 
-    node_st *entry = NBlookup(FUNDEF_SYMTBL(scope), FUNCALL_NAME(node));
+    char *signature = NBgeneratesignature(node, FUNDEF_SYMTBL(scope));
+    node_st *entry = NBlookup(FUNDEF_SYMTBL(scope), signature);
 
     if (entry != NULL)
     {
