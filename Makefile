@@ -1,4 +1,4 @@
-.PHONY: help debug release dist clean deps coconut
+.PHONY: help debug release dist clean deps coconut check
 
 help:
 	@echo "Targets:"
@@ -6,6 +6,14 @@ help:
 	@echo "  release: Generate build artifacts for a release build in build-release"
 	@echo "  dist   : Pack civicc and coconut into a tar.gz file. Use this for creating a submission"
 	@echo "  clean  : Remove all build directories and created dist files"
+
+check: debug
+	@cd test;	\
+		CIVAS=../bin/civas	\
+		CIVVM=../bin/civvm	\
+		CIVCC=../build-debug/civicc	\
+		RUN_FUNCTIONAL=0	\
+		bash run.bash basic nested_funs arrays
 
 coconut:
 	make -C coconut
@@ -23,3 +31,4 @@ dist:
 clean:
 	rm -f *.tar*
 	rm -rf build*/
+

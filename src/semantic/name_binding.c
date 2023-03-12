@@ -177,3 +177,72 @@ node_st *NBfuncall(node_st *node)
 
     return node;
 }
+
+// /**
+//  * Returns the type as a character.
+//  **/
+// char *get_type(node_st *expr, node_st *symtbl)
+// {
+//     // If type is constant
+//     // If type is var (look up in table)
+//     // If type is binop
+//     // if expression has dimensions it an array of certain type
+
+//     char *type = NULL;
+//     switch (NODE_TYPE(expr))
+//     {
+//     case NT_NUM:
+//         type = "int";
+//         break;
+//     case NT_FLOAT:
+//         type = "float";
+//         break;
+//     case NT_BOOL:
+//         type = "bool";
+//         break;
+//     case NT_VAR:
+//         switch (STE_TYPE(NBlookup(symtbl, VAR_NAME(expr))))
+//         {
+//         case CT_bool:
+//             type = "bool";
+//             break;
+//         case CT_float:
+//             type = "float";
+//             break;
+//         case CT_int:
+//             type = "int";
+//             break;
+//         }
+//         break;
+//     }
+//     return type;
+// }
+
+// /**
+//  * Generates a unique function signature based on a given function call and its arguments.
+//  * The function infers the return type, name, and number of parameters of the function to create a
+//  * signature with the format funtype_funname_arity. The signature is used to distinguish the function
+//  * from others with the same name but different types or parameters.
+//  *
+//  * @param funcall A pointer to a funcall node representing the function call.
+//  * @param symtbl A pointer to the symbol table containing information about the function's scope.
+//  *
+//  * @return A pointer to a string containing the function signature, or NULL if the signature cannot be generated.
+//  **/
+
+// char *NBgeneratesignature(node_st *funcall, node_st *symtbl)
+// {
+//     char *signature = STRcpy(FUNCALL_NAME(funcall));
+//     if (FUNCALL_ARGS(funcall) != NULL)
+//     {
+//         node_st *arg = FUNCALL_ARGS(funcall);
+//         while (arg != NULL)
+//         {
+//             char *type = get_type(EXPRS_EXPR(arg), symtbl);
+//             signature = STRcat(signature, "_");
+//             signature = STRcat(signature, type);
+//             arg = EXPRS_NEXT(arg);
+//         }
+//     }
+//     return signature;
+// }

@@ -17,6 +17,9 @@
         "stack": "c",
         "str.h": "c",
         "dbug.h": "c",
-        "ctinfo.h": "c"
+        "ctinfo.h": "c",
+        "regex": "c",
+        "memory": "c",
+        "utility": "c"
     }
 }

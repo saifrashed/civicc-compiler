@@ -20,8 +20,15 @@ void IRinit() { return; }
 void IRfini() { return; }
 
 /**
- * This function takes a declaration and traverses it's STE nodes and attaches the new node to the tail.
- * This function returns the node if storing has succeeded and returns NULL if this has failed.
+ * Adds a new symbol table entry (STE) to the specified symbol table.
+ * The new STE contains information about an identifier, including its type and associated AST node.
+ *
+ * @param symtbl A pointer to the symbol table to add the new STE to.
+ * @param identifier A string containing the identifier for the new STE.
+ * @param type The type of the new STE.
+ * @param link A pointer to the AST node associated with the new STE.
+ *
+ * @return A pointer to the new STE node if storing succeeds, or NULL if storing fails.
  **/
 node_st *IRstore(node_st *symtbl, char *identifier, enum Type type, node_st *link)
 {
@@ -49,8 +56,12 @@ node_st *IRstore(node_st *symtbl, char *identifier, enum Type type, node_st *lin
 }
 
 /**
- * Generates a unique suffix.
- * the probability of a collision is approximately 5.5*10^-15 or 0.000000000000055%.
+ * Generates a random suffix of the specified size.
+ * The probability of a collision with an existing suffix is approximately 5.5*10^-15 or 0.000000000000055%.
+ *
+ * @param size The size of the suffix to generate.
+ *
+ * @return A pointer to a string containing the random suffix.
  **/
 char *IRrandsuffix(size_t size)
 {
@@ -109,61 +120,65 @@ node_st *IRfundef(node_st *node)
  */
 node_st *IRfor(node_st *node)
 {
-    // Get current scope
-    struct data_ir *data = DATA_IR_GET();
-    node_st *outer_scope = data->current_scope;
 
-    // Generate unique suffix for variable name
-    char *suffix = IRrandsuffix(10);
+    TRAVchildren(node); // First traverse inner loops
 
-    // Create variable declaration for induction variable, if present
-    char *name = FOR_VAR(node);
-    node_st *value = FOR_START_EXPR(node);
-    if (name != NULL && value != NULL)
+    if (FOR_START_EXPR(node) != NULL) // If the for variable has not been removed we start the proces for removal.
     {
-        // Create new vardecl node for induction variable
-        char *new_name = STRcat(name, suffix);
-        node_st *new_decl = ASTvardecl(NULL, value, NULL, new_name, CT_int);
 
-        // Add new declaration to end of variable declarations in outer function body
-        node_st *tail = FUNBODY_DECLS(FUNDEF_BODY(outer_scope));
-        if (tail != NULL)
+        // Get current scope
+        struct data_ir *data = DATA_IR_GET();
+
+        printf("IRfor \n");
+
+        node_st *outer_scope = data->current_scope;
+
+        // Generate unique suffix for variable name
+        char *suffix = IRrandsuffix(10);
+
+        // Create variable declaration for induction variable, if present
+        char *name = FOR_VAR(node);
+        node_st *value = FOR_START_EXPR(node);
+        if (name != NULL && value != NULL)
         {
-            while (VARDECL_NEXT(tail))
+            // Create new vardecl node for induction variable
+            char *new_name = STRcat(name, suffix);
+            node_st *new_decl = ASTvardecl(NULL, value, NULL, new_name, CT_int);
+
+            // Add new declaration to end of variable declarations in outer function body
+            node_st *tail = FUNBODY_DECLS(FUNDEF_BODY(outer_scope));
+            if (tail != NULL)
             {
-                tail = VARDECL_NEXT(tail);
+                while (VARDECL_NEXT(tail))
+                {
+                    tail = VARDECL_NEXT(tail);
+                }
+                VARDECL_NEXT(tail) = new_decl;
             }
-            VARDECL_NEXT(tail) = new_decl;
+            else
+            {
+                FUNBODY_DECLS(FUNDEF_BODY(outer_scope)) = new_decl;
+            }
+
+            // Store new declaration in symbol table for outer function
+            IRstore(FUNDEF_SYMTBL(outer_scope), new_name, VARDECL_TYPE(new_decl), new_decl);
         }
-        else
-        {
-            FUNBODY_DECLS(FUNDEF_BODY(outer_scope)) = new_decl;
-        }
 
-        // Store new declaration in symbol table for outer function
-        IRstore(FUNDEF_SYMTBL(outer_scope), new_name, VARDECL_TYPE(new_decl), new_decl);
+        // Set search and suffix members of data_ir to appropriate values
+        data->search = FOR_VAR(node);
+        data->suffix = suffix;
+
+        // Traverse children of input node
+        TRAVchildren(node);
+
+        // Remove start expression and induction variable from input node
+        FOR_START_EXPR(node) = NULL;
+        FOR_VAR(node) = NULL;
+
+        // Reset search and suffix members of data_ir
+        data->search = NULL;
+        data->suffix = NULL;
     }
-
-    // Traverse block inside loop if search and replace operation is still ongoing
-    if (data->search != NULL && strcmp(data->search, FOR_VAR(node)) != 0) // if var names are the same new variable overshadows previous one
-    {
-        TRAVdo(FOR_BLOCK(node));
-    }
-
-    // Set search and suffix members of data_ir to appropriate values
-    data->search = FOR_VAR(node);
-    data->suffix = suffix;
-
-    // Traverse children of input node
-    TRAVchildren(node);
-
-    // Remove start expression and induction variable from input node
-    FOR_START_EXPR(node) = NULL;
-    FOR_VAR(node) = NULL;
-
-    // Reset search and suffix members of data_ir
-    data->search = NULL;
-    data->suffix = NULL;
 
     return node;
 }
@@ -177,6 +192,7 @@ node_st *IRvarlet(node_st *node)
     struct data_ir *data = DATA_IR_GET();
 
     // If identifier matches current induction variable, add suffix to identifier name
+
     if (STReq(VARLET_NAME(node), data->search))
     {
         char *new_name = STRcat(VARLET_NAME(node), data->suffix);

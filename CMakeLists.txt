@@ -55,3 +55,4 @@ add_custom_target(dot
     dot -Tpng ccngen/ast.dot > ast.png
     COMMENT "Generate a png of your ast based on the generated dot diagram."
 )
+

@@ -82,6 +82,8 @@ node_st *PRTbinop(node_st *node)
   char *tmp = NULL;
   printf("(");
 
+  // TRAVleft(node);
+
   TRAVleft(node);
 
   switch (BINOP_OP(node))

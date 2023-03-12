@@ -23,7 +23,7 @@ phase ContextAnalysis {
                 user node_ptr current_scope
             }
         };
-         traversal InductionRemoval {
+        traversal InductionRemoval {
             uid = IR,
             nodes = {Program, Fundef, For, Var, VarLet},
             travdata {
@@ -32,14 +32,14 @@ phase ContextAnalysis {
                 string suffix
             }
         };
-          traversal NameBinding {
+        traversal NameBinding {
             uid = NB,
             nodes = {Program, Fundef, VarLet, Var, FunCall},
             travdata {
                 user node_ptr current_scope
             }
         };
-          traversal LamdaLifting {
+        traversal LamdaLifting {
             uid = LL,
             nodes = {FunDef},
             travdata {
