@@ -22,94 +22,88 @@
 void STinit() { return; }
 void STfini() { return; }
 
-char *STgeneratesignature(node_st *fundef)
+// Generate a unique signature for a given function definition node
+char *STgeneratesignature(node_st *function_definition)
 {
-    char *signature = STRcpy(FUNDEF_NAME(fundef)); // First we copy the string in memory
-    int count = 0;                                 // Initialize a counter variable
+    // Copy the function name to a new string in memory
+    char *signature = STRcpy(FUNDEF_NAME(function_definition));
 
-    if (FUNDEF_PARAMS(fundef) != NULL) // We check if there are any parameters
+    // Initialize a counter variable for the number of parameters
+    int parameter_count = 0;
+
+    // Check if there are any parameters in the function definition
+    if (FUNDEF_PARAMS(function_definition) != NULL)
     {
-        node_st *param = FUNDEF_PARAMS(fundef);
 
-        while (param != NULL) // While there are parameters we increment our counter.
+        // Count the number of parameters
+        node_st *parameter = FUNDEF_PARAMS(function_definition);
+        while (parameter != NULL)
         {
-            count++;
-            param = PARAM_NEXT(param);
+            parameter_count++;
+            parameter = PARAM_NEXT(parameter);
         }
     }
 
-    // Append the counter value to the signature string
-    char count_str[10];
-    snprintf(count_str, 10, "_%d", count);
-    signature = STRcat(signature, count_str);
+    // Append the parameter count to the signature string
+    char parameter_count_string[10];
+    snprintf(parameter_count_string, 10, "_%d", parameter_count);
+    signature = STRcat(signature, parameter_count_string);
 
     return signature;
 }
 
-/**
- * Searches the specified symbol table for an identifier and returns its corresponding
- * symbol table entry (STE) if found. If the identifier is not found, returns NULL.
- *
- * @param symtbl A pointer to the symbol table to search.
- * @param identifier A string containing the identifier to search for.
- *
- * @return A pointer to the STE for the specified identifier, or NULL if not found.
- **/
-node_st *STlookup(node_st *symtbl, char *identifier)
+// Look up an identifier in a given symbol table
+node_st *STlookup(node_st *symbol_table, char *identifier)
 {
-    if (symtbl == NULL || identifier == NULL)
+    // Check if the symbol table or identifier are NULL
+    if (symbol_table == NULL || identifier == NULL)
+    {
         return NULL;
+    }
 
-    // Check if the identifier exists in the current symbol table
-    node_st *entry = SYMTBL_HEAD(symtbl);
+    // Check if the identifier exists in the symbol table
+    node_st *entry = SYMTBL_HEAD(symbol_table);
     while (entry != NULL)
     {
         if (STReq(STE_NAME(entry), identifier) == true)
         {
+            // Identifier found in the symbol table
             return entry;
         }
         entry = STE_NEXT(entry);
     }
 
-    // Identifier not found in the current symbol table
+    // Identifier not found in the symbol table
     return NULL;
 }
 
-/**
- * Adds a new symbol table entry (STE) to the specified symbol table.
- * Returns a pointer to the new STE node if storing succeeds, or NULL if storing fails.
- *
- * @param symtbl A pointer to the symbol table to add the new STE to.
- * @param identifier A string containing the identifier for the new STE.
- * @param type The type of the new STE.
- * @param link A pointer to the AST node associated with the new STE.
- *
- * @return A pointer to the new STE node if storing succeeds, or NULL if storing fails.
- **/
-
-node_st *STstore(node_st *symtbl, char *identifier, enum Type type, node_st *link)
+// Store an identifier and its associated data in a given symbol table
+node_st *STstore(node_st *symbol_table, char *identifier, enum Type type, node_st *link)
 {
-    if (!symtbl || !identifier || !link)
-    { // check for null pointers
+    // Check for null pointers
+    if (!symbol_table || !identifier || !link)
+    {
         return NULL;
     }
 
-    node_st *tail = SYMTBL_HEAD(symtbl);
+    // Find the tail of the symbol table
+    node_st *tail = SYMTBL_HEAD(symbol_table);
     if (tail)
-    { // if the symbol table already has entries, find the tail
+    {
         while (STE_NEXT(tail))
         {
             tail = STE_NEXT(tail);
         }
     }
     else
-    { // otherwise, set the head
-        SYMTBL_HEAD(symtbl) = ASTste(NULL, identifier, type, link);
-        return symtbl;
+    { // Set the head of the symbol table if it's empty
+        SYMTBL_HEAD(symbol_table) = ASTste(NULL, identifier, type, link);
+        return symbol_table;
     }
 
-    STE_NEXT(tail) = ASTste(NULL, identifier, type, link); // add new entry to the tail
-    return symtbl;
+    // Add a new entry to the tail of the symbol table
+    STE_NEXT(tail) = ASTste(NULL, identifier, type, link);
+    return symbol_table;
 }
 
 /**
@@ -117,17 +111,11 @@ node_st *STstore(node_st *symtbl, char *identifier, enum Type type, node_st *lin
  */
 node_st *STprogram(node_st *node)
 {
-    printf("STprogram \n");
-
     struct data_st *data = DATA_ST_GET();
 
     data->current_scope = node;
 
-    node_st *init = ASTfundef(NULL, NULL, CT_void, "__init", false);
-
-    FUNDEF_SYMTBL(init) = ASTsymtbl(NULL, NULL);
-
-    PROGRAM_SYMTBL(node) = ASTsymtbl(NULL, init); // Create a blank symbol table with a init fundef for global scope.
+    PROGRAM_SYMTBL(node) = ASTsymtbl(NULL, NULL); // Create a blank symbol table with a init fundef for global scope.
 
     TRAVchildren(node);
 
@@ -142,9 +130,6 @@ node_st *STprogram(node_st *node)
 node_st *STfundef(node_st *node)
 {
     struct data_st *data = DATA_ST_GET();
-
-    printf("STfundef \n");
-
     node_st *outer = data->current_scope;
     enum ccn_nodetype outer_type = NODE_TYPE(outer);
 
@@ -152,16 +137,13 @@ node_st *STfundef(node_st *node)
     if (outer_type == NT_PROGRAM)
     {
         FUNDEF_SYMTBL(node) = ASTsymtbl(PROGRAM_SYMTBL(outer), NULL);
-
         char *signature = STgeneratesignature(node);
         node_st *entry = STlookup(PROGRAM_SYMTBL(outer), signature);
-
         if (entry == NULL)
         {
             STstore(PROGRAM_SYMTBL(outer), signature, FUNDEF_TYPE(node), node);
         }
-
-        if (entry != NULL)
+        else
         {
             CTI(CTI_ERROR, true, "\n Duplicate definition: '%s' is already defined. see: line: %d col: %d-%d. \n",
                 FUNDEF_NAME(node), NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
@@ -170,16 +152,13 @@ node_st *STfundef(node_st *node)
     else if (outer_type == NT_FUNDEF)
     {
         FUNDEF_SYMTBL(node) = ASTsymtbl(FUNDEF_SYMTBL(outer), NULL);
-
         char *signature = STgeneratesignature(node);
         node_st *entry = STlookup(FUNDEF_SYMTBL(outer), signature);
-
         if (entry == NULL)
         {
             STstore(FUNDEF_SYMTBL(outer), signature, FUNDEF_TYPE(node), node);
         }
-
-        if (entry != NULL)
+        else
         {
             CTI(CTI_ERROR, true, "\n Duplicate definition: '%s' is already defined. see: line: %d col: %d-%d. \n",
                 FUNDEF_NAME(node), NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
@@ -189,6 +168,7 @@ node_st *STfundef(node_st *node)
     // Set this node as the current scope
     data->current_scope = node;
 
+    // Traverse the node and its body
     TRAVparams(node);
     TRAVbody(node);
 
@@ -199,35 +179,29 @@ node_st *STfundef(node_st *node)
 }
 
 /**
- * THESE NODES MUST HAVE
- * AN UNIQUE DECLARATION SO NO DECLARATION CAN PRECEDE IT IN THE SAME SCOPE
- */
-
-/**
  * @fn STglobdecl
  */
 node_st *STglobdecl(node_st *node)
 {
+    // Get the data and the current scope
     struct data_st *data = DATA_ST_GET();
+    node_st *outer = data->current_scope;
 
-    node_st *outer = data->current_scope; // we get the current scope.
-
+    // Look up the node in the symbol table
     node_st *entry = STlookup(PROGRAM_SYMTBL(outer), GLOBDECL_NAME(node));
 
+    // Store the node in the symbol table if it doesn't exist
     if (entry == NULL)
     {
         STstore(PROGRAM_SYMTBL(outer), GLOBDECL_NAME(node), GLOBDECL_TYPE(node), node);
     }
-
-    if (entry != NULL)
-    {
+    else
+    { // Otherwise, report an error
         CTI(CTI_ERROR, true, "\n Duplicate definition: '%s' is already defined. see: line: %d col: %d-%d. \n",
             GLOBDECL_NAME(node), NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
     }
 
-    printf("STglobdef \n");
-
-    // Set this node as the current scope
+    // Set this node as the current scope and traverse its children
     TRAVchildren(node);
 
     return node;
@@ -238,23 +212,25 @@ node_st *STglobdecl(node_st *node)
  */
 node_st *STglobdef(node_st *node)
 {
+    // Get the data and the current scope
     struct data_st *data = DATA_ST_GET();
+    node_st *outer = data->current_scope;
 
-    node_st *outer = data->current_scope; // we get the current scope.
-
+    // Look up the node in the symbol table
     node_st *entry = STlookup(PROGRAM_SYMTBL(outer), GLOBDEF_NAME(node));
 
+    // Store the node in the symbol table if it doesn't exist
     if (entry == NULL)
     {
         STstore(PROGRAM_SYMTBL(outer), GLOBDEF_NAME(node), GLOBDEF_TYPE(node), node);
     }
-
-    if (entry != NULL)
-    {
+    else
+    { // Otherwise, report an error
         CTI(CTI_ERROR, true, "\n Duplicate definition: '%s' is already defined. see: line: %d col: %d-%d. \n",
             GLOBDEF_NAME(node), NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
     }
 
+    // Traverse the node's children and return the node
     TRAVchildren(node);
 
     return node;
@@ -265,23 +241,25 @@ node_st *STglobdef(node_st *node)
  */
 node_st *STvardecl(node_st *node)
 {
+    // Get the data and the current scope
     struct data_st *data = DATA_ST_GET();
+    node_st *outer = data->current_scope;
 
-    node_st *outer = data->current_scope; // we get the current scope.
-
+    // Look up the node in the symbol table
     node_st *entry = STlookup(FUNDEF_SYMTBL(outer), VARDECL_NAME(node));
 
+    // Store the node in the symbol table if it doesn't exist
     if (entry == NULL)
     {
         STstore(FUNDEF_SYMTBL(outer), VARDECL_NAME(node), VARDECL_TYPE(node), node);
     }
-
-    if (entry != NULL)
-    {
+    else
+    { // Otherwise, report an error
         CTI(CTI_ERROR, true, "\n Duplicate definition: '%s' is already defined. see: line: %d col: %d-%d. \n",
             VARDECL_NAME(node), NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
     }
 
+    // Traverse the node's children and return the node
     TRAVchildren(node);
 
     return node;
@@ -292,25 +270,28 @@ node_st *STvardecl(node_st *node)
  */
 node_st *STparam(node_st *node)
 {
+    // Get the data and the current scope
     struct data_st *data = DATA_ST_GET();
+    node_st *outer = data->current_scope;
 
-    node_st *outer = data->current_scope; // we get the current scope.
+    // Traverse the dimensions of the node
+    TRAVdims(node);
 
-    TRAVdims(node); // We first traverse possible  dimensions
-
+    // Look up the node in the symbol table
     node_st *entry = STlookup(FUNDEF_SYMTBL(outer), PARAM_NAME(node));
 
+    // Store the node in the symbol table if it doesn't exist
     if (entry == NULL)
     {
         STstore(FUNDEF_SYMTBL(outer), PARAM_NAME(node), PARAM_TYPE(node), node);
     }
-
-    if (entry != NULL)
-    {
+    else
+    { // Otherwise, report an error
         CTI(CTI_ERROR, true, "\n Duplicate definition: '%s' is already defined. see: line: %d col: %d-%d. \n",
             PARAM_NAME(node), NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
     }
 
+    // Traverse the next node and return the current node
     TRAVnext(node);
 
     return node;
@@ -321,12 +302,12 @@ node_st *STparam(node_st *node)
  */
 node_st *STids(node_st *node)
 {
+    // Get the data and the current scope
     struct data_st *data = DATA_ST_GET();
-
-    node_st *outer = data->current_scope; // we get the current scope.
+    node_st *outer = data->current_scope;
     enum ccn_nodetype outer_type = NODE_TYPE(outer);
 
-    // Create a new symbol table for the node
+    // Create a new symbol table for the node if the outer node is a program or a function definition
     if (outer_type == NT_PROGRAM)
     {
         node_st *entry = STlookup(PROGRAM_SYMTBL(outer), IDS_NAME(node));
@@ -335,9 +316,8 @@ node_st *STids(node_st *node)
         {
             STstore(PROGRAM_SYMTBL(outer), IDS_NAME(node), CT_int, node);
         }
-
-        if (entry != NULL)
-        {
+        else
+        { // Otherwise, report an error
             CTI(CTI_ERROR, true, "\n Duplicate definition: '%s' is already defined. see: line: %d col: %d-%d. \n",
                 IDS_NAME(node), NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
         }
@@ -350,14 +330,14 @@ node_st *STids(node_st *node)
         {
             STstore(FUNDEF_SYMTBL(outer), IDS_NAME(node), CT_int, node);
         }
-
-        if (entry != NULL)
-        {
+        else
+        { // Otherwise, report an error
             CTI(CTI_ERROR, true, "\n Duplicate definition: '%s' is already defined. see: line: %d col: %d-%d. \n",
                 IDS_NAME(node), NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
         }
     }
 
+    // Traverse the node's children and return the node
     TRAVchildren(node);
 
     return node;

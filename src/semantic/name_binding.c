@@ -25,15 +25,19 @@ void NBfini() { return; }
 
 char *NBgeneratesignature(node_st *funcall, node_st *symtbl)
 {
+    // Copy the function call name to the signature string
     char *signature = STRcpy(FUNCALL_NAME(funcall));
-    int count = 0; // Initialize a counter variable
 
+    // Initialize a counter variable
+    int count = 0;
+
+    // Count the number of arguments in the function call
     if (FUNCALL_ARGS(funcall) != NULL)
     {
         node_st *arg = FUNCALL_ARGS(funcall);
         while (arg != NULL)
         {
-            count++; // Increment the counter
+            count++;
             arg = EXPRS_NEXT(arg);
         }
     }
@@ -46,15 +50,15 @@ char *NBgeneratesignature(node_st *funcall, node_st *symtbl)
     return signature;
 }
 
-/**
- * This function searches all SYMTBL's from inner to outer for an identifier.
- * Returns STE if found.
- **/
 node_st *NBlookup(node_st *symtbl, char *identifier)
 {
+    // Check if the symbol table and identifier are not null
     if (symtbl == NULL || identifier == NULL)
+    {
         return NULL;
+    }
 
+    // Traverse the symbol table hierarchy
     node_st *temp = symtbl;
     while (temp != NULL)
     {
@@ -81,6 +85,7 @@ node_st *NBlookup(node_st *symtbl, char *identifier)
         break;
     }
 
+    // If the identifier is not found, return null
     return NULL;
 }
 
@@ -125,25 +130,28 @@ node_st *NBfundef(node_st *node)
  */
 node_st *NBvarlet(node_st *node)
 {
+    // Get the data and current scope
     struct data_nb *data = DATA_NB_GET();
-
     node_st *scope = data->current_scope;
 
+    // Look up the variable in the symbol table
     node_st *entry = NBlookup(FUNDEF_SYMTBL(scope), VARLET_NAME(node));
 
+    // If the variable is found, mark it as a variable entry
     if (entry != NULL)
     {
         VARLET_ENTRY(entry);
     }
 
+    // If the variable is not found, print an error message
     if (entry == NULL)
     {
         CTI(CTI_ERROR, true, "\n Undefined reference: '%s' is not defined at: line: %d col: %d-%d. \n",
             VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
     }
 
+    // Traverse the node's children and return the node
     TRAVchildren(node);
-
     return node;
 }
 
@@ -152,25 +160,28 @@ node_st *NBvarlet(node_st *node)
  */
 node_st *NBvar(node_st *node)
 {
+    // Get the data and current scope
     struct data_nb *data = DATA_NB_GET();
-
     node_st *scope = data->current_scope;
 
+    // Look up the variable in the symbol table
     node_st *entry = NBlookup(FUNDEF_SYMTBL(scope), VAR_NAME(node));
 
+    // If the variable is found, mark it as a variable entry
     if (entry != NULL)
     {
         VAR_ENTRY(entry);
     }
 
+    // If the variable is not found, print an error message
     if (entry == NULL)
     {
         CTI(CTI_ERROR, true, "\n Undefined reference: '%s' is not defined at: line: %d col: %d-%d. \n",
             VAR_NAME(node), NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
     }
 
+    // Traverse the node's children and return the node
     TRAVchildren(node);
-
     return node;
 }
 
@@ -179,94 +190,28 @@ node_st *NBvar(node_st *node)
  */
 node_st *NBfuncall(node_st *node)
 {
+    // Get the data and current scope
     struct data_nb *data = DATA_NB_GET();
-
     node_st *scope = data->current_scope;
 
+    // Look up the function call in the symbol table
     char *signature = NBgeneratesignature(node, FUNDEF_SYMTBL(scope));
     node_st *entry = NBlookup(FUNDEF_SYMTBL(scope), signature);
 
+    // If the function is found, mark it as a function call entry
     if (entry != NULL)
     {
         FUNCALL_ENTRY(entry);
     }
 
+    // If the function is not found, print an error message
     if (entry == NULL)
     {
         CTI(CTI_ERROR, true, "\n Undefined reference: '%s' is not defined at: line: %d col: %d-%d. \n",
             FUNCALL_NAME(node), NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
     }
 
+    // Traverse the node's children and return the node
     TRAVchildren(node);
-
     return node;
 }
-
-// /**
-//  * Returns the type as a character.
-//  **/
-// char *get_type(node_st *expr, node_st *symtbl)
-// {
-//     // If type is constant
-//     // If type is var (look up in table)
-//     // If type is binop
-//     // if expression has dimensions it an array of certain type
-
-//     char *type = NULL;
-//     switch (NODE_TYPE(expr))
-//     {
-//     case NT_NUM:
-//         type = "int";
-//         break;
-//     case NT_FLOAT:
-//         type = "float";
-//         break;
-//     case NT_BOOL:
-//         type = "bool";
-//         break;
-//     case NT_VAR:
-//         switch (STE_TYPE(NBlookup(symtbl, VAR_NAME(expr))))
-//         {
-//         case CT_bool:
-//             type = "bool";
-//             break;
-//         case CT_float:
-//             type = "float";
-//             break;
-//         case CT_int:
-//             type = "int";
-//             break;
-//         }
-//         break;
-//     }
-//     return type;
-// }
-
-// /**
-//  * Generates a unique function signature based on a given function call and its arguments.
-//  * The function infers the return type, name, and number of parameters of the function to create a
-//  * signature with the format funtype_funname_arity. The signature is used to distinguish the function
-//  * from others with the same name but different types or parameters.
-//  *
-//  * @param funcall A pointer to a funcall node representing the function call.
-//  * @param symtbl A pointer to the symbol table containing information about the function's scope.
-//  *
-//  * @return A pointer to a string containing the function signature, or NULL if the signature cannot be generated.
-//  **/
-
-// char *NBgeneratesignature(node_st *funcall, node_st *symtbl)
-// {
-//     char *signature = STRcpy(FUNCALL_NAME(funcall));
-//     if (FUNCALL_ARGS(funcall) != NULL)
-//     {
-//         node_st *arg = FUNCALL_ARGS(funcall);
-//         while (arg != NULL)
-//         {
-//             char *type = get_type(EXPRS_EXPR(arg), symtbl);
-//             signature = STRcat(signature, "_");
-//             signature = STRcat(signature, type);
-//             arg = EXPRS_NEXT(arg);
-//         }
-//     }
-//     return signature;
-// }

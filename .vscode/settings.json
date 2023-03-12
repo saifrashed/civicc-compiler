@@ -21,6 +21,24 @@
         "regex": "c",
         "memory": "c",
         "utility": "c",
-        "ios": "c"
+        "ios": "c",
+        "assignment_extract": "c",
+        "__functional_base": "c",
+        "__functional_base_03": "c",
+        "__hash_table": "c",
+        "__tree": "c",
+        "__tuple": "c",
+        "algorithm": "c",
+        "array": "c",
+        "chrono": "c",
+        "cstddef": "c",
+        "type_traits": "c",
+        "forward_list": "c",
+        "functional": "c",
+        "iterator": "c",
+        "limits": "c",
+        "ratio": "c",
+        "tuple": "c",
+        "variant": "c"
     }
 }

@@ -32,6 +32,13 @@ phase ContextAnalysis {
                 string suffix
             }
         };
+        traversal AssignmentExtract {
+            uid = AE,
+            nodes = {Program, Fundef, GlobDef, VarDecl},
+            travdata {
+                user node_ptr current_scope
+            }
+        };
         traversal NameBinding {
             uid = NB,
             nodes = {Program, Fundef, VarLet, Var, FunCall},
@@ -41,7 +48,7 @@ phase ContextAnalysis {
         };
         traversal TypeChecker {
             uid = TC,
-            nodes = {Assign, IfElse, While, DoWhile, For, Return, Cast, FunCall, Var, ArrExpr, Binop, Monop, Float, Bool, Num},
+            nodes = {Assign, IfElse, While, DoWhile, For, Return, Cast, FunCall, Var, VarLet, ArrExpr, Binop, Monop, Float, Bool, Num},
             travdata {
                 Type inferred
             }

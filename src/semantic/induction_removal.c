@@ -19,65 +19,54 @@
 void IRinit() { return; }
 void IRfini() { return; }
 
-/**
- * Adds a new symbol table entry (STE) to the specified symbol table.
- * The new STE contains information about an identifier, including its type and associated AST node.
- *
- * @param symtbl A pointer to the symbol table to add the new STE to.
- * @param identifier A string containing the identifier for the new STE.
- * @param type The type of the new STE.
- * @param link A pointer to the AST node associated with the new STE.
- *
- * @return A pointer to the new STE node if storing succeeds, or NULL if storing fails.
- **/
 node_st *IRstore(node_st *symtbl, char *identifier, enum Type type, node_st *link)
 {
+    // Check for null pointers
     if (!symtbl || !identifier || !link)
-    { // check for null pointers
+    {
         return NULL;
     }
 
+    // Find the tail of the symbol table, or set the head if it's empty
     node_st *tail = SYMTBL_HEAD(symtbl);
     if (tail)
-    { // if the symbol table already has entries, find the tail
+    {
         while (STE_NEXT(tail))
         {
             tail = STE_NEXT(tail);
         }
     }
     else
-    { // otherwise, set the head
+    {
         SYMTBL_HEAD(symtbl) = ASTste(NULL, identifier, type, link);
         return symtbl;
     }
 
-    STE_NEXT(tail) = ASTste(NULL, identifier, type, link); // add new entry to the tail
+    // Add a new entry to the tail and return the symbol table
+    STE_NEXT(tail) = ASTste(NULL, identifier, type, link);
     return symtbl;
 }
 
-/**
- * Generates a random suffix of the specified size.
- * The probability of a collision with an existing suffix is approximately 5.5*10^-15 or 0.000000000000055%.
- *
- * @param size The size of the suffix to generate.
- *
- * @return A pointer to a string containing the random suffix.
- **/
 char *IRrandsuffix(size_t size)
 {
-    char *newstr = malloc(size + 11); // Allocate memory for the new string
-    const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+    // Allocate memory for the new string
+    char *newstr = malloc(size + 11);
+
+    // Generate a random string with the first character set to '_'
     if (newstr)
     {
-        newstr[0] = '_'; // Set the first character to '_'
+        const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+        newstr[0] = '_';
 
         for (size_t n = 1; n < size + 10; n++)
         {
             int key = rand() % (int)(sizeof charset - 1);
             newstr[n] = charset[key];
         }
+
         newstr[size + 10] = '\0';
     }
+
     return newstr;
 }
 

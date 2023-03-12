@@ -37,6 +37,7 @@ add_executable(civicc ${FLEX_CivicLexer_OUTPUTS} ${BISON_CivicParser_OUTPUTS}
     # Youre free to remove the demo directory and these entries.
     src/semantic/symbol_table.c
     src/semantic/induction_removal.c
+    src/semantic/assignment_extract.c
     src/semantic/name_binding.c
     src/semantic/type_checker.c
 )
