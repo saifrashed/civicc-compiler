@@ -23,6 +23,17 @@ phase ContextAnalysis {
                 user node_ptr current_scope
             }
         };
+        traversal CreateInit {
+            uid = CI,
+            nodes = {Program}
+        };
+        traversal ArrayInitialization {
+            uid = AI,
+            nodes = {Program, Fundef, VarDecl},
+            travdata {
+                user node_ptr current_scope
+            }
+        };
         traversal InductionRemoval {
             uid = IR,
             nodes = {Program, Fundef, For, Var, VarLet},
@@ -32,8 +43,8 @@ phase ContextAnalysis {
                 string suffix
             }
         };
-        traversal AssignmentExtract {
-            uid = AE,
+        traversal VarInitialization {
+            uid = VI,
             nodes = {Program, Fundef, GlobDef, VarDecl},
             travdata {
                 user node_ptr current_scope

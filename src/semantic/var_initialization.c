@@ -2,8 +2,8 @@
 /**
  * @file
  *
- * This file contains the code for the Assignmentextract traversal.
- * The traversal has the uid: AE
+ * This file contains the code for the VarInitialization traversal.
+ * The traversal has the uid: VI
  *
  *
  */
@@ -17,10 +17,10 @@
 #include "palm/dbug.h"
 #include "palm/str.h"
 
-void AEinit() { return; }
-void AEfini() { return; }
+void VIinit() { return; }
+void VIfini() { return; }
 
-node_st *AElookup(node_st *symbol_table, char *identifier)
+node_st *VIlookup(node_st *symbol_table, char *identifier)
 {
     // Check if the symbol table or identifier are NULL
     if (symbol_table == NULL || identifier == NULL)
@@ -45,42 +45,12 @@ node_st *AElookup(node_st *symbol_table, char *identifier)
 }
 
 /**
- * @fn AEprogram
+ * @fn VIprogram
  */
-node_st *AEprogram(node_st *node)
+node_st *VIprogram(node_st *node)
 {
-    // Initialize a function declaration node with the name "__init" and void return type
-    char *init_function_name = "__init";
-    node_st *init_function_declaration = ASTdecls(
-        ASTfundef(ASTfunbody(NULL, NULL, NULL), NULL, CT_void, init_function_name, false),
-        NULL);
-
-    // Add the "__init" declaration to the end of the declaration list
-    node_st *declaration_tail = PROGRAM_NEXT(node);
-    while (DECLS_NEXT(declaration_tail) != NULL)
-    {
-        declaration_tail = DECLS_NEXT(declaration_tail);
-    }
-    DECLS_NEXT(declaration_tail) = CCNcopy(init_function_declaration);
-
-    // Set the symbol table of the "__init" declaration to be a copy of the program's symbol table
-    FUNDEF_SYMTBL(DECLS_DECL(DECLS_NEXT(declaration_tail))) = ASTsymtbl(PROGRAM_SYMTBL(node), NULL);
-
-    // Copy the program's symbol table
-    node_st *symbol_table_head = CCNcopy(SYMTBL_HEAD(PROGRAM_SYMTBL(node)));
-
-    // Create a new symbol table with the "__init" declaration as its first declaration
-    node_st *new_symbol_table_head = ASTste(
-        symbol_table_head,
-        FUNDEF_NAME(DECLS_DECL(DECLS_NEXT(declaration_tail))),
-        CT_void,
-        DECLS_DECL(DECLS_NEXT(declaration_tail)));
-
-    // Set the new symbol table head as the program's symbol table head
-    SYMTBL_HEAD(PROGRAM_SYMTBL(node)) = CCNcopy(new_symbol_table_head);
-
     // Set the current scope of the program's data to be the node being traversed
-    struct data_ae *program_data = DATA_AE_GET();
+    struct data_vi *program_data = DATA_VI_GET();
     program_data->current_scope = node;
 
     // Traverse the children of the current node
@@ -91,11 +61,11 @@ node_st *AEprogram(node_st *node)
 }
 
 /**
- * @fn AEfundef
+ * @fn VIfundef
  */
-node_st *AEfundef(node_st *node)
+node_st *VIfundef(node_st *node)
 {
-    struct data_ae *data = DATA_AE_GET();
+    struct data_vi *data = DATA_VI_GET();
 
     node_st *outer = data->current_scope;
 
@@ -111,15 +81,15 @@ node_st *AEfundef(node_st *node)
 }
 
 /**
- * @fn AEprogram
+ * @fn VIprogram
  */
-node_st *AEglobdef(node_st *node)
+node_st *VIglobdef(node_st *node)
 {
     // Traverse the children of the current node
     TRAVchildren(node);
 
     // Get the program's data and current scope
-    struct data_ae *program_data = DATA_AE_GET();
+    struct data_vi *program_data = DATA_VI_GET();
     node_st *outer_scope = program_data->current_scope;
 
     // Check if there is an initialization assignment
@@ -128,7 +98,7 @@ node_st *AEglobdef(node_st *node)
 
         // Lookup the "__init" declaration in the program's symbol table
         char *init_function_name = "__init";
-        node_st *init_function_lookup = AElookup(PROGRAM_SYMTBL(outer_scope), init_function_name);
+        node_st *init_function_lookup = VIlookup(PROGRAM_SYMTBL(outer_scope), init_function_name);
 
         // Get the function declaration node for the "__init" function
         node_st *init_function_declaration = STE_DECL(init_function_lookup);
@@ -160,12 +130,15 @@ node_st *AEglobdef(node_st *node)
 }
 
 /**
- * @fn AEvardecl
+ * @fn VIvardecl
  */
-node_st *AEvardecl(node_st *node)
+node_st *VIvardecl(node_st *node)
 {
+    // First we traverse to keep order of assignments correct.
+    TRAVchildren(node);
+
     // Get the data and the current scope
-    struct data_ae *data = DATA_AE_GET();
+    struct data_vi *data = DATA_VI_GET();
     node_st *outer = data->current_scope;
 
     // Create an assignment node if there is an initial value
@@ -177,7 +150,9 @@ node_st *AEvardecl(node_st *node)
         // Insert the assignment node into the outer function body's statements
         node_st *outer_body = FUNDEF_BODY(outer);
         node_st *outer_stmts = FUNBODY_STMTS(outer_body);
+
         node_st *newassign_stmts = ASTstmts(assign, outer_stmts);
+
         FUNBODY_STMTS(outer_body) = CCNcopy(newassign_stmts);
 
         // Clear the initial value from the variable declaration node
