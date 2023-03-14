@@ -233,7 +233,6 @@ node_st *TCmonop(node_st *node)
 node_st *TCfloat(node_st *node)
 {
     // We infer the type CT_float
-
     TRAVchildren(node);
 
     return node;

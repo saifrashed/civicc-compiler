@@ -50,11 +50,14 @@ node_st *VIlookup(node_st *symbol_table, char *identifier)
 node_st *VIprogram(node_st *node)
 {
     // Set the current scope of the program's data to be the node being traversed
-    struct data_vi *program_data = DATA_VI_GET();
-    program_data->current_scope = node;
+    struct data_vi *data = DATA_VI_GET();
+    data->current_scope = node;
 
     // Traverse the children of the current node
     TRAVchildren(node);
+
+    // Reset the parent node as the current scope
+    data->current_scope = node;
 
     // Return the current node
     return node;
@@ -85,12 +88,13 @@ node_st *VIfundef(node_st *node)
  */
 node_st *VIglobdef(node_st *node)
 {
+
     // Traverse the children of the current node
     TRAVchildren(node);
 
     // Get the program's data and current scope
-    struct data_vi *program_data = DATA_VI_GET();
-    node_st *outer_scope = program_data->current_scope;
+    struct data_vi *data = DATA_VI_GET();
+    node_st *outer_scope = data->current_scope;
 
     // Check if there is an initialization assignment
     if (GLOBDEF_INIT(node) != NULL)
@@ -112,18 +116,26 @@ node_st *VIglobdef(node_st *node)
         node_st *init_function_body = FUNDEF_BODY(init_function_declaration);
         node_st *init_function_statements = FUNBODY_STMTS(init_function_body);
 
-        // Create a new statement list with the assignment statement added to the beginning
-        node_st *new_statement_list = ASTstmts(assignment_statement, init_function_statements);
+        if (init_function_statements != NULL)
+        {
+            node_st *temp = init_function_statements;
 
-        // Set the new statement list as the statement list for the "__init" function
-        FUNBODY_STMTS(init_function_body) = CCNcopy(new_statement_list);
+            while (STMTS_NEXT(temp) != NULL)
+            {
+                temp = STMTS_NEXT(temp);
+            }
+
+            // Create a new statement list with the assignment statement added to the beginning
+            STMTS_NEXT(temp) = CCNcopy(ASTstmts(assignment_statement, NULL));
+        }
+        else
+        {
+            FUNBODY_STMTS(init_function_body) = ASTstmts(CCNcopy(assignment_statement), NULL);
+        }
 
         // Clear the initialization value of the current global definition node
         GLOBDEF_INIT(node) = NULL;
     }
-
-    // Traverse the children of the current node again
-    TRAVchildren(node);
 
     // Return the current node
     return node;
@@ -158,9 +170,6 @@ node_st *VIvardecl(node_st *node)
         // Clear the initial value from the variable declaration node
         VARDECL_INIT(node) = NULL;
     }
-
-    // Traverse the node's children and return the node
-    TRAVchildren(node);
 
     return node;
 }
