@@ -29,7 +29,7 @@ phase ContextAnalysis {
         };
         traversal ArrayInitialization {
             uid = AI,
-            nodes = {Program, Fundef, VarDecl},
+            nodes = {Program, Fundef, GlobDef, VarDecl},
             travdata {
                 user node_ptr current_scope
             }
@@ -59,8 +59,9 @@ phase ContextAnalysis {
         };
         traversal TypeChecker {
             uid = TC,
-            nodes = {Assign, IfElse, While, DoWhile, For, Return, Cast, FunCall, Var, VarLet, ArrExpr, Binop, Monop, Float, Bool, Num},
+            nodes = {Program, Fundef, Assign, IfElse, While, DoWhile, For, Return, Cast, FunCall, Var, VarLet, ArrExpr, Binop, Monop, Float, Bool, Num},
             travdata {
+                user node_ptr current_scope,
                 Type inferred
             }
         };
@@ -273,7 +274,7 @@ node Param {
     }
 };
 
-node VarDecl {
+node glol {
     children {
         Exprs dims { constructor },
         Expr init { constructor },
@@ -306,7 +307,8 @@ node Binop {
         Expr right { constructor, mandatory }
     },
     attributes {
-        BinOpEnum op { constructor }
+        BinOpEnum op { constructor },
+        Type type
     }
 };
 
@@ -315,7 +317,8 @@ node Monop {
         Expr operand { constructor, mandatory }
     },
     attributes {
-        MonOpEnum op { constructor }
+        MonOpEnum op { constructor },
+        Type type
     }
 };
 

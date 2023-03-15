@@ -301,7 +301,7 @@ funbody: CURLYBRACKET_L vardecls CURLYBRACKET_R
 funcall: ID ROUNDBRACKET_L args_opt ROUNDBRACKET_R  // example: foo(5, 3);
         {
           $$ = ASTfuncall($3, $1);
-          AddLocToNode($$, &@1, &@1);
+          AddLocToNode($$, &@1, &@4);
         };
 
 
@@ -541,74 +541,90 @@ expr:  ROUNDBRACKET_L expr ROUNDBRACKET_R
 unary_expr: MINUS expr %prec UMINUS
       {
         $$ = ASTmonop($2, MO_not);
+        AddLocToNode($$, &@1, &@2);
       }
       | NEG expr
       {
         $$ = ASTmonop($2, MO_neg);
+        AddLocToNode($$, &@1, &@2);
       };
 
 
 arithmetic_expr: expr PLUS expr
       {
         $$ = ASTbinop( $1, $3, BO_add);
+        AddLocToNode($$, &@1, &@3);
       }
       | expr MINUS expr
       {
         $$ = ASTbinop( $1, $3, BO_sub);
+        AddLocToNode($$, &@1, &@3);
       }
       | expr STAR expr
       {
         $$ = ASTbinop( $1, $3, BO_mul);
+        AddLocToNode($$, &@1, &@3);
       }
       | expr SLASH expr
       {
         $$ = ASTbinop( $1, $3, BO_div);
+        AddLocToNode($$, &@1, &@3);
       }
       | expr PERCENT expr
       {
         $$ = ASTbinop( $1, $3, BO_mod);
+        AddLocToNode($$, &@1, &@3);
       };
 
 
 comparison_expr: expr LT expr
       {
         $$ = ASTbinop( $1, $3, BO_le);
+        AddLocToNode($$, &@1, &@3);
       }
       | expr LE expr
       {
         $$ = ASTbinop( $1, $3, BO_lt);
+        AddLocToNode($$, &@1, &@3);
       }
       | expr GT expr
       {
         $$ = ASTbinop( $1, $3, BO_gt);
+        AddLocToNode($$, &@1, &@3);
       }
       | expr GE expr
       {
         $$ = ASTbinop( $1, $3, BO_ge);
+        AddLocToNode($$, &@1, &@3);
       }
       | expr EQ expr
       {
           $$ = ASTbinop( $1, $3, BO_eq);
+          AddLocToNode($$, &@1, &@3);
       }
       | expr NE expr
       {
         $$ = ASTbinop( $1, $3, BO_ne);
+        AddLocToNode($$, &@1, &@3);
       };
 
 
 logical_expr: expr OR expr
       {
         $$ = ASTbinop( $1, $3, BO_or);
+        AddLocToNode($$, &@1, &@3);
       }
       | expr AND expr
       {
         $$ = ASTbinop( $1, $3, BO_and);
+        AddLocToNode($$, &@1, &@3);
       };
 
 
 array_expr: SQUAREBRACKET_L exprs_dims SQUAREBRACKET_R
       {
         $$ = ASTarrexpr($2);
+        AddLocToNode($$, &@1, &@3);
       };
 
 

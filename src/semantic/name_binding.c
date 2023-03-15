@@ -201,7 +201,8 @@ node_st *NBfuncall(node_st *node)
     // If the function is found, mark it as a function call entry
     if (entry != NULL)
     {
-        FUNCALL_ENTRY(entry);
+        FUNCALL_NAME(node) = signature;
+        FUNCALL_ENTRY(entry) = entry;
     }
 
     // If the function is not found, print an error message

@@ -62,13 +62,13 @@ int yycolumn = 1;
 
 "-"                        { FILTER( MINUS); }
 "+"                        { FILTER( PLUS);  }
-"*"                        { FILTER( STAR);  } 
-"/"                        { FILTER( SLASH);  } 
-"%"                        { FILTER( PERCENT);  } 
+"*"                        { FILTER( STAR);  }
+"/"                        { FILTER( SLASH);  }
+"%"                        { FILTER( PERCENT);  }
 
 "!"                        { FILTER( NEG); }
 "<="                       { FILTER( LE);    }
-"<"                        { FILTER( LT);    } 
+"<"                        { FILTER( LT);    }
 ">="                       { FILTER( GE);    }
 ">"                        { FILTER( GT);    }
 "=="                       { FILTER( EQ);    }
@@ -88,12 +88,12 @@ int yycolumn = 1;
 
 [A-Za-z][A-Za-z0-9_]*      { yylval.id = STRcpy(yytext); FILTER( ID); }
 
-[0-9]+                     { yylval.cint=atoi(yytext); FILTER( NUM); }
+[1-9][0-9]{0,8}|0|214748364[0-7]                     { yylval.cint=atoi(yytext); FILTER( NUM); }
 
-[0-9]+\.[0-9]* 	   { yylval.cflt=atoi(yytext); FILTER( FLOAT); }         
+[0-9]+\.[0-9]* 	   { yylval.cflt=atoi(yytext); FILTER( FLOAT); }
 
 
-\n.*                       { 
+\n.*                       {
                              yycolumn = 1;
                              global.line += 1;
                              global.col = 0;
@@ -101,7 +101,7 @@ int yycolumn = 1;
                            }
 
 [ \t]                      { global.col += yyleng;
-                           } 
+                           }
 %%
 
 static inline void token_action() {
