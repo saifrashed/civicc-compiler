@@ -472,6 +472,15 @@ node_st *PRTifelse(node_st *node)
 }
 
 /**
+ * @fn PRTternary
+ */
+node_st *PRTternary(node_st *node)
+{
+
+  return node;
+}
+
+/**
  * @fn PRTwhile
  */
 node_st *PRTwhile(node_st *node)

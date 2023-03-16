@@ -65,6 +65,21 @@ phase ContextAnalysis {
                 Type inferred
             }
         };
+        traversal ParameterPassing {
+            uid = PP,
+            nodes = {Program, Fundef, FunCall},
+            travdata {
+                user node_ptr current_scope
+            }
+        };
+        traversal BooleanTransform {
+            uid = BT,
+            nodes = {Binop}
+        };
+        traversal CastTransform {
+            uid = CT,
+            nodes = {Cast}
+        };
     }
 };
 
@@ -100,7 +115,7 @@ nodeset Decl = {GlobDef, GlobDecl, FunDef};
 
 nodeset Vars = {VarDecl, Var, VarLet};
 
-nodeset Expr = {Cast, FunCall, Var, ArrExpr} | (Constants | Operations);
+nodeset Expr = {Cast, FunCall, Var, ArrExpr, Ternary} | (Constants | Operations);
 
 nodeset Stmt = {Assign, ExprStmt, IfElse, While, DoWhile, For, Return};
 
@@ -215,6 +230,14 @@ node IfElse {
     }
 };
 
+node Ternary {
+    children {
+        Expr cond { constructor, mandatory },
+        Expr then { constructor, mandatory },
+        Expr else_block { constructor, mandatory }
+    }
+};
+
 node While {
     children {
         Expr cond { constructor, mandatory },
@@ -274,7 +297,7 @@ node Param {
     }
 };
 
-node glol {
+node VarDecl {
     children {
         Exprs dims { constructor },
         Expr init { constructor },

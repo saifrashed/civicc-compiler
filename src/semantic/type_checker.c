@@ -185,6 +185,8 @@ node_st *TCassign(node_st *node)
 
     // Traverse Varlet and infer type
 
+    // We check if dimensions on the left hand side match the dimension of the right hand side.
+
     // Traverse expression and infer type
 
     TRAVchildren(node);
@@ -271,10 +273,33 @@ node_st *TCreturn(node_st *node)
  */
 node_st *TCcast(node_st *node)
 {
+    struct data_tc *data = DATA_TC_GET();
 
     // We infer the type based on the type being cast. Bool, Int and Float are compatible with eachother.
 
-    TRAVchildren(node);
+    // switch (CAST_TYPE(node))
+    // {
+    // case CT_int:
+    //     TRAVexpr(node);
+    //     enum Type expr_type = data->inferred;
+
+    //     data->inferred = CT_int;
+    //     break;
+    // case CT_bool:
+    //     TRAVexpr(node);
+    //     enum Type expr_type = data->inferred;
+
+    //     data->inferred = CT_bool;
+    //     break;
+    // case CT_float:
+    //     TRAVexpr(node);
+    //     enum Type expr_type = data->inferred;
+
+    //     if()
+
+    //     data->inferred = CT_float;
+    //     break;
+    // }
 
     return node;
 }
