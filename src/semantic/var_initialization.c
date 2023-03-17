@@ -157,7 +157,7 @@ node_st *VIvardecl(node_st *node)
     if (VARDECL_INIT(node) != NULL)
     {
         // Create the assignment node
-        node_st *assign = ASTassign(ASTvarlet(VARDECL_DIMS(node), VARDECL_NAME(node)), VARDECL_INIT(node));
+        node_st *assign = ASTassign(ASTvarlet(NULL, VARDECL_NAME(node)), VARDECL_INIT(node));
 
         // Insert the assignment node into the outer function body's statements
         node_st *outer_body = FUNDEF_BODY(outer);

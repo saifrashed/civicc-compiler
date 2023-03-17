@@ -27,9 +27,13 @@ phase ContextAnalysis {
             uid = CI,
             nodes = {Program}
         };
+        traversal CreateAllocate {
+            uid = CA,
+            nodes = {Program}
+        };
         traversal ArrayInitialization {
             uid = AI,
-            nodes = {Program, Fundef, GlobDef, VarDecl},
+            nodes = {Program, Fundef},
             travdata {
                 user node_ptr current_scope
             }

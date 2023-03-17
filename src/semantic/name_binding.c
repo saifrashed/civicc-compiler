@@ -23,7 +23,7 @@
 void NBinit() { return; }
 void NBfini() { return; }
 
-char *NBgeneratesignature(node_st *funcall, node_st *symtbl)
+char *NBgeneratesignature(node_st *funcall)
 {
     // Copy the function call name to the signature string
     char *signature = STRcpy(FUNCALL_NAME(funcall));
@@ -195,7 +195,8 @@ node_st *NBfuncall(node_st *node)
     node_st *scope = data->current_scope;
 
     // Look up the function call in the symbol table
-    char *signature = NBgeneratesignature(node, FUNDEF_SYMTBL(scope));
+    char *signature = NBgeneratesignature(node);
+
     node_st *entry = NBlookup(FUNDEF_SYMTBL(scope), signature);
 
     // If the function is found, mark it as a function call entry
@@ -205,8 +206,14 @@ node_st *NBfuncall(node_st *node)
         FUNCALL_ENTRY(entry) = entry;
     }
 
-    // If the function is not found, print an error message
-    if (entry == NULL)
+    // If function is an allocate function
+    if (STReq(FUNCALL_NAME(node), "__allocate") == true)
+    {
+        node_st *allocate_entry = NBlookup(FUNDEF_SYMTBL(scope), "__allocate");
+
+        FUNCALL_ENTRY(node) = allocate_entry;
+    }
+    else if (entry == NULL) // If there is no entries to be found.
     {
         CTI(CTI_ERROR, true, "\n Undefined reference: '%s' is not defined at: line: %d col: %d-%d. \n",
             FUNCALL_NAME(node), NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
