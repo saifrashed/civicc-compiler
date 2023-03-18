@@ -116,16 +116,12 @@ node_st *AIsymtbl_attachbefore(node_st *symtbl, node_st *ste, node_st *new_ste)
         if (previous == NULL)
         {
             // The found declaration is the first one
-
             SYMTBL_HEAD(symtbl) = new_ste;
-
             STE_NEXT(new_ste) = ste;
         }
         else
         {
-
             STE_NEXT(previous) = new_ste;
-
             STE_NEXT(new_ste) = ste;
         }
     }
@@ -140,7 +136,6 @@ node_st *AIsymtbl_attachbefore(node_st *symtbl, node_st *ste, node_st *new_ste)
 
 node_st *AIadd_before(node_st *funbody, node_st *before, node_st *new)
 {
-
     node_st *entry = FUNBODY_DECLS(funbody);
     node_st *previous = NULL;
 
@@ -155,19 +150,14 @@ node_st *AIadd_before(node_st *funbody, node_st *before, node_st *new)
         // The desired vardecl is found
         if (previous == NULL)
         {
-
             VARDECL_NEXT(new) = before;
-
             FUNBODY_DECLS(funbody) = new;
-
             return new;
         }
         else
         {
             VARDECL_NEXT(previous) = new;
-
             VARDECL_NEXT(new) = entry;
-
             return new;
         }
     }
@@ -193,6 +183,86 @@ void AIallocate(node_st *allocate, char *name)
         }
 
         EXPRS_NEXT(temp) = ASTexprs(ASTvar(NULL, name), NULL);
+    }
+}
+
+node_st *find_last_for_loop(node_st *forloop)
+{
+    node_st *temp = forloop;
+    while (FOR_BLOCK(temp) != NULL)
+    {
+        temp = STMTS_STMT(FOR_BLOCK(temp));
+    }
+    return temp;
+}
+
+void AIforloop(node_st *forloop, char *name)
+{
+    if (FOR_VAR(forloop) == NULL && FOR_START_EXPR(forloop) == NULL && FOR_STOP(forloop) == NULL)
+    { // If initial for loop has to be configed.
+        FOR_VAR(forloop) = generate_temp_name();
+        FOR_START_EXPR(forloop) = ASTnum(0);
+        FOR_STOP(forloop) = ASTvar(NULL, name);
+    }
+    else
+    { // We create a new for loop and add in inside.
+        node_st *last_for_loop = find_last_for_loop(forloop);
+        FOR_BLOCK(last_for_loop) = ASTstmts(ASTfor(ASTnum(0), ASTvar(NULL, name), NULL, NULL, generate_temp_name()), NULL);
+    }
+}
+node_st *append_var(node_st *list, char *var)
+{
+    if (list == NULL)
+    {
+        return ASTexprs(ASTvar(NULL, var), NULL);
+    }
+    else
+    {
+        node_st *temp = list;
+        while (EXPRS_NEXT(temp) != NULL)
+        {
+            temp = EXPRS_NEXT(temp);
+        }
+        EXPRS_NEXT(temp) = ASTexprs(ASTvar(NULL, var), NULL);
+        return list;
+    }
+}
+
+node_st *AIforloop_indices(node_st *forloop)
+{
+    node_st *temp = forloop;
+    node_st *indices = NULL;
+
+    while (FOR_BLOCK(temp) != NULL)
+    {
+        char *induc = STRcpy(FOR_VAR(temp));
+        indices = append_var(indices, induc);
+        temp = STMTS_STMT(FOR_BLOCK(temp));
+    }
+
+    char *induc = STRcpy(FOR_VAR(temp));
+    indices = append_var(indices, induc);
+
+    return indices;
+}
+
+void AIforloop_assignment(node_st *forloop, char *var, char *exprs)
+{
+
+    if (FOR_BLOCK(forloop) != NULL)
+    {
+        node_st *temp = forloop;
+
+        while (FOR_BLOCK(temp) != NULL)
+        {
+            temp = STMTS_STMT(FOR_BLOCK(temp));
+        }
+
+        FOR_BLOCK(temp) = ASTstmts(ASTassign(ASTvarlet(AIforloop_indices(forloop), var), ASTvar(NULL, exprs)), NULL);
+    }
+    else
+    {
+        FOR_BLOCK(forloop) = ASTstmts(ASTassign(ASTvarlet(AIforloop_indices(forloop), var), ASTvar(NULL, exprs)), NULL);
     }
 }
 
@@ -231,7 +301,8 @@ node_st *AIfundef(node_st *node)
 
         node_st *dimension = VARDECL_DIMS(declaration);
 
-        node_st *allocate = ASTfuncall(NULL, "__allocate");
+        node_st *allocate = ASTfuncall(NULL, "__allocate");      // To build the allocate function
+        node_st *forloop = ASTfor(NULL, NULL, NULL, NULL, NULL); // To build the forloop statement
 
         while (dimension != NULL)
         {
@@ -243,16 +314,30 @@ node_st *AIfundef(node_st *node)
             EXPRS_EXPR(dimension) = ASTvar(NULL, STRcpy(name));
 
             AIallocate(allocate, name);
+            AIforloop(forloop, name);
 
             dimension = EXPRS_NEXT(dimension);
         }
 
         if (VARDECL_INIT(declaration) != NULL) // Right hand side
         {
-            char *name = generate_temp_name();
-            node_st *lookup = AIlookup(FUNDEF_SYMTBL(node), VARDECL_NAME(declaration));
+            if (NODE_TYPE(VARDECL_INIT(declaration)) != NT_ARREXPR) // If we want to apply nested for loop assignment
+            {
+                char *name = generate_temp_name();
+                node_st *lookup = AIlookup(FUNDEF_SYMTBL(node), VARDECL_NAME(declaration));
 
-            AIsymtbl_attachbefore(FUNDEF_SYMTBL(node), lookup, ASTste(NULL, name, CT_int, AIadd_before(FUNDEF_BODY(node), STE_DECL(lookup), ASTvardecl(NULL, VARDECL_INIT(declaration), NULL, name, CT_int))));
+                AIsymtbl_attachbefore(FUNDEF_SYMTBL(node), lookup, ASTste(NULL, name, CT_int, AIadd_before(FUNDEF_BODY(node), STE_DECL(lookup), ASTvardecl(NULL, VARDECL_INIT(declaration), NULL, name, CT_int))));
+
+                AIforloop_assignment(forloop, VARDECL_NAME(declaration), name);
+
+                // Add for loop to statement
+                FUNBODY_STMTS(FUNDEF_BODY(node)) = ASTstmts(forloop, FUNBODY_STMTS(FUNDEF_BODY(node)));
+            }
+
+            if (NODE_TYPE(VARDECL_INIT(declaration)) == NT_ARREXPR) // If we want to apply scalar assignment.
+            {
+                // Array expression to set of assignments
+            }
         }
 
         // Assign with an allocate function

@@ -20,6 +20,8 @@
 void TCinit() { return; }
 void TCfini() { return; }
 
+enum Type inferred = CT_NULL;
+
 int TCdimensions(node_st *expr)
 {
     int dimensions = 0;
@@ -165,6 +167,30 @@ enum Type TCget_decl_type(node_st *decl)
     return CT_NULL;
 }
 
+enum Type TCget_inferred_type(enum Type inferred)
+{
+    switch (inferred)
+    {
+    case CT_int:
+        return CT_int;
+        break;
+    case CT_bool:
+        return CT_bool;
+        break;
+    case CT_float:
+        return CT_float;
+        break;
+    case CT_NULL:
+        return CT_NULL;
+        break;
+    case CT_void:
+        return CT_void;
+        break;
+    }
+
+    return CT_NULL;
+}
+
 node_st *TClookup(node_st *symtbl, char *identifier)
 {
     // Check if the symbol table and identifier are not null
@@ -245,7 +271,7 @@ node_st *TCfundef(node_st *node)
     if (TChasreturn(node))
     {
         TRAVchildren(node);
-        return_type = data->inferred;
+        return_type = inferred;
     }
     else
     {
@@ -254,6 +280,22 @@ node_st *TCfundef(node_st *node)
     }
 
     data->current_scope = outer;
+
+    // We check if function definitions are missing any kind of return statement.
+    if (FUNDEF_BODY(node) != NULL)
+    {
+        if (FUNBODY_DECLS(FUNDEF_BODY(node)) == NULL && FUNBODY_LOCAL_FUNDEFS(FUNDEF_BODY(node)) == NULL && FUNBODY_STMTS(FUNDEF_BODY(node)) == NULL)
+        {
+            if (fun_type == CT_bool || fun_type == CT_float || fun_type == CT_int)
+            {
+                // We sent error if any other expressions mistmatches on type
+                CTI(CTI_ERROR, true, "\n Error: Missing return statement at: line: %d col: %d-%d. \n",
+                    NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
+
+                return node;
+            }
+        }
+    }
 
     // check if fun type matches return type
     if (fun_type != return_type)
@@ -273,9 +315,26 @@ node_st *TCfundef(node_st *node)
  */
 node_st *TCassign(node_st *node)
 {
-    // struct data_tc *data = DATA_TC_GET();
+
+    // Traverse let
+    TRAVlet(node);
+    // Get inferred type
+    enum Type let = inferred;
+
+    // Traverse expr
+    TRAVexpr(node);
+    // Get inferred type
+    enum Type expr = inferred;
 
     // Type check
+    if (let != expr)
+    {
+        // We sent error if any other expressions mistmatches on type
+        CTI(CTI_ERROR, true, "\n Error: Invalid assign statement at: line: %d col: %d-%d. \n",
+            NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
+
+        return node;
+    }
 
     // If expr is var
     // If expr is not var
@@ -290,11 +349,9 @@ node_st *TCassign(node_st *node)
  */
 node_st *TCifelse(node_st *node)
 {
-    struct data_tc *data = DATA_TC_GET();
-
     // Traverse cond and infer type
     TRAVcond(node);
-    enum Type cond_type = data->inferred;
+    enum Type cond_type = inferred;
 
     // Must match bool
     if (cond_type != CT_bool)
@@ -314,11 +371,9 @@ node_st *TCifelse(node_st *node)
  */
 node_st *TCwhile(node_st *node)
 {
-    struct data_tc *data = DATA_TC_GET();
-
     // Traverse cond and infer type
     TRAVcond(node);
-    enum Type cond_type = data->inferred;
+    enum Type cond_type = inferred;
 
     // Must match bool
     if (cond_type != CT_bool)
@@ -338,11 +393,9 @@ node_st *TCwhile(node_st *node)
  */
 node_st *TCdowhile(node_st *node)
 {
-    struct data_tc *data = DATA_TC_GET();
-
     // Traverse cond and infer type
     TRAVcond(node);
-    enum Type cond_type = data->inferred;
+    enum Type cond_type = inferred;
 
     // Must match bool
     if (cond_type != CT_bool)
@@ -362,11 +415,9 @@ node_st *TCdowhile(node_st *node)
  */
 node_st *TCfor(node_st *node)
 {
-    struct data_tc *data = DATA_TC_GET();
-
     // Traverse stop and infer type
     TRAVstop(node);
-    enum Type stop_type = data->inferred;
+    enum Type stop_type = inferred;
 
     // Must match num
     if (stop_type != CT_int)
@@ -374,13 +425,11 @@ node_st *TCfor(node_st *node)
         // We sent error if any other expressions mistmatches on type
         CTI(CTI_ERROR, true, "\n Type error in loop expression: at: line: %d col: %d-%d. \n",
             NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
-
-        return node;
     }
 
     // Traverse step and infer type
     TRAVstep(node);
-    enum Type step_type = data->inferred;
+    enum Type step_type = inferred;
 
     // Must match num
     if (step_type != CT_int)
@@ -388,8 +437,6 @@ node_st *TCfor(node_st *node)
         // We sent error if any other expressions mistmatches on type
         CTI(CTI_ERROR, true, "\n Type error in loop expression: at: line: %d col: %d-%d. \n",
             NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
-
-        return node;
     }
 
     return node;
@@ -400,14 +447,8 @@ node_st *TCfor(node_st *node)
  */
 node_st *TCreturn(node_st *node)
 {
-    struct data_tc *data = DATA_TC_GET();
-
     // Traverse expressison
     TRAVexpr(node);
-    enum Type expr_type = data->inferred;
-
-    // Infer type
-    data->inferred = expr_type;
 
     return node;
 }
@@ -417,23 +458,23 @@ node_st *TCreturn(node_st *node)
  */
 node_st *TCcast(node_st *node)
 {
-    struct data_tc *data = DATA_TC_GET();
-
     // We infer the type based on the type being cast. Bool, Int and Float are compatible with eachother.
     switch (CAST_TYPE(node))
     {
     case CT_int:
-        data->inferred = CT_int;
+        inferred = CT_int;
         break;
     case CT_bool:
-        data->inferred = CT_bool;
+        inferred = CT_bool;
         break;
     case CT_float:
-        data->inferred = CT_float;
+        inferred = CT_float;
         break;
     case CT_void:
+        inferred = CT_void;
         break;
     case CT_NULL:
+        inferred = CT_NULL;
         break;
     }
 
@@ -464,7 +505,7 @@ node_st *TCfuncall(node_st *node)
 
         TRAVexpr(arg);
 
-        enum Type arg_type = data->inferred;
+        enum Type arg_type = inferred;
 
         // We check if the types align.
         if (param_type != arg_type)
@@ -476,30 +517,12 @@ node_st *TCfuncall(node_st *node)
             return node;
         }
 
-        // if (NODE_TYPE(EXPRS_EXPR(arg)) == NT_VAR) // If we are dealing with a VAR
-        // {
-        //     int param_dims_count = TCcountindices(param);
-
-        //     node_st *decl = STE_DECL(TClookup(FUNDEF_SYMTBL(data->current_scope), VAR_NAME(EXPRS_EXPR(arg))));
-
-        //     int arg_dims_count = TCcountindices(decl);
-
-        //     if (param_dims_count != arg_dims_count)
-        //     {
-        //         // We sent error if any other expressions mistmatches on type
-        //         CTI(CTI_ERROR, true, "\n Function parameter types don't match: at: line: %d col: %d-%d. \n",
-        //             NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
-
-        //         return node;
-        //     }
-        // }
-
         arg = EXPRS_NEXT(arg);
         param = PARAM_NEXT(param);
     }
 
     // We infer type num or float if all expressions are one of two.
-    data->inferred = type;
+    inferred = type;
 
     return node;
 }
@@ -509,14 +532,12 @@ node_st *TCfuncall(node_st *node)
  */
 node_st *TCarrexpr(node_st *node)
 {
-    struct data_tc *data = DATA_TC_GET();
-
     // We First want to determine dimension of first element (If it has dimensions)
     int dimension = TCdimensions(EXPRS_EXPR(ARREXPR_EXPRS(node)));
 
     // Then we want to determine type of first element.
     TRAVexpr(ARREXPR_EXPRS(node));
-    enum Type arrtype = data->inferred;
+    enum Type arrtype = inferred;
 
     // Then we loop through all other expressions and test if the values are the same. If not we send a an error
     node_st *temp = EXPRS_NEXT(ARREXPR_EXPRS(node));
@@ -526,7 +547,7 @@ node_st *TCarrexpr(node_st *node)
     {
         TRAVexpr(temp);
 
-        if (arrtype != data->inferred)
+        if (arrtype != inferred)
         {
             // We sent error if any other expressions mistmatches on type
             CTI(CTI_ERROR, true, "\n Mixed types error: at: line: %d col: %d-%d. \n",
@@ -548,7 +569,7 @@ node_st *TCarrexpr(node_st *node)
     }
 
     // We infer type num or float if all expressions are one of two.
-    data->inferred = arrtype;
+    inferred = arrtype;
 
     return node;
 }
@@ -558,19 +579,15 @@ node_st *TCarrexpr(node_st *node)
  */
 node_st *TCbinop(node_st *node)
 {
-    struct data_tc *data = DATA_TC_GET();
-
     // Traverse left
     TRAVleft(node);
-
     // Get inferred type
-    enum Type left = data->inferred;
+    enum Type left = inferred;
 
     // Traverse right
     TRAVright(node);
-
     // Get inferred type
-    enum Type right = data->inferred;
+    enum Type right = inferred;
 
     // Infer the correct types.
     switch (BINOP_OP(node)) // Arithmetic operators
@@ -579,19 +596,19 @@ node_st *TCbinop(node_st *node)
     case BO_mul:
         if (left == CT_bool && right == CT_bool)
         {
-            data->inferred = CT_bool;
+            inferred = CT_bool;
             BINOP_TYPE(node) = CT_bool;
             return node;
         }
         else if (left == CT_int && right == CT_int)
         {
-            data->inferred = CT_int;
+            inferred = CT_int;
             BINOP_TYPE(node) = CT_int;
             return node;
         }
         else if (left == CT_float && right == CT_float)
         {
-            data->inferred = CT_float;
+            inferred = CT_float;
             BINOP_TYPE(node) = CT_float;
             return node;
         }
@@ -600,13 +617,13 @@ node_st *TCbinop(node_st *node)
     case BO_div:
         if (left == CT_int && right == CT_int)
         {
-            data->inferred = CT_int;
+            inferred = CT_int;
             BINOP_TYPE(node) = CT_int;
             return node;
         }
         else if (left == CT_float && right == CT_float)
         {
-            data->inferred = CT_float;
+            inferred = CT_float;
             BINOP_TYPE(node) = CT_float;
             return node;
         }
@@ -614,22 +631,18 @@ node_st *TCbinop(node_st *node)
     case BO_mod:
         if (left == CT_int && right == CT_int)
         {
-            data->inferred = CT_int;
+            inferred = CT_int;
             BINOP_TYPE(node) = CT_int;
             return node;
         }
         break;
-    }
-
-    switch (BINOP_OP(node)) // Equality operators
-    {
     case BO_lt:
     case BO_le:
     case BO_gt:
     case BO_ge:
         if ((left == CT_int || left == CT_float) && (right == CT_int || right == CT_float))
         {
-            data->inferred = CT_bool;
+            inferred = CT_bool;
             BINOP_TYPE(node) = CT_bool;
             return node;
         }
@@ -638,20 +651,16 @@ node_st *TCbinop(node_st *node)
     case BO_ne:
         if (left == right && (left == CT_bool || left == CT_int || left == CT_float))
         {
-            data->inferred = CT_bool;
+            inferred = CT_bool;
             BINOP_TYPE(node) = CT_bool;
             return node;
         }
         break;
-    }
-
-    switch (BINOP_OP(node)) // Logical operators
-    {
     case BO_and:
     case BO_or:
         if (left == CT_bool && right == CT_bool)
         {
-            data->inferred = CT_bool;
+            inferred = CT_bool;
             BINOP_TYPE(node) = CT_bool;
             return node;
         }
@@ -670,20 +679,18 @@ node_st *TCbinop(node_st *node)
  */
 node_st *TCmonop(node_st *node)
 {
-    struct data_tc *data = DATA_TC_GET();
-
     // Traverse operand
     TRAVoperand(node);
 
     // Get inferred type
-    enum Type type = data->inferred;
+    enum Type type = inferred;
 
     // We infer the type bool when negation with bool.
     if (MONOP_OP(node) == MO_neg)
     {
         if (type == CT_bool)
         {
-            data->inferred = CT_bool;
+            inferred = CT_bool;
             MONOP_TYPE(node) = CT_bool;
             return node;
         }
@@ -694,14 +701,14 @@ node_st *TCmonop(node_st *node)
     {
         if (type == CT_float)
         {
-            data->inferred = CT_float;
+            inferred = CT_float;
             MONOP_TYPE(node) = CT_float;
             return node;
         }
 
         if (type == CT_int)
         {
-            data->inferred = CT_int;
+            inferred = CT_int;
             MONOP_TYPE(node) = CT_int;
             return node;
         }
@@ -722,30 +729,13 @@ node_st *TCvar(node_st *node)
     struct data_tc *data = DATA_TC_GET();
 
     // We infer type
-    node_st *decl = STE_DECL(TClookup(FUNDEF_SYMTBL(data->current_scope), VAR_NAME(node)));
-
-    enum Type type;
-
-    if (NODE_TYPE(decl) == NT_VARDECL)
-    {
-        type = VARDECL_TYPE(decl);
-    }
-
-    if (NODE_TYPE(decl) == NT_GLOBDEF)
-    {
-        type = GLOBDEF_TYPE(decl);
-    }
-
-    if (NODE_TYPE(decl) == NT_GLOBDECL)
-    {
-        type = GLOBDECL_TYPE(decl);
-    }
+    node_st *ste = TClookup(FUNDEF_SYMTBL(data->current_scope), VAR_NAME(node));
+    enum Type type = STE_TYPE(ste);
 
     // We do a indices check
     if (VAR_INDICES(node) != NULL)
     {
-        int decl_dims_count = TCcountindices(decl);
-
+        int decl_dims_count = TCcountindices(STE_DECL(ste));
         int indices_count = TCcountindices(node);
 
         if (decl_dims_count != indices_count)
@@ -758,22 +748,7 @@ node_st *TCvar(node_st *node)
         }
     }
 
-    switch (type)
-    {
-    case CT_int:
-        data->inferred = CT_int;
-        break;
-    case CT_bool:
-        data->inferred = CT_bool;
-        break;
-    case CT_float:
-        data->inferred = CT_float;
-        break;
-    case CT_void:
-        break;
-    case CT_NULL:
-        break;
-    }
+    inferred = type;
 
     return node;
 }
@@ -786,29 +761,14 @@ node_st *TCvarlet(node_st *node)
     struct data_tc *data = DATA_TC_GET();
 
     // We infer type
-    node_st *decl = STE_DECL(TClookup(FUNDEF_SYMTBL(data->current_scope), VARLET_NAME(node)));
+    node_st *ste = TClookup(FUNDEF_SYMTBL(data->current_scope), VARLET_NAME(node));
 
-    enum Type type;
+    enum Type type = STE_TYPE(ste);
 
-    if (NODE_TYPE(decl) == NT_VARDECL)
-    {
-        type = VARDECL_TYPE(decl);
-    }
-
-    if (NODE_TYPE(decl) == NT_GLOBDEF)
-    {
-        type = GLOBDEF_TYPE(decl);
-    }
-
-    if (NODE_TYPE(decl) == NT_GLOBDECL)
-    {
-        type = GLOBDECL_TYPE(decl);
-    }
-
-    if (NODE_TYPE(decl) == NT_PARAM && PARAM_DIMS(decl) != NULL)
+    if (NODE_TYPE(ste) == NT_PARAM && PARAM_DIMS(ste) != NULL)
     {
         // We do a indices check if this varlet is simply a assign varlet.
-        int decl_dims_count = TCcountindices(decl);
+        int decl_dims_count = TCcountindices(STE_DECL(ste));
 
         int indices_count = TCcountindices(node);
 
@@ -822,22 +782,7 @@ node_st *TCvarlet(node_st *node)
         }
     }
 
-    switch (type)
-    {
-    case CT_int:
-        data->inferred = CT_int;
-        break;
-    case CT_bool:
-        data->inferred = CT_bool;
-        break;
-    case CT_void:
-        break;
-    case CT_NULL:
-        break;
-    case CT_float:
-        data->inferred = CT_float;
-        break;
-    }
+    inferred = type;
 
     return node;
 }
@@ -847,10 +792,8 @@ node_st *TCvarlet(node_st *node)
  */
 node_st *TCfloat(node_st *node)
 {
-    struct data_tc *data = DATA_TC_GET();
-
     // We infer the type CT_float
-    data->inferred = CT_float;
+    inferred = CT_float;
 
     return node;
 }
@@ -860,10 +803,8 @@ node_st *TCfloat(node_st *node)
  */
 node_st *TCbool(node_st *node)
 {
-    struct data_tc *data = DATA_TC_GET();
-
     // We infer the type CT_bool
-    data->inferred = CT_bool;
+    inferred = CT_bool;
 
     return node;
 }
@@ -873,10 +814,8 @@ node_st *TCbool(node_st *node)
  */
 node_st *TCnum(node_st *node)
 {
-    struct data_tc *data = DATA_TC_GET();
-
     // We infer the type CT_num
-    data->inferred = CT_int;
+    inferred = CT_int;
 
     return node;
 }

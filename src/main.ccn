@@ -65,8 +65,7 @@ phase ContextAnalysis {
             uid = TC,
             nodes = {Program, Fundef, Assign, IfElse, While, DoWhile, For, Return, Cast, FunCall, Var, VarLet, ArrExpr, Binop, Monop, Float, Bool, Num},
             travdata {
-                user node_ptr current_scope,
-                Type inferred
+                user node_ptr current_scope
             }
         };
         traversal ParameterPassing {
