@@ -316,6 +316,11 @@ node_st *TCfundef(node_st *node)
 node_st *TCassign(node_st *node)
 {
 
+    struct data_tc *data = DATA_TC_GET();
+
+    // We infer type
+    node_st *ste = TClookup(FUNDEF_SYMTBL(data->current_scope), VARLET_NAME(ASSIGN_LET(node)));
+
     // Traverse let
     TRAVlet(node);
     // Get inferred type
@@ -334,6 +339,21 @@ node_st *TCassign(node_st *node)
             NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
 
         return node;
+    }
+
+    if (VARLET_INDICES(ASSIGN_LET(node)) != NULL)
+    {
+        int varlet_indices = TCcountindices(ASSIGN_LET(node));
+        int decl_indices = TCcountindices(STE_DECL(ste));
+
+        if (varlet_indices != decl_indices)
+        {
+            // We sent error if any other expressions mistmatches on type
+            CTI(CTI_ERROR, true, "\n Error: Invalid assign statement at: line: %d col: %d-%d. \n",
+                NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
+
+            return node;
+        }
     }
 
     // If expr is var
