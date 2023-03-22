@@ -2,7 +2,6 @@
 
 struct globals global;
 
-
 /*
  * Initialize global variables from globals.mac
  */

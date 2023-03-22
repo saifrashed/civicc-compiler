@@ -22,9 +22,7 @@ node_st *CTcast(node_st *node)
 {
     // Trav expression
 
-    // If value is either = true we change this cast expression to ASTnum of 1
-
-    // If value is either = false we change this cast expression to ASTnum of 0
+    // For each Cast operation with a boolean we replace the expression with a ternary (bool) ? 1 : 0 - using the ternary node.
 
     return node;
 }

@@ -316,9 +316,15 @@ node_st *TCfundef(node_st *node)
 node_st *TCassign(node_st *node)
 {
 
+    // skip allocate
+
+    if (NODE_TYPE(ASSIGN_EXPR(node)) == NT_FUNCALL && STReq(FUNCALL_NAME(ASSIGN_EXPR(node)), "__allocate"))
+    {
+        return node;
+    }
+
     struct data_tc *data = DATA_TC_GET();
 
-    // We infer type
     node_st *ste = TClookup(FUNDEF_SYMTBL(data->current_scope), VARLET_NAME(ASSIGN_LET(node)));
 
     // Traverse let
@@ -331,7 +337,7 @@ node_st *TCassign(node_st *node)
     // Get inferred type
     enum Type expr = inferred;
 
-    // Type check
+    // Type check if assignment doesnt have a function call with allocate
     if (let != expr)
     {
         // We sent error if any other expressions mistmatches on type
@@ -355,11 +361,6 @@ node_st *TCassign(node_st *node)
             return node;
         }
     }
-
-    // If expr is var
-    // If expr is not var
-
-    TRAVchildren(node);
 
     return node;
 }
@@ -543,53 +544,6 @@ node_st *TCfuncall(node_st *node)
 
     // We infer type num or float if all expressions are one of two.
     inferred = type;
-
-    return node;
-}
-
-/**
- * @fn TCarrexpr
- */
-node_st *TCarrexpr(node_st *node)
-{
-    // We First want to determine dimension of first element (If it has dimensions)
-    int dimension = TCdimensions(EXPRS_EXPR(ARREXPR_EXPRS(node)));
-
-    // Then we want to determine type of first element.
-    TRAVexpr(ARREXPR_EXPRS(node));
-    enum Type arrtype = inferred;
-
-    // Then we loop through all other expressions and test if the values are the same. If not we send a an error
-    node_st *temp = EXPRS_NEXT(ARREXPR_EXPRS(node));
-
-    // Loop through all expressions.
-    while (temp != NULL)
-    {
-        TRAVexpr(temp);
-
-        if (arrtype != inferred)
-        {
-            // We sent error if any other expressions mistmatches on type
-            CTI(CTI_ERROR, true, "\n Mixed types error: at: line: %d col: %d-%d. \n",
-                NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
-
-            return node;
-        }
-
-        if (dimension != TCdimensions(EXPRS_EXPR(temp)))
-        {
-            // We sent error if any other expressions mistmatches on dimensions
-            CTI(CTI_ERROR, true, "\n Mixed dimensions error: at: line: %d col: %d-%d. \n",
-                NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
-
-            return node;
-        }
-
-        temp = EXPRS_NEXT(temp);
-    }
-
-    // We infer type num or float if all expressions are one of two.
-    inferred = arrtype;
 
     return node;
 }

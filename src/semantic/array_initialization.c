@@ -283,7 +283,7 @@ void AIarrexpr_to_assignment(char *var, node_st *fundef, node_st *arrexpr, int l
             index++;
         }
 
-        if (NODE_TYPE(EXPRS_EXPR(temp)) == NT_FLOAT)
+        if (NODE_TYPE(EXPRS_EXPR(temp)) == NT_NUM || NODE_TYPE(EXPRS_EXPR(temp)) == NT_FLOAT)
         {
             indices[level] = index;
 
@@ -297,30 +297,15 @@ void AIarrexpr_to_assignment(char *var, node_st *fundef, node_st *arrexpr, int l
                 }
                 else
                 {
-                    exprs = ASTexprs(ASTnum(indices[i]), exprs);
-                }
-            }
 
-            FUNBODY_STMTS(FUNDEF_BODY(fundef)) = ASTstmts(ASTassign(ASTvarlet(exprs, STRcpy(var)), EXPRS_EXPR(temp)), FUNBODY_STMTS(FUNDEF_BODY(fundef)));
+                    node_st *temp_exprs = exprs;
 
-            index++;
-        }
+                    while (EXPRS_NEXT(temp_exprs) != NULL)
+                    {
+                        temp_exprs = EXPRS_NEXT(temp_exprs);
+                    }
 
-        if (NODE_TYPE(EXPRS_EXPR(temp)) == NT_NUM)
-        {
-            indices[level] = index;
-
-            node_st *exprs = NULL;
-
-            for (int i = 0; i <= level; i++)
-            {
-                if (exprs == NULL)
-                {
-                    exprs = ASTexprs(ASTnum(indices[i]), NULL);
-                }
-                else
-                {
-                    exprs = ASTexprs(ASTnum(indices[i]), exprs);
+                    EXPRS_NEXT(temp_exprs) = ASTexprs(ASTnum(indices[i]), NULL);
                 }
             }
 

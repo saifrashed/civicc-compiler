@@ -84,44 +84,6 @@ node_st *PPadd_before_param(node_st *fundef, node_st *before, node_st *new)
             return new;
         }
     }
-    return NULL;
-}
-
-node_st *PPadd_before_arg(node_st *funcall, node_st *before, node_st *new)
-{
-    node_st *entry = FUNCALL_ARGS(funcall);
-    node_st *previous = NULL;
-
-    while (entry != NULL)
-    {
-
-        if (VAR_NAME(EXPRS_EXPR(entry)) == VAR_NAME(EXPRS_EXPR(before)))
-        {
-            printf("FOUND");
-            break;
-        }
-
-        previous = entry;
-        entry = EXPRS_NEXT(entry);
-    }
-
-    if (entry != NULL)
-    {
-        // The desired vardecl is found
-        if (previous == NULL)
-        {
-            EXPRS_NEXT(new) = before;
-            FUNCALL_ARGS(funcall) = new;
-            return new;
-        }
-        else
-        {
-            EXPRS_NEXT(previous) = new;
-            EXPRS_NEXT(new) = entry;
-            return new;
-        }
-    }
-    return NULL;
 }
 
 /**
@@ -148,6 +110,33 @@ node_st *PPfundef(node_st *node)
     node_st *outer = data->current_scope;
 
     data->current_scope = node;
+
+    node_st *temp_param = FUNDEF_PARAMS(node);
+
+    while (temp_param != NULL)
+    {
+
+        if (PARAM_DIMS(temp_param) != NULL)
+        { // This parameter has dimensions
+            node_st *temp_dim = PARAM_DIMS(temp_param);
+
+            while (temp_dim != NULL)
+            {
+
+                printf("%s\n", IDS_NAME(temp_dim));
+                // node_st *ste = PPlookup(FUNDEF_SYMTBL(node), IDS_NAME(temp_dim));
+
+                // node_st *new = PPadd_before_param(node, temp_param, CCNcopy(ASTparam(NULL, NULL, IDS_NAME(temp_dim), CT_int)));
+
+                // // // We link the ste with the actual parameter
+                // STE_DECL(ste) = new;
+
+                temp_dim = IDS_NEXT(temp_dim);
+            }
+        }
+
+        temp_param = PARAM_NEXT(temp_param);
+    }
 
     TRAVchildren(node);
 
@@ -231,3 +220,40 @@ node_st *PPfuncall(node_st *node)
 
 //         temp_param = PARAM_NEXT(temp_param);
 //     }
+
+// node_st *PPadd_before_arg(node_st *funcall, node_st *before, node_st *new)
+// {
+//     node_st *entry = FUNCALL_ARGS(funcall);
+//     node_st *previous = NULL;
+
+//     while (entry != NULL)
+//     {
+
+//         if (VAR_NAME(EXPRS_EXPR(entry)) == VAR_NAME(EXPRS_EXPR(before)))
+//         {
+//             printf("FOUND");
+//             break;
+//         }
+
+//         previous = entry;
+//         entry = EXPRS_NEXT(entry);
+//     }
+
+//     if (entry != NULL)
+//     {
+//         // The desired vardecl is found
+//         if (previous == NULL)
+//         {
+//             EXPRS_NEXT(new) = before;
+//             FUNCALL_ARGS(funcall) = new;
+//             return new;
+//         }
+//         else
+//         {
+//             EXPRS_NEXT(previous) = new;
+//             EXPRS_NEXT(new) = entry;
+//             return new;
+//         }
+//     }
+//     return NULL;
+// }

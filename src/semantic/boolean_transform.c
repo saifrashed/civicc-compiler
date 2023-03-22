@@ -21,5 +21,7 @@
 node_st *BTbinop(node_st *node)
 {
 
+    // We convert each binop with and/or to a equel ternary expression.
+
     return node;
 }
