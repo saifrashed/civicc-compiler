@@ -116,7 +116,7 @@ int TCcountindices(node_st *expr)
     return count;
 }
 
-bool TChasreturn(node_st *fundef)
+bool TChas_return(node_st *fundef)
 {
 
     node_st *funbody = FUNDEF_BODY(fundef);
@@ -252,60 +252,26 @@ node_st *TCprogram(node_st *node)
  */
 node_st *TCfundef(node_st *node)
 {
-
     // If __init or __allocate we skip type checking
     if (STReq(FUNDEF_NAME(node), "__allocate") || STReq(FUNDEF_NAME(node), "__init"))
     {
         return node;
     }
 
-    struct data_tc *data = DATA_TC_GET();
-    node_st *outer = data->current_scope;
-
-    enum Type fun_type = FUNDEF_TYPE(node);
-
-    data->current_scope = node;
-
-    enum Type return_type;
-
-    if (TChasreturn(node))
+    if (FUNDEF_TYPE(node) == CT_void && TChas_return(node))
     {
-        TRAVchildren(node);
-        return_type = inferred;
-    }
-    else
-    {
-        TRAVchildren(node);
-        return_type = fun_type;
-    }
-
-    data->current_scope = outer;
-
-    // We check if function definitions are missing any kind of return statement.
-    if (FUNDEF_BODY(node) != NULL)
-    {
-        if (FUNBODY_DECLS(FUNDEF_BODY(node)) == NULL && FUNBODY_LOCAL_FUNDEFS(FUNDEF_BODY(node)) == NULL && FUNBODY_STMTS(FUNDEF_BODY(node)) == NULL)
-        {
-            if (fun_type == CT_bool || fun_type == CT_float || fun_type == CT_int)
-            {
-                // We sent error if any other expressions mistmatches on type
-                CTI(CTI_ERROR, true, "\n Error: Missing return statement at: line: %d col: %d-%d. \n",
-                    NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
-
-                return node;
-            }
-        }
-    }
-
-    // check if fun type matches return type
-    if (fun_type != return_type)
-    {
-        // We sent error if any other expressions mistmatches on type
+        // We sent error if void function contains a return statement.
         CTI(CTI_ERROR, true, "\n Error: Invalid return statement at: line: %d col: %d-%d. \n",
             NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
-
-        return node;
     }
+
+    struct data_tc *data = DATA_TC_GET();
+    node_st *outer = data->current_scope;
+    data->current_scope = node;
+
+    TRAVchildren(node);
+
+    data->current_scope = outer;
 
     return node;
 }
@@ -315,9 +281,7 @@ node_st *TCfundef(node_st *node)
  */
 node_st *TCassign(node_st *node)
 {
-
     // skip allocate
-
     if (NODE_TYPE(ASSIGN_EXPR(node)) == NT_FUNCALL && STReq(FUNCALL_NAME(ASSIGN_EXPR(node)), "__allocate"))
     {
         return node;
@@ -468,8 +432,23 @@ node_st *TCfor(node_st *node)
  */
 node_st *TCreturn(node_st *node)
 {
+    struct data_tc *data = DATA_TC_GET();
+
+    // We determine function type
+    enum Type fun_type = FUNDEF_TYPE(data->current_scope);
+
     // Traverse expressison
+    enum Type return_type = inferred;
+
     TRAVexpr(node);
+    return_type = inferred;
+
+    if (fun_type != return_type)
+    {
+        // We sent error if any other return expressions mistmatches on function type
+        CTI(CTI_ERROR, true, "\n Error: Invalid return type at: line: %d col: %d-%d. \n",
+            NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
+    }
 
     return node;
 }
@@ -519,13 +498,12 @@ node_st *TCfuncall(node_st *node)
 
     node_st *arg = FUNCALL_ARGS(node);
 
-    while (param != NULL)
+    while (param != NULL && arg != NULL)
     {
         // If any pair has different types, then the types don't match and we sent an error.
         enum Type param_type = PARAM_TYPE(param);
 
         TRAVexpr(arg);
-
         enum Type arg_type = inferred;
 
         // We check if the types align.

@@ -57,32 +57,50 @@ node_st *PPlookup(node_st *symtbl, char *identifier)
     return NULL;
 }
 
-node_st *PPadd_before_param(node_st *fundef, node_st *before, node_st *new)
+node_st *PPadd_before_param(node_st *fundef, char *search, char *identifier)
 {
-    node_st *entry = FUNDEF_PARAMS(fundef);
-    node_st *previous = NULL;
 
-    while (PARAM_NEXT(entry) != NULL && PARAM_NAME(entry) != PARAM_NAME(before))
+    node_st *temp = FUNDEF_PARAMS(fundef);
+
+    node_st *previous = NULL;
+    node_st *current = NULL;
+    node_st *new = ASTparam(NULL, NULL, identifier, CT_int);
+
+    if (temp == NULL)
     {
-        previous = entry;
-        entry = PARAM_NEXT(entry);
+        return NULL; // Empty parameter list, nothing to do
     }
 
-    if (entry != NULL)
+    while (temp != NULL)
     {
-        // The desired vardecl is found
-        if (previous == NULL)
+
+        if (STReq(PARAM_NAME(temp), search))
         {
-            PARAM_NEXT(new) = before;
-            FUNDEF_PARAMS(fundef) = new;
-            return new;
+            // Found the desired parameter
+            current = temp;
+            break; // Exit the loop
         }
-        else
-        {
-            PARAM_NEXT(previous) = new;
-            PARAM_NEXT(new) = entry;
-            return new;
-        }
+
+        previous = temp; // Update the previous node
+        temp = PARAM_NEXT(temp);
+    }
+
+    if (previous == NULL)
+    {
+        // The first parameter is the one we're searching for
+        // We need to add the new parameter as the first one
+        PARAM_NEXT(new) = current;
+        FUNDEF_PARAMS(fundef) = new;
+
+        return FUNDEF_PARAMS(fundef);
+    }
+    else
+    {
+        // Add the new parameter between the previous and current nodes
+        PARAM_NEXT(new) = current;
+        PARAM_NEXT(previous) = new;
+
+        return PARAM_NEXT(previous);
     }
 }
 
@@ -109,8 +127,6 @@ node_st *PPfundef(node_st *node)
     struct data_pp *data = DATA_PP_GET();
     node_st *outer = data->current_scope;
 
-    data->current_scope = node;
-
     node_st *temp_param = FUNDEF_PARAMS(node);
 
     while (temp_param != NULL)
@@ -122,14 +138,12 @@ node_st *PPfundef(node_st *node)
 
             while (temp_dim != NULL)
             {
+                node_st *ste = PPlookup(FUNDEF_SYMTBL(node), IDS_NAME(temp_dim));
 
-                printf("%s\n", IDS_NAME(temp_dim));
-                // node_st *ste = PPlookup(FUNDEF_SYMTBL(node), IDS_NAME(temp_dim));
+                node_st *param = PPadd_before_param(node, STRcpy(PARAM_NAME(temp_param)), STRcpy(IDS_NAME(temp_dim)));
 
-                // node_st *new = PPadd_before_param(node, temp_param, CCNcopy(ASTparam(NULL, NULL, IDS_NAME(temp_dim), CT_int)));
-
-                // // // We link the ste with the actual parameter
-                // STE_DECL(ste) = new;
+                // We link the ste with the actual parameter
+                STE_DECL(ste) = param;
 
                 temp_dim = IDS_NEXT(temp_dim);
             }
@@ -137,6 +151,8 @@ node_st *PPfundef(node_st *node)
 
         temp_param = PARAM_NEXT(temp_param);
     }
+
+    data->current_scope = node;
 
     TRAVchildren(node);
 
@@ -151,8 +167,68 @@ node_st *PPfundef(node_st *node)
 node_st *PPfuncall(node_st *node)
 {
 
+    struct data_pp *data = DATA_PP_GET();
+    node_st *outer = data->current_scope;
+    node_st *temp_arg = FUNCALL_ARGS(node);
+
+    while (temp_arg != NULL)
+    {
+
+        if (NODE_TYPE(EXPRS_EXPR(temp_arg)) == NT_VAR)
+        {
+            node_st *ste = PPlookup(FUNDEF_SYMTBL(outer), VAR_NAME(EXPRS_EXPR(temp_arg)));
+
+            node_st *decl = STE_DECL(ste);
+
+            if (NODE_TYPE(decl) == NT_PARAM)
+            {
+                printf("NT_PARAM\n");
+            }
+
+            if (NODE_TYPE(decl) == NT_GLOBDECL)
+            {
+                printf("NT_GLOBDECL\n");
+            }
+
+            if (NODE_TYPE(decl) == NT_VARDECL)
+            {
+                printf("NT_VARDECL\n");
+
+                // Als het een var is dan koppelen we deze nieuwe argument met de STE.
+            }
+
+            if (NODE_TYPE(decl) == NT_GLOBDEF)
+            {
+                printf("NT_GLOBDEF\n");
+
+                // Als het een var is dan koppelen we deze nieuwe argument met de STE.
+            }
+        }
+
+        temp_arg = EXPRS_NEXT(temp_arg);
+    }
+
+    TRAVchildren(node);
+
     return node;
 }
+
+// if (PARAM_DIMS(decl) != NULL)
+//                 { // This argument has dimensions
+//                     node_st *temp_dim = PARAM_DIMS(decl);
+
+//                     while (temp_dim != NULL)
+//                     {
+//                         node_st *ste = PPlookup(FUNDEF_SYMTBL(outer), IDS_NAME(temp_dim));
+
+//                         // // We link the ste with the actual parameter
+//                         node_st *new = PPadd_before_arg(node, temp_arg, CCNcopy(ASTexprs(ASTvar(NULL, IDS_NAME(temp_dim)), NULL)));
+
+//                         VAR_ENTRY(EXPRS_EXPR(new)) = ste;
+
+//                         temp_dim = IDS_NEXT(temp_dim);
+//                     }
+//                 }
 
 //  struct data_pp *data = DATA_PP_GET();
 //     node_st *outer = data->current_scope;

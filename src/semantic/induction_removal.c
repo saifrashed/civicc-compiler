@@ -118,8 +118,6 @@ node_st *IRfor(node_st *node)
         // Get current scope
         struct data_ir *data = DATA_IR_GET();
 
-        printf("IRfor \n");
-
         node_st *outer_scope = data->current_scope;
 
         // Generate unique suffix for variable name

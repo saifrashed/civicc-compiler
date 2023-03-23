@@ -455,10 +455,12 @@ stmt: assign
       | RETURN SEMICOLON // example: return;
       {
         $$ = ASTreturn(NULL);
+        AddLocToNode($$, &@1, &@1);
       }
       | RETURN expr SEMICOLON // example: return 1;
       {
         $$ = ASTreturn($2);
+        AddLocToNode($$, &@1, &@1);
       };
 
 
