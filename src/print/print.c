@@ -477,6 +477,13 @@ node_st *PRTifelse(node_st *node)
 node_st *PRTternary(node_st *node)
 {
 
+  printf("(");
+  TRAVcond(node);
+  printf(") ? ");
+  TRAVthen(node);
+  printf(" : ");
+  TRAVelse_block(node);
+
   return node;
 }
 

@@ -45,7 +45,7 @@ add_executable(civicc ${FLEX_CivicLexer_OUTPUTS} ${BISON_CivicParser_OUTPUTS}
     src/semantic/type_checker.c
     src/semantic/parameter_passing.c
     src/semantic/boolean_transform.c
-    src/semantic/cast_transform.c
+    src/semantic/loop_transform.c
     src/semantic/code_generation.c
 )
 

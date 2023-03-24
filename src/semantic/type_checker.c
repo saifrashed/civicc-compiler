@@ -462,12 +462,31 @@ node_st *TCcast(node_st *node)
     switch (CAST_TYPE(node))
     {
     case CT_int:
+
+        TRAVexpr(node);
+
+        if (inferred == CT_bool)
+        {
+            node_st *ternary = ASTternary(CAST_EXPR(node), ASTnum(1), ASTnum(0));
+            CAST_EXPR(node) = CCNcopy(ternary);
+        }
+
         inferred = CT_int;
+
         break;
     case CT_bool:
         inferred = CT_bool;
         break;
     case CT_float:
+
+        TRAVexpr(node);
+
+        if (inferred == CT_bool)
+        {
+            node_st *ternary = ASTternary(CAST_EXPR(node), ASTfloat(1.0), ASTnum(0.0));
+            CAST_EXPR(node) = CCNcopy(ternary);
+        }
+
         inferred = CT_float;
         break;
     case CT_void:
@@ -512,6 +531,9 @@ node_st *TCfuncall(node_st *node)
             // We sent error if any other expressions mistmatches on type
             CTI(CTI_ERROR, true, "\n Function parameter types don't match: at: line: %d col: %d-%d. \n",
                 NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
+
+            // We infer type num or float if all expressions are one of two.
+            inferred = type;
 
             return node;
         }

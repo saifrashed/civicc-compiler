@@ -72,9 +72,9 @@ phase ContextAnalysis {
             uid = BT,
             nodes = {Binop}
         };
-        traversal CastTransform {
-            uid = CT,
-            nodes = {Cast}
+        traversal LoopTransform {
+            uid = LT,
+            nodes = {For}
         };
         traversal TypeChecker {
             uid = TC,

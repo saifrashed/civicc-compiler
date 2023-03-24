@@ -104,6 +104,96 @@ node_st *PPadd_before_param(node_st *fundef, char *search, char *identifier)
     }
 }
 
+node_st *PPadd_id_before_arg(node_st *funcall, char *search, char *identifier)
+{
+    node_st *temp = FUNCALL_ARGS(funcall);
+
+    node_st *previous = NULL;
+    node_st *current = NULL;
+    node_st *new = ASTexprs(ASTvar(NULL, identifier), NULL);
+
+    if (temp == NULL)
+    {
+        return NULL; // Empty argument list, nothing to do
+    }
+
+    while (temp != NULL)
+    {
+        if (NODE_TYPE(EXPRS_EXPR(temp)) == NT_VAR && STReq(VAR_NAME(EXPRS_EXPR(temp)), search))
+        {
+            // Found the desired parameter
+            current = temp;
+            break; // Exit the loop
+        }
+
+        previous = temp; // Update the previous node
+        temp = EXPRS_NEXT(temp);
+    }
+
+    if (previous == NULL)
+    {
+        // The first parameter is the one we're searching for
+        // We need to add the new parameter as the first one
+        EXPRS_NEXT(new) = current;
+        FUNCALL_ARGS(funcall) = CCNcopy(new);
+
+        return FUNCALL_ARGS(funcall);
+    }
+    else
+    {
+        // Add the new parameter between the previous and current nodes
+        EXPRS_NEXT(new) = current;
+        EXPRS_NEXT(previous) = CCNcopy(new);
+
+        return EXPRS_NEXT(previous);
+    }
+}
+
+node_st *PPadd_expr_before_arg(node_st *funcall, char *search, node_st *expression)
+{
+    node_st *temp = FUNCALL_ARGS(funcall);
+
+    node_st *previous = NULL;
+    node_st *current = NULL;
+    node_st *new = ASTexprs(CCNcopy(expression), NULL);
+
+    if (temp == NULL)
+    {
+        return NULL; // Empty argument list, nothing to do
+    }
+
+    while (temp != NULL)
+    {
+        if (NODE_TYPE(EXPRS_EXPR(temp)) == NT_VAR && STReq(VAR_NAME(EXPRS_EXPR(temp)), search))
+        {
+            // Found the desired parameter
+            current = temp;
+            break; // Exit the loop
+        }
+
+        previous = temp; // Update the previous node
+        temp = EXPRS_NEXT(temp);
+    }
+
+    if (previous == NULL)
+    {
+        // The first parameter is the one we're searching for
+        // We need to add the new parameter as the first one
+        EXPRS_NEXT(new) = current;
+        FUNCALL_ARGS(funcall) = CCNcopy(new);
+
+        return FUNCALL_ARGS(funcall);
+    }
+    else
+    {
+        // Add the new parameter between the previous and current nodes
+        EXPRS_NEXT(new) = current;
+        EXPRS_NEXT(previous) = CCNcopy(new);
+
+        return EXPRS_NEXT(previous);
+    }
+}
+
 /**
  * @fn PPprogram
  */
@@ -182,26 +272,99 @@ node_st *PPfuncall(node_st *node)
 
             if (NODE_TYPE(decl) == NT_PARAM)
             {
-                printf("NT_PARAM\n");
+                // We add ids in funcall and link with STE
+                if (PARAM_DIMS(decl) != NULL)
+                {
+                    printf("NT_PARAM\n");
+
+                    node_st *dim = PARAM_DIMS(decl);
+
+                    while (dim != NULL) // loop through all dimensions
+                    {
+                        node_st *arg = PPadd_id_before_arg(node, VAR_NAME(EXPRS_EXPR(temp_arg)), IDS_NAME(dim));
+
+                        if (NODE_TYPE(arg) == NT_VAR) // Link new arg with STE
+                        {
+                            node_st *ste = PPlookup(FUNDEF_SYMTBL(outer), IDS_NAME(dim));
+                            VAR_ENTRY(EXPRS_EXPR(arg)) = ste;
+                        }
+
+                        dim = IDS_NEXT(dim);
+                    }
+                }
             }
 
             if (NODE_TYPE(decl) == NT_GLOBDECL)
             {
-                printf("NT_GLOBDECL\n");
+                // We add ids in funcall and link with STE
+                if (GLOBDECL_DIMS(decl) != NULL)
+                {
+                    printf("NT_GLOBDECL\n");
+
+                    node_st *dim = GLOBDECL_DIMS(decl);
+
+                    while (dim != NULL) // loop through all dimensions
+                    {
+                        node_st *arg = PPadd_id_before_arg(node, VAR_NAME(EXPRS_EXPR(temp_arg)), IDS_NAME(dim));
+
+                        if (NODE_TYPE(arg) == NT_VAR) // Link new arg with STE
+                        {
+                            node_st *ste = PPlookup(FUNDEF_SYMTBL(outer), IDS_NAME(dim));
+                            VAR_ENTRY(EXPRS_EXPR(arg)) = ste;
+                        }
+
+                        dim = IDS_NEXT(dim);
+                    }
+                }
             }
 
             if (NODE_TYPE(decl) == NT_VARDECL)
             {
-                printf("NT_VARDECL\n");
+                // We add exprs in funcall and link with STE if VAR
+                if (VARDECL_DIMS(decl) != NULL)
+                {
+                    printf("NT_VARDECL\n");
 
-                // Als het een var is dan koppelen we deze nieuwe argument met de STE.
+                    node_st *dim = VARDECL_DIMS(decl);
+
+                    while (dim != NULL) // loop through all dimensions
+                    {
+                        node_st *arg = PPadd_expr_before_arg(node, VAR_NAME(EXPRS_EXPR(temp_arg)), EXPRS_EXPR(dim));
+
+                        if (NODE_TYPE(arg) == NT_VAR) // Link new arg with STE
+                        {
+                            node_st *ste = PPlookup(FUNDEF_SYMTBL(outer), VAR_NAME(EXPRS_EXPR(temp_arg)));
+                            VAR_ENTRY(EXPRS_EXPR(arg)) = ste;
+                        }
+
+                        dim = EXPRS_NEXT(dim);
+                    }
+                }
             }
 
             if (NODE_TYPE(decl) == NT_GLOBDEF)
             {
-                printf("NT_GLOBDEF\n");
 
-                // Als het een var is dan koppelen we deze nieuwe argument met de STE.
+                // We add exprs in funcall and link with STE if VAR
+                if (GLOBDEF_DIMS(decl) != NULL)
+                {
+                    printf("NT_GLOBDEF\n");
+
+                    node_st *dim = GLOBDEF_DIMS(decl);
+
+                    while (dim != NULL) // loop through all dimensions
+                    {
+                        node_st *arg = PPadd_expr_before_arg(node, VAR_NAME(EXPRS_EXPR(temp_arg)), EXPRS_EXPR(dim));
+
+                        if (NODE_TYPE(arg) == NT_VAR) // Link new arg with STE
+                        {
+                            node_st *ste = PPlookup(FUNDEF_SYMTBL(outer), VAR_NAME(EXPRS_EXPR(temp_arg)));
+                            VAR_ENTRY(EXPRS_EXPR(arg)) = ste;
+                        }
+
+                        dim = EXPRS_NEXT(dim);
+                    }
+                }
             }
         }
 
@@ -212,124 +375,3 @@ node_st *PPfuncall(node_st *node)
 
     return node;
 }
-
-// if (PARAM_DIMS(decl) != NULL)
-//                 { // This argument has dimensions
-//                     node_st *temp_dim = PARAM_DIMS(decl);
-
-//                     while (temp_dim != NULL)
-//                     {
-//                         node_st *ste = PPlookup(FUNDEF_SYMTBL(outer), IDS_NAME(temp_dim));
-
-//                         // // We link the ste with the actual parameter
-//                         node_st *new = PPadd_before_arg(node, temp_arg, CCNcopy(ASTexprs(ASTvar(NULL, IDS_NAME(temp_dim)), NULL)));
-
-//                         VAR_ENTRY(EXPRS_EXPR(new)) = ste;
-
-//                         temp_dim = IDS_NEXT(temp_dim);
-//                     }
-//                 }
-
-//  struct data_pp *data = DATA_PP_GET();
-//     node_st *outer = data->current_scope;
-
-//     // Look up function declaration
-
-//     node_st *temp_arg = FUNCALL_ARGS(node);
-
-//     while (temp_arg != NULL)
-//     {
-
-//         if (NODE_TYPE(EXPRS_EXPR(temp_arg)) == NT_VAR)
-//         {
-//             node_st *ste = PPlookup(FUNDEF_SYMTBL(outer), VAR_NAME(EXPRS_EXPR(temp_arg)));
-
-//             node_st *decl = STE_DECL(ste);
-
-//             if (NODE_TYPE(decl) == NT_PARAM)
-//             {
-//                 if (PARAM_DIMS(decl) != NULL)
-//                 { // This argument has dimensions
-//                     node_st *temp_dim = PARAM_DIMS(decl);
-
-//                     while (temp_dim != NULL)
-//                     {
-//                         node_st *ste = PPlookup(FUNDEF_SYMTBL(outer), IDS_NAME(temp_dim));
-
-//                         // // We link the ste with the actual parameter
-//                         node_st *new = PPadd_before_arg(node, temp_arg, CCNcopy(ASTexprs(ASTvar(NULL, IDS_NAME(temp_dim)), NULL)));
-
-//                         VAR_ENTRY(EXPRS_EXPR(new)) = ste;
-
-//                         temp_dim = IDS_NEXT(temp_dim);
-//                     }
-//                 }
-//             }
-//         }
-
-//         temp_arg = EXPRS_NEXT(temp_arg);
-//     }
-
-//     // Look up variable declaration
-
-//  node_st *temp_param = FUNDEF_PARAMS(node);
-
-//     while (temp_param != NULL)
-//     {
-
-//         if (PARAM_DIMS(temp_param) != NULL)
-//         { // This parameter has dimensions
-//             node_st *temp_dim = PARAM_DIMS(temp_param);
-
-//             while (temp_dim != NULL)
-//             {
-//                 node_st *ste = PPlookup(FUNDEF_SYMTBL(node), IDS_NAME(temp_dim));
-
-//                 node_st *new = PPadd_before_param(node, temp_param, CCNcopy(ASTparam(NULL, NULL, IDS_NAME(temp_dim), CT_int)));
-
-//                 // // We link the ste with the actual parameter
-//                 // STE_DECL(ste) = new;
-
-//                 temp_dim = IDS_NEXT(temp_dim);
-//             }
-//         }
-
-//         temp_param = PARAM_NEXT(temp_param);
-//     }
-
-// node_st *PPadd_before_arg(node_st *funcall, node_st *before, node_st *new)
-// {
-//     node_st *entry = FUNCALL_ARGS(funcall);
-//     node_st *previous = NULL;
-
-//     while (entry != NULL)
-//     {
-
-//         if (VAR_NAME(EXPRS_EXPR(entry)) == VAR_NAME(EXPRS_EXPR(before)))
-//         {
-//             printf("FOUND");
-//             break;
-//         }
-
-//         previous = entry;
-//         entry = EXPRS_NEXT(entry);
-//     }
-
-//     if (entry != NULL)
-//     {
-//         // The desired vardecl is found
-//         if (previous == NULL)
-//         {
-//             EXPRS_NEXT(new) = before;
-//             FUNCALL_ARGS(funcall) = new;
-//             return new;
-//         }
-//         else
-//         {
-//             EXPRS_NEXT(previous) = new;
-//             EXPRS_NEXT(new) = entry;
-//             return new;
-//         }
-//     }
-//     return NULL;
-// }
