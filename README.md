@@ -4,10 +4,11 @@ Civicc Compiler is a compiler for the Civicc programming language. The compiler 
 ## Requirements
 To run the Civicc Compiler, the following software must be installed on your system:
 
+Bison. Bison requires a modern version (>=3). Default on macOS Monterey is too old.
 Flex
-Bison
-Clang (or any C compiler that supports the x86 architecture)
-Graphviz (for creating a diagram)
+Cmake (> 3.13)
+GCC or Clang. Clang needs the zero-variadic-macro-arguments extension and you might need to supress warnings for functions with variadic arguments.
+Graphviz is required if you want to turn the generated dot diagram into an image via make dot
 
 ## Installation
 

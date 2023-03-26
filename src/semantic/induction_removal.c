@@ -126,10 +126,11 @@ node_st *IRfor(node_st *node)
         // Create variable declaration for induction variable, if present
         char *name = FOR_VAR(node);
         node_st *value = FOR_START_EXPR(node);
+        char *new_name = STRcat(name, suffix);
+
         if (name != NULL && value != NULL)
         {
             // Create new vardecl node for induction variable
-            char *new_name = STRcat(name, suffix);
             node_st *new_decl = ASTvardecl(NULL, value, NULL, new_name, CT_int);
 
             // Add new declaration to end of variable declarations in outer function body
@@ -160,7 +161,7 @@ node_st *IRfor(node_st *node)
 
         // Remove start expression and induction variable from input node
         FOR_START_EXPR(node) = NULL;
-        FOR_VAR(node) = NULL;
+        FOR_VAR(node) = new_name;
 
         // Reset search and suffix members of data_ir
         data->search = NULL;

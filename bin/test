@@ -1,0 +1,19 @@
+foo:
+1_while:
+    iload_0
+    iloadc_0
+    ieq
+    branch_f 3_false_expr
+    iload_0
+    iloadc_0
+    igt
+    jump 4_end
+3_false_expr:
+    bloadc_f
+4_end:
+    branch_f 2_end
+    jump 1_while
+2_end:
+    iloadc_1
+    ireturn
+

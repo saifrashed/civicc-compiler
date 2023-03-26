@@ -54,6 +54,13 @@ phase ContextAnalysis {
                 user node_ptr current_scope
             }
         };
+        traversal LoopTransform {
+            uid = LT,
+            nodes = {Program, Fundef, For},
+            travdata {
+                user node_ptr current_scope
+            }
+        };
         traversal NameBinding {
             uid = NB,
             nodes = {Program, Fundef, VarLet, Var, FunCall},
@@ -72,10 +79,6 @@ phase ContextAnalysis {
             uid = BT,
             nodes = {Binop}
         };
-        traversal LoopTransform {
-            uid = LT,
-            nodes = {For}
-        };
         traversal TypeChecker {
             uid = TC,
             nodes = {Program, Fundef, Assign, IfElse, While, DoWhile, For, Return, Cast, FunCall, Var, VarLet, Binop, Monop, Float, Bool, Num},
@@ -85,8 +88,10 @@ phase ContextAnalysis {
         };
         traversal CodeGeneration {
             uid = CG,
-            nodes = {Program},
+            nodes = {Program, Fundef, Return, Assign, Binop, Monop, Var, VarLet, Num, Float, Bool},
             travdata {
+                user node_ptr constbl,
+                user node_ptr current_scope,
                 user file_ptr output_file
             }
         };
@@ -140,7 +145,8 @@ root node Program {
         Decls next { constructor, mandatory }
     },
      attributes {
-        Symtbl symtbl
+        Symtbl symtbl,
+        Constbl constbl
     }
 };
 
@@ -409,5 +415,22 @@ node Ste {
         string name { constructor, mandatory },
         Type type { constructor },
         Link decl {constructor, mandatory}
+    }
+};
+
+
+node Constbl {
+    children {
+        Cte head { constructor }
+    }
+};
+
+node Cte {
+    children {
+        Cte next { constructor }
+    },
+    attributes {
+        Constants constant { constructor },
+        Type type { constructor }
     }
 };

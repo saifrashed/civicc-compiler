@@ -542,12 +542,12 @@ expr:  ROUNDBRACKET_L expr ROUNDBRACKET_R
 
 unary_expr: MINUS expr %prec UMINUS
       {
-        $$ = ASTmonop($2, MO_not);
+        $$ = ASTmonop($2, MO_neg);
         AddLocToNode($$, &@1, &@2);
       }
       | NEG expr
       {
-        $$ = ASTmonop($2, MO_neg);
+        $$ = ASTmonop($2, MO_not);
         AddLocToNode($$, &@1, &@2);
       };
 

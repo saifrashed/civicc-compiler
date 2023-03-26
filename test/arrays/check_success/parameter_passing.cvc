@@ -28,9 +28,6 @@ int bar(int[f, g] lo) {
     foo(arraytwo);
     foo(arrayfive);
 
-    baz(arrayone);
-    baz(arraythree);
-    baz(lo);
 
     return foo(arraytwo);
 }

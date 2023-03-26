@@ -12,7 +12,7 @@ check: debug
 		CIVAS=../bin/civas	\
 		CIVVM=../bin/civvm	\
 		CIVCC=../build-debug/civicc	\
-		RUN_FUNCTIONAL=0	\
+		RUN_FUNCTIONAL=1	\
 		bash run.bash basic nested_funs arrays
 
 coconut:

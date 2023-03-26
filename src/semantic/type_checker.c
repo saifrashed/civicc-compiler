@@ -662,17 +662,6 @@ node_st *TCmonop(node_st *node)
     // We infer the type bool when negation with bool.
     if (MONOP_OP(node) == MO_neg)
     {
-        if (type == CT_bool)
-        {
-            inferred = CT_bool;
-            MONOP_TYPE(node) = CT_bool;
-            return node;
-        }
-    }
-
-    // We infer the type num or float when unary minus with num or float
-    if (MONOP_OP(node) == MO_not)
-    {
         if (type == CT_float)
         {
             inferred = CT_float;
@@ -684,6 +673,17 @@ node_st *TCmonop(node_st *node)
         {
             inferred = CT_int;
             MONOP_TYPE(node) = CT_int;
+            return node;
+        }
+    }
+
+    // We infer the type num or float when unary minus with num or float
+    if (MONOP_OP(node) == MO_not)
+    {
+        if (type == CT_bool)
+        {
+            inferred = CT_bool;
+            MONOP_TYPE(node) = CT_bool;
             return node;
         }
     }
