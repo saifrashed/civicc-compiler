@@ -98,8 +98,14 @@ node_st *LTfor(node_st *node)
         step = ASTnum(1);
     }
 
-    node_st *condition = ASTternary(ASTbinop(CCNcopy(step), ASTnum(0), BO_gt), ASTbinop(ASTvar(NULL, STRcpy(FOR_VAR(node))), CCNcopy(FOR_STOP(node)), BO_lt), ASTbinop(ASTvar(NULL, STRcpy(FOR_VAR(node))), CCNcopy(FOR_STOP(node)), BO_gt));
-    node_st *increment = ASTassign(ASTvarlet(NULL, STRcpy(FOR_VAR(node))), ASTbinop(ASTvar(NULL, STRcpy(FOR_VAR(node))), CCNcopy(step), BO_add));
+    node_st *condition = ASTternary(
+        ASTbinop(CCNcopy(step), ASTnum(0), BO_gt),
+        ASTbinop(ASTvar(NULL, STRcpy(FOR_VAR(node))), CCNcopy(FOR_STOP(node)), BO_lt),
+        ASTbinop(ASTvar(NULL, STRcpy(FOR_VAR(node))), CCNcopy(FOR_STOP(node)), BO_gt));
+
+    node_st *increment = ASTassign(
+        ASTvarlet(NULL, STRcpy(FOR_VAR(node))),
+        ASTbinop(ASTvar(NULL, STRcpy(FOR_VAR(node))), CCNcopy(step), BO_add));
 
     node_st *stmts = FOR_BLOCK(node);
 

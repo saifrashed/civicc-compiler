@@ -35,18 +35,18 @@ add_executable(civicc ${FLEX_CivicLexer_OUTPUTS} ${BISON_CivicParser_OUTPUTS}
     src/global/globals.h
 
     # Youre free to remove the demo directory and these entries.
-    src/semantic/symbol_table.c
-    src/semantic/create_init.c
-    src/semantic/create_allocate.c
-    src/semantic/array_initialization.c
-    src/semantic/induction_removal.c
-    src/semantic/induction_initialization.c
-    src/semantic/var_initialization.c
-    src/semantic/name_binding.c
-    src/semantic/type_checker.c
-    src/semantic/parameter_passing.c
-    src/semantic/boolean_transform.c
-    src/semantic/loop_transform.c
+    src/codegen/symbol_table.c
+    src/codegen/create_init.c
+    src/codegen/create_allocate.c
+    src/codegen/array_initialization.c
+    src/codegen/induction_removal.c
+    src/codegen/induction_initialization.c
+    src/codegen/var_initialization.c
+    src/codegen/name_binding.c
+    src/codegen/type_checker.c
+    src/codegen/parameter_passing.c
+    src/codegen/boolean_transform.c
+    src/codegen/loop_transform.c
     src/codegen/code_generation.c
 )
 
