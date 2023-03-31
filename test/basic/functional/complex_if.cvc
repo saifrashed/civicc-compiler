@@ -1,0 +1,46 @@
+extern void printNewlines( int num);
+extern void printInt(int val);
+
+
+void printResult(int x, int y, int z, bool a, bool b, bool c, bool d, bool e, bool f, bool g)
+{
+    if ((x > y && y < z) || (z == 0 && (x == 0 || y == 0)) && ((a && b) || (c || d)) && !(e && f || g))
+    {
+        for (int i = 0, 3) {
+            printInt(i + 1); // print 1, 2, 3
+        }
+    }
+    else if (x < y)
+    {
+        for (int i = 0, 4) {
+            printInt(i + 1); // print 1, 2, 3, 4
+        }
+    }
+    else if (z != 0 && !(a && b))
+    {
+        for (int i = 0, 2) {
+            printInt(i + 1); // print 1, 2
+        }
+    }
+    else
+    {
+        for (int i = 0, 5) {
+            printInt(i + 1); // print 1, 2, 3, 4, 5
+        }
+    }
+
+    printNewlines(1);
+}
+
+export int main()
+{
+
+    // Call printResult for each case
+    printResult(3, 2, 4, true, true, true, false, false, false, false);
+    printResult(2, 3, 1, false, false, false, false, false, false, false);
+    printResult(3, 2, 1, false, true, false, false, false, false, false);
+    printResult(3, 3, 0, true, true, false, false, true, true, false);
+
+
+    return 0;
+}

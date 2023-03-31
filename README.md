@@ -33,3 +33,8 @@ Graphviz is required if you want to turn the generated dot diagram into an image
 ### To check parser for conflicts:
 - bison --verbose parser.y;
 - bison --verbose -Wcounterexamples parser.y
+
+### To run civicc tool chain:
+
+civas test
+civvm --verbose civ.out

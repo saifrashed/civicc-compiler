@@ -439,7 +439,6 @@ node_st *CGglobdecl(node_st *node)
     instruction_string = STRcat(instruction_string, "\n");
 
     // add index to STE
-
     STE_ASSEMBLY_INDEX(ste) = importvar_index;
 
     // increment value
@@ -675,15 +674,29 @@ node_st *CGifelse(node_st *node)
 
     TRAVcond(node);
 
-    fprintf(data->output_file, "    branch_f %s\n", else_label);
+    if (IFELSE_ELSE_BLOCK(node) != NULL)
+    {
+        fprintf(data->output_file, "    branch_f %s\n", else_label);
+    }
+    else
+    {
+        fprintf(data->output_file, "    branch_f %s\n", end_label);
+    }
 
     TRAVthen(node);
 
-    fprintf(data->output_file, "    jump %s\n", end_label);
+    if (IFELSE_ELSE_BLOCK(node) != NULL)
+    {
 
-    fprintf(data->output_file, "%s:\n", else_label);
+        fprintf(data->output_file, "    jump %s\n", end_label);
+    }
 
-    TRAVelse_block(node);
+    if (IFELSE_ELSE_BLOCK(node) != NULL)
+    {
+        fprintf(data->output_file, "%s:\n", else_label);
+
+        TRAVelse_block(node);
+    }
 
     fprintf(data->output_file, "%s:\n", end_label);
 
@@ -729,28 +742,34 @@ node_st *CGcast(node_st *node)
     // get index from constant table (if none we add it)
     if (CAST_TYPE(node) == CT_bool)
     {
+        TRAVexpr(node); // Traverse expression
 
         if (NODE_TYPE(CAST_EXPR(node)) == NT_FLOAT)
         {
-            if (FLOAT_VAL(CAST_EXPR(node)) > 0)
-            {
-                fprintf(data->output_file, "    bloadc_t\n");
-            }
-            else
-            {
-                fprintf(data->output_file, "    bloadc_f\n");
-            }
+            fprintf(data->output_file, "    floadc_0\n");
+            fprintf(data->output_file, "    fne\n");
         }
 
         if (NODE_TYPE(CAST_EXPR(node)) == NT_NUM)
         {
-            if (NUM_VAL(CAST_EXPR(node)) > 0)
+            fprintf(data->output_file, "    iloadc_0\n");
+            fprintf(data->output_file, "    ine\n");
+        }
+
+        if (NODE_TYPE(CAST_EXPR(node)) == NT_VAR)
+        {
+            node_st *ste = CGlookup(FUNDEF_SYMTBL(data->current_scope), VAR_NAME(CAST_EXPR(node)));
+
+            if (STE_TYPE(ste) == CT_float)
             {
-                fprintf(data->output_file, "    bloadc_t\n");
+                fprintf(data->output_file, "    floadc_0\n");
+                fprintf(data->output_file, "    fne\n");
             }
-            else
+
+            if (STE_TYPE(ste) == CT_int)
             {
-                fprintf(data->output_file, "    bloadc_f\n");
+                fprintf(data->output_file, "    iloadc_0\n");
+                fprintf(data->output_file, "    ine\n");
             }
         }
     }

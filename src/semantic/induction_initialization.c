@@ -117,5 +117,99 @@ node_st *IIfor(node_st *node)
         entry = STMTS_NEXT(entry);
     }
 
+    TRAVblock(node); // continue searching block
+
+    return node;
+}
+
+/**
+ * @fn IIwhile
+ */
+node_st *IIwhile(node_st *node)
+{
+    struct data_ii *data = DATA_II_GET();
+
+    node_st *entry = WHILE_BLOCK(node);
+    node_st *previous = NULL;
+
+    while (entry != NULL)
+    {
+
+        if (NODE_TYPE(STMTS_STMT(entry)) == NT_FOR)
+        {
+            node_st *forloop = STMTS_STMT(entry);
+            node_st *vardecl = IIlookup(FUNDEF_SYMTBL(data->current_scope), FOR_VAR(forloop));
+
+            node_st *assign = ASTassign(ASTvarlet(NULL, STE_NAME(vardecl)), VARDECL_INIT(STE_DECL(vardecl)));
+
+            node_st *stmts = ASTstmts(assign, ASTstmts(forloop, STMTS_NEXT(entry)));
+
+            // The desired vardecl is found
+            if (previous == NULL)
+            {
+                // The found declaration is the first one
+                WHILE_BLOCK(node) = ASTstmts(CCNcopy(assign), ASTstmts(forloop, STMTS_NEXT(entry)));
+            }
+            else
+            {
+                STMTS_NEXT(previous) = ASTstmts(CCNcopy(assign), ASTstmts(forloop, STMTS_NEXT(entry)));
+            }
+
+            // We null the vardecl so that it doesnt get processed further down the pipe line.
+            VARDECL_INIT(STE_DECL(vardecl)) = NULL;
+        }
+
+        previous = entry;
+        entry = STMTS_NEXT(entry);
+    }
+
+    TRAVblock(node); // continue searching block
+
+    return node;
+}
+
+/**
+ * @fn IIdowhile
+ */
+node_st *IIdowhile(node_st *node)
+{
+    struct data_ii *data = DATA_II_GET();
+
+    node_st *entry = DOWHILE_BLOCK(node);
+    node_st *previous = NULL;
+
+    while (entry != NULL)
+    {
+
+        if (NODE_TYPE(STMTS_STMT(entry)) == NT_FOR)
+        {
+            node_st *forloop = STMTS_STMT(entry);
+            node_st *vardecl = IIlookup(FUNDEF_SYMTBL(data->current_scope), FOR_VAR(forloop));
+
+            node_st *assign = ASTassign(ASTvarlet(NULL, STE_NAME(vardecl)), VARDECL_INIT(STE_DECL(vardecl)));
+
+            node_st *stmts = ASTstmts(assign, ASTstmts(forloop, STMTS_NEXT(entry)));
+
+            // The desired vardecl is found
+            if (previous == NULL)
+            {
+                // The found declaration is the first one
+                DOWHILE_BLOCK(node) = ASTstmts(CCNcopy(assign), ASTstmts(forloop, STMTS_NEXT(entry)));
+            }
+            else
+            {
+                STMTS_NEXT(previous) = ASTstmts(CCNcopy(assign), ASTstmts(forloop, STMTS_NEXT(entry)));
+            }
+
+            // We null the vardecl so that it doesnt get processed further down the pipe line.
+            VARDECL_INIT(STE_DECL(vardecl)) = NULL;
+        }
+
+        previous = entry;
+        entry = STMTS_NEXT(entry);
+    }
+
+    TRAVblock(node); // continue searching block
+
     return node;
 }

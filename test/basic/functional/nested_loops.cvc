@@ -1,0 +1,30 @@
+extern void printInt(int val);
+extern void printNewlines( int num);
+
+
+export int main()
+{
+
+    int outerCounter = 0;
+    int middleCounter = 0;
+
+    do {
+        middleCounter = 0;
+
+        while (middleCounter < 3) {
+            for (int innerCounter = 0, 3, 1) {
+                printInt(outerCounter);
+                printInt(middleCounter);
+                printInt(innerCounter);
+                printNewlines(1);
+            }
+
+            middleCounter = middleCounter + 1;
+        }
+
+        outerCounter = outerCounter + 1;
+    } while (outerCounter < 3);
+
+
+    return 0;
+}

@@ -348,6 +348,8 @@ node_st *TCifelse(node_st *node)
         return node;
     }
 
+    TRAVchildren(node);
+
     return node;
 }
 
@@ -444,8 +446,16 @@ node_st *TCreturn(node_st *node)
     // Traverse expressison
     enum Type return_type = inferred;
 
-    TRAVexpr(node);
-    return_type = inferred;
+    // An empty return is always a void return
+    if (RETURN_EXPR(node) != NULL)
+    {
+        TRAVexpr(node);
+        return_type = inferred;
+    }
+    else
+    {
+        return_type = CT_void;
+    }
 
     if (fun_type != return_type)
     {
@@ -488,7 +498,7 @@ node_st *TCcast(node_st *node)
 
         if (inferred == CT_bool)
         {
-            node_st *ternary = ASTternary(CAST_EXPR(node), ASTfloat(1.0), ASTnum(0.0));
+            node_st *ternary = ASTternary(CAST_EXPR(node), ASTfloat(1.0), ASTfloat(0.0));
             CAST_EXPR(node) = CCNcopy(ternary);
         }
 

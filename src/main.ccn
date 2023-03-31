@@ -51,7 +51,7 @@ phase ContextAnalysis {
         };
         traversal InductionInitialization {
             uid = II,
-            nodes = {Program, Fundef, For},
+            nodes = {Program, Fundef, For, While, DoWhile},
             travdata {
                 user node_ptr current_scope
             }

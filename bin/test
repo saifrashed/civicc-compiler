@@ -1,51 +1,106 @@
-foo:
-    iload_0
+main:
+    esr 10
+    iloadc 0
+    istore 0
+    floadc 1
+    fstore 1
+    bloadc_f
+    bstore 2
+    floadc_0
+    fstore 3
     fload_1
     f2i
-    iadd
-    iload_2
-    iadd
-    ireturn
-
-fun:
-    esr 4
+    istore 4
+    bload_2
+    branch_f 9_false_expr
     iloadc_1
-    istore 0
-    iloadc 0
-    istore 1
-    iloadc 1
-    istore 2
-    iloadc 2
-    istore 3
+    jump 10_end
+9_false_expr:
+    iloadc_0
+10_end:
+    istore 5
     iload_0
-    iload_1
-    ilt
-    branch_f 3_false_expr
-    iload_2
-    iload_3
-    igt
-    jump 4_end
-3_false_expr:
-    bloadc_f
-4_end:
-    branch_f 1_false_expr
-    iloadc_1
-    jump 2_end
-1_false_expr:
+    i2f
+    fstore 6
+    bload_2
+    branch_f 7_false_expr
+    floadc_1
+    jump 8_end
+7_false_expr:
+    floadc_0
+8_end:
+    fstore 7
+    iload_0
     iloadc_0
-2_end:
-    istore 3
-    iloadc_1
-    ireturn
-
-main:
+    ine
+    bstore 8
+    fload_3
+    floadc_0
+    fne
+    bstore 9
     isrg
-    jsr 0 fun
-    ipop
+    iload 4
+    jsre 0
+    isrg
+    iloadc_1
+    jsre 1
+    isrg
+    iload 5
+    jsre 0
+    isrg
+    iloadc_1
+    jsre 1
+    isrg
+    fload 6
+    jsre 2
+    isrg
+    iloadc_1
+    jsre 1
+    isrg
+    fload 7
+    jsre 2
+    isrg
+    iloadc_1
+    jsre 1
+    bload 8
+    branch_f 5_false_expr
+    iloadc_1
+    jump 6_end
+5_false_expr:
+    iloadc_0
+6_end:
+    iloadc_1
+    ieq
+    branch_f 4_end
+    isrg
+    iloadc 2
+    jsre 0
+4_end:
+    bload 9
+    branch_f 2_false_expr
+    iloadc_1
+    jump 3_end
+2_false_expr:
+    iloadc_0
+3_end:
+    iloadc_0
+    ieq
+    branch_f 1_end
+    isrg
+    iloadc 3
+    jsre 0
+1_end:
+    isrg
+    iloadc_1
+    jsre 1
     iloadc_0
     ireturn
 
-.const int 2
-.const int 3
-.const int 4
+.const int 5
+.const float 4.0
+.const int 10
+.const int 20
 .exportfun "main" int main
+.importfun "printInt" void int
+.importfun "printNewlines" void int
+.importfun "printFloat" void float

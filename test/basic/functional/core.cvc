@@ -69,3 +69,34 @@ export int isprime(int n)
 }
 
 export int value = 5 * 5 * 5;
+
+
+export int main()
+{
+
+    int test = 5 * 5 * 5;
+
+    printInt(test);
+    // ** gcd **
+
+    printInt(gcd(12, 14));
+    printNewlines(1);
+
+    // ** fac **
+
+    printInt(fac(10));
+    printNewlines(1);
+
+    // ** fib **
+
+    printInt(fib(10));
+    printNewlines(1);
+
+    // ** isprime **
+
+    printInt(isprime(11));
+    printNewlines(1);
+
+
+    return 0;
+}

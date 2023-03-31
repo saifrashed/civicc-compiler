@@ -41,6 +41,7 @@
         "tuple": "c",
         "variant": "c",
         "string.h": "c",
-        "globals.h": "c"
+        "globals.h": "c",
+        "nested_if": "cpp"
     }
 }
