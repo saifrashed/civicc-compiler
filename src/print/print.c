@@ -41,8 +41,6 @@ node_st *PRTprogram(node_st *node)
 
   TRAVnext(node);
 
-  TRAVdo(PROGRAM_CONSTBL(node)); // Taverse constant table for programs
-
   return node;
 }
 
@@ -852,44 +850,6 @@ node_st *PRTste(node_st *node)
     }
 
     printf(")");
-  }
-
-  TRAVnext(node);
-
-  return node;
-}
-
-/**
- * @fn PRTconstbl
- */
-node_st *PRTconstbl(node_st *node)
-{
-  printf("\n****************************** START CONSTANT TABLE ******************************");
-
-  if (CONSTBL_HEAD(node) != NULL)
-  {
-    TRAVdo(CONSTBL_HEAD(node)); // Taverse constant table for programs
-  }
-
-  printf("\n****************************** END CONSTANT TABLE ******************************** \n\n");
-
-  return node;
-}
-
-/**
- * @fn PRTcte
- */
-node_st *PRTcte(node_st *node)
-{
-
-  if (CTE_TYPE(node) == CT_int)
-  {
-    printf("\n%d (INT)", NUM_VAL(CTE_CONSTANT(node)));
-  }
-
-  if (CTE_TYPE(node) == CT_float)
-  {
-    printf("\n%.6f (FLOAT)", FLOAT_VAL(CTE_CONSTANT(node)));
   }
 
   TRAVnext(node);

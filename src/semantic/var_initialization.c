@@ -17,6 +17,8 @@
 #include "palm/dbug.h"
 #include "palm/str.h"
 
+char *search = NULL;
+
 void VIinit() { return; }
 void VIfini() { return; }
 
@@ -108,8 +110,9 @@ node_st *VIglobdef(node_st *node)
         node_st *init_function_declaration = STE_DECL(init_function_lookup);
 
         // Create an assignment statement with the initialization value
+        node_st *varlet = ASTvarlet(GLOBDEF_DIMS(node), GLOBDEF_NAME(node));
         node_st *assignment_statement = ASTassign(
-            ASTvarlet(GLOBDEF_DIMS(node), GLOBDEF_NAME(node)),
+            varlet,
             GLOBDEF_INIT(node));
 
         // Get the body and statement list of the "__init" function
@@ -156,6 +159,10 @@ node_st *VIvardecl(node_st *node)
     // Create an assignment node if there is an initial value
     if (VARDECL_INIT(node) != NULL)
     {
+        search = VARDECL_NAME(node);
+        TRAVdo(VARDECL_INIT(node));
+        search = NULL;
+
         // Create the assignment node
         node_st *assign = ASTassign(ASTvarlet(NULL, VARDECL_NAME(node)), VARDECL_INIT(node));
 
@@ -171,5 +178,49 @@ node_st *VIvardecl(node_st *node)
         VARDECL_INIT(node) = NULL;
     }
 
+    return node;
+}
+
+/**
+ * @fn VIvar
+ */
+node_st *VIvar(node_st *node)
+{
+    struct data_vi *data = DATA_VI_GET();
+
+    if (search != NULL)
+    {
+
+        // If var name doesn'y have vardecl before search in symbol table we link with global
+        if (STReq(search, VAR_NAME(node)) != true)
+        {
+
+            bool hasdecl = false;
+
+            // Check if the identifier exists in the symbol table
+            node_st *entry = SYMTBL_HEAD(FUNDEF_SYMTBL(data->current_scope));
+            while (STReq(STE_NAME(entry), search) != true)
+            {
+
+                if (STReq(STE_NAME(entry), VAR_NAME(node)) == true)
+                {
+                    hasdecl = true;
+                }
+                entry = STE_NEXT(entry);
+            }
+
+            if (hasdecl == false)
+            {
+                node_st *ste = VIlookup(SYMTBL_OUTER(FUNDEF_SYMTBL(data->current_scope)), VAR_NAME(node));
+                VAR_ENTRY(node) = ste;
+            }
+        }
+
+        if (STReq(search, VAR_NAME(node))) // The search var is the same as the vardecl var.
+        {
+            node_st *ste = VIlookup(SYMTBL_OUTER(FUNDEF_SYMTBL(data->current_scope)), VAR_NAME(node));
+            VAR_ENTRY(node) = ste;
+        }
+    }
     return node;
 }

@@ -1,0 +1,71 @@
+extern void printInt(int val);
+extern void printNewlines(int num);
+
+export int gcd(int a, int b)
+{
+    int gcd; // variable for GCD
+
+    for (int i = 1, b + 1)
+    {
+        if (a % i == 0 && b % i == 0)
+        {
+            gcd = i;
+        }
+
+        if (i >= a && i >= b) // check wheter index surpasses both values
+        {
+            return gcd;
+        }
+    }
+
+    return gcd;
+}
+
+export int fac(int n)
+{
+
+    int f = 1; // variable for factorial
+
+    for (int i = 1, n + 1)
+    {
+        f = f * i;
+    }
+
+    return f;
+}
+
+export int fib(int n)
+{
+    int a = 0;
+    int b = 1;
+    int c;
+
+    if (n == 0)
+        return a;
+    for (int i = 2, n + 1)
+    {
+        c = a + b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+export int isprime(int n)
+{
+    if (n <= 1)
+        return 0;
+    if (n % 2 == 0 && n > 2)
+        return 0;
+
+    for (int i = 3, (n / 2) + 2)
+    {
+        if (n % i == 0)
+            return 0;
+    }
+    return 1;
+
+    return 0;
+}
+
+export int value = 5 * 5 * 5;

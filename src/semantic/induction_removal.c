@@ -213,3 +213,7 @@ node_st *IRvar(node_st *node)
 
     return node;
 }
+
+// Go through all forloops
+// Systematically search statements in each forloop block - find STE in symbol table
+// If for var exists then we make vardecl null and add an assign with vardecl expression before the for

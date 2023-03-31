@@ -1,19 +1,51 @@
 foo:
-1_while:
     iload_0
-    iloadc_0
-    ieq
+    fload_1
+    f2i
+    iadd
+    iload_2
+    iadd
+    ireturn
+
+fun:
+    esr 4
+    iloadc_1
+    istore 0
+    iloadc 0
+    istore 1
+    iloadc 1
+    istore 2
+    iloadc 2
+    istore 3
+    iload_0
+    iload_1
+    ilt
     branch_f 3_false_expr
-    iload_0
-    iloadc_0
+    iload_2
+    iload_3
     igt
     jump 4_end
 3_false_expr:
     bloadc_f
 4_end:
-    branch_f 2_end
-    jump 1_while
+    branch_f 1_false_expr
+    iloadc_1
+    jump 2_end
+1_false_expr:
+    iloadc_0
 2_end:
+    istore 3
     iloadc_1
     ireturn
 
+main:
+    isrg
+    jsr 0 fun
+    ipop
+    iloadc_0
+    ireturn
+
+.const int 2
+.const int 3
+.const int 4
+.exportfun "main" int main

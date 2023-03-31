@@ -86,6 +86,7 @@ node_st *LTfundef(node_st *node)
  */
 node_st *LTfor(node_st *node)
 {
+
     struct data_lt *data = DATA_LT_GET();
 
     node_st *outer = data->current_scope;
@@ -104,12 +105,14 @@ node_st *LTfor(node_st *node)
 
     if (stmts != NULL)
     {
-        while (STMTS_NEXT(stmts) != NULL)
+        node_st *temp_stmts = stmts;
+
+        while (STMTS_NEXT(temp_stmts) != NULL)
         {
-            stmts = STMTS_NEXT(stmts);
+            temp_stmts = STMTS_NEXT(temp_stmts);
         }
 
-        STMTS_NEXT(stmts) = ASTstmts(increment, NULL);
+        STMTS_NEXT(temp_stmts) = ASTstmts(increment, NULL);
     }
     else
     {
@@ -117,6 +120,8 @@ node_st *LTfor(node_st *node)
     }
 
     node = ASTwhile(condition, stmts);
+
+    TRAVchildren(node); // Continue searching for loops
 
     return node;
 }

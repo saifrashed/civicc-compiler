@@ -253,7 +253,7 @@ node_st *TCprogram(node_st *node)
 node_st *TCfundef(node_st *node)
 {
     // If __init or __allocate we skip type checking
-    if (STReq(FUNDEF_NAME(node), "__allocate") || STReq(FUNDEF_NAME(node), "__init"))
+    if (STReq(FUNDEF_NAME(node), "__allocate"))
     {
         return node;
     }
@@ -370,6 +370,8 @@ node_st *TCwhile(node_st *node)
         return node;
     }
 
+    TRAVchildren(node);
+
     return node;
 }
 
@@ -391,6 +393,8 @@ node_st *TCdowhile(node_st *node)
 
         return node;
     }
+
+    TRAVchildren(node);
 
     return node;
 }
@@ -459,6 +463,7 @@ node_st *TCreturn(node_st *node)
 node_st *TCcast(node_st *node)
 {
     // We infer the type based on the type being cast. Bool, Int and Float are compatible with eachother.
+
     switch (CAST_TYPE(node))
     {
     case CT_int:
@@ -614,16 +619,37 @@ node_st *TCbinop(node_st *node)
     case BO_le:
     case BO_gt:
     case BO_ge:
-        if ((left == CT_int || left == CT_float) && (right == CT_int || right == CT_float))
+        if ((left == CT_int) && (right == CT_int))
         {
             inferred = CT_bool;
-            BINOP_TYPE(node) = CT_bool;
+            BINOP_TYPE(node) = CT_int;
+            return node;
+        }
+
+        if ((left == CT_float) && (right == CT_float))
+        {
+            inferred = CT_bool;
+            BINOP_TYPE(node) = CT_float;
             return node;
         }
         break;
     case BO_eq:
     case BO_ne:
-        if (left == right && (left == CT_bool || left == CT_int || left == CT_float))
+        if ((left == CT_int) && (right == CT_int))
+        {
+            inferred = CT_bool;
+            BINOP_TYPE(node) = CT_int;
+            return node;
+        }
+
+        if ((left == CT_float) && (right == CT_float))
+        {
+            inferred = CT_bool;
+            BINOP_TYPE(node) = CT_float;
+            return node;
+        }
+
+        if ((left == CT_bool) && (right == CT_bool))
         {
             inferred = CT_bool;
             BINOP_TYPE(node) = CT_bool;
@@ -838,4 +864,22 @@ node_st *TCnum(node_st *node)
 //     break;
 // }
 
-// printf("\n\n");
+// // printf("\n\n");
+//     switch (CAST_TYPE(node))
+//     {
+//     case CT_int:
+//         printf("CT_int\n");
+//         break;
+//     case CT_bool:
+//         printf(" CT_bool\n");
+//         break;
+//     case CT_float:
+//         printf(" CT_float\n");
+//         break;
+//     case CT_NULL:
+//         printf("CT_NULL\n");
+//         break;
+//     case CT_void:
+//         printf(" CT_void\n");
+//         break;
+//     }

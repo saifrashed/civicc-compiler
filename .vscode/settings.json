@@ -40,6 +40,7 @@
         "ratio": "c",
         "tuple": "c",
         "variant": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "globals.h": "c"
     }
 }

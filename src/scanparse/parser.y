@@ -581,12 +581,12 @@ arithmetic_expr: expr PLUS expr
 
 comparison_expr: expr LT expr
       {
-        $$ = ASTbinop( $1, $3, BO_le);
+        $$ = ASTbinop( $1, $3, BO_lt);
         AddLocToNode($$, &@1, &@3);
       }
       | expr LE expr
       {
-        $$ = ASTbinop( $1, $3, BO_lt);
+        $$ = ASTbinop( $1, $3, BO_le);
         AddLocToNode($$, &@1, &@3);
       }
       | expr GT expr

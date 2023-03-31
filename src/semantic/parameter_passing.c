@@ -217,6 +217,11 @@ node_st *PPfundef(node_st *node)
     struct data_pp *data = DATA_PP_GET();
     node_st *outer = data->current_scope;
 
+    if (FUNDEF_BODY(node) == NULL)
+    {
+        return node;
+    }
+
     node_st *temp_param = FUNDEF_PARAMS(node);
 
     while (temp_param != NULL)

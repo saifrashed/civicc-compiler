@@ -40,13 +40,14 @@ add_executable(civicc ${FLEX_CivicLexer_OUTPUTS} ${BISON_CivicParser_OUTPUTS}
     src/semantic/create_allocate.c
     src/semantic/array_initialization.c
     src/semantic/induction_removal.c
+    src/semantic/induction_initialization.c
     src/semantic/var_initialization.c
     src/semantic/name_binding.c
     src/semantic/type_checker.c
     src/semantic/parameter_passing.c
     src/semantic/boolean_transform.c
     src/semantic/loop_transform.c
-    src/semantic/code_generation.c
+    src/codegen/code_generation.c
 )
 
 target_compile_options(civicc PRIVATE

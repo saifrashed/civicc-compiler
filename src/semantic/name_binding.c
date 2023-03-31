@@ -140,7 +140,7 @@ node_st *NBvarlet(node_st *node)
     // If the variable is found, mark it as a variable entry
     if (entry != NULL)
     {
-        VARLET_ENTRY(entry);
+        VARLET_ENTRY(node) = entry;
     }
 
     // If the variable is not found, print an error message
@@ -160,6 +160,14 @@ node_st *NBvarlet(node_st *node)
  */
 node_st *NBvar(node_st *node)
 {
+
+    if (VAR_ENTRY(node) != NULL)
+    { // This VAR has already been set.
+      // Traverse the node's children and return the node
+        TRAVchildren(node);
+        return node;
+    }
+
     // Get the data and current scope
     struct data_nb *data = DATA_NB_GET();
     node_st *scope = data->current_scope;
@@ -170,7 +178,7 @@ node_st *NBvar(node_st *node)
     // If the variable is found, mark it as a variable entry
     if (entry != NULL)
     {
-        VAR_ENTRY(entry);
+        VAR_ENTRY(node) = entry;
     }
 
     // If the variable is not found, print an error message
@@ -203,7 +211,7 @@ node_st *NBfuncall(node_st *node)
     if (entry != NULL)
     {
         FUNCALL_NAME(node) = signature;
-        FUNCALL_ENTRY(entry) = entry;
+        FUNCALL_ENTRY(node) = entry;
     }
 
     // If function is an allocate function
