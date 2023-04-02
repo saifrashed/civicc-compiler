@@ -16,6 +16,7 @@
 #include "ccngen/trav.h"
 #include "palm/dbug.h"
 #include "palm/str.h"
+#include "palm/ctinfo.h"
 
 char *search = NULL;
 
@@ -60,6 +61,8 @@ node_st *VIprogram(node_st *node)
 
     // Reset the parent node as the current scope
     data->current_scope = node;
+
+    CTIabortOnError(); // This Initialises the error messages.
 
     // Return the current node
     return node;
@@ -212,7 +215,16 @@ node_st *VIvar(node_st *node)
             if (hasdecl == false)
             {
                 node_st *ste = VIlookup(SYMTBL_OUTER(FUNDEF_SYMTBL(data->current_scope)), VAR_NAME(node));
-                VAR_ENTRY(node) = ste;
+
+                if (ste != NULL)
+                {
+                    VAR_ENTRY(node) = ste;
+                }
+                else
+                {
+                    CTI(CTI_ERROR, true, "\n Undefined reference: '%s' is not defined at: line: %d col: %d-%d. \n",
+                        VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
+                }
             }
         }
 

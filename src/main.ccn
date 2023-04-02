@@ -77,6 +77,13 @@ phase ContextAnalysis {
                 user node_ptr current_scope
             }
         };
+        traversal TypeChecker {
+            uid = TC,
+            nodes = {Program, Fundef, Assign, IfElse, While, DoWhile, For, Return, Cast, FunCall, Var, VarLet, Binop, Monop, Float, Bool, Num},
+            travdata {
+                user node_ptr current_scope
+            }
+        };
         traversal ParameterPassing {
             uid = PP,
             nodes = {Program, Fundef, FunCall},
@@ -87,13 +94,6 @@ phase ContextAnalysis {
         traversal BooleanTransform {
             uid = BT,
             nodes = {Binop}
-        };
-        traversal TypeChecker {
-            uid = TC,
-            nodes = {Program, Fundef, Assign, IfElse, While, DoWhile, For, Return, Cast, FunCall, Var, VarLet, Binop, Monop, Float, Bool, Num},
-            travdata {
-                user node_ptr current_scope
-            }
         };
     }
 };

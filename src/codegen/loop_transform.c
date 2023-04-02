@@ -18,30 +18,6 @@
 void LTinit() { return; }
 void LTfini() { return; }
 
-node_st *LTlookup(node_st *symbol_table, char *identifier)
-{
-    // Check if the symbol table or identifier are NULL
-    if (symbol_table == NULL || identifier == NULL)
-    {
-        return NULL;
-    }
-
-    // Check if the identifier exists in the symbol table
-    node_st *entry = SYMTBL_HEAD(symbol_table);
-    while (entry != NULL)
-    {
-        if (STReq(STE_NAME(entry), identifier) == true)
-        {
-            // Identifier found in the symbol table
-            return entry;
-        }
-        entry = STE_NEXT(entry);
-    }
-
-    // Identifier not found in the symbol table
-    return NULL;
-}
-
 /**
  * @fn LTprogram
  */

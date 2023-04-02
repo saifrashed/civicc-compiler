@@ -22,26 +22,6 @@ void TCfini() { return; }
 
 enum Type inferred = CT_NULL;
 
-int TCdimensions(node_st *expr)
-{
-    int dimensions = 0;
-
-    if (NODE_TYPE(expr) == NT_ARREXPR)
-    {
-        dimensions = 1;
-        node_st *temp = EXPRS_EXPR(ARREXPR_EXPRS(expr));
-
-        while (NODE_TYPE(temp) == NT_ARREXPR)
-        {
-            dimensions++;
-
-            temp = EXPRS_EXPR(ARREXPR_EXPRS(temp));
-        }
-    }
-
-    return dimensions;
-}
-
 int TCcountindices(node_st *expr)
 {
     node_st *dims;
@@ -147,89 +127,6 @@ bool TChas_return(node_st *fundef)
     return false;
 }
 
-enum Type TCget_decl_type(node_st *decl)
-{
-    if (NODE_TYPE(decl) == NT_VARDECL)
-    {
-        return VARDECL_TYPE(decl);
-    }
-
-    if (NODE_TYPE(decl) == NT_GLOBDEF)
-    {
-        return GLOBDEF_TYPE(decl);
-    }
-
-    if (NODE_TYPE(decl) == NT_GLOBDECL)
-    {
-        return GLOBDECL_TYPE(decl);
-    }
-
-    return CT_NULL;
-}
-
-enum Type TCget_inferred_type(enum Type inferred)
-{
-    switch (inferred)
-    {
-    case CT_int:
-        return CT_int;
-        break;
-    case CT_bool:
-        return CT_bool;
-        break;
-    case CT_float:
-        return CT_float;
-        break;
-    case CT_NULL:
-        return CT_NULL;
-        break;
-    case CT_void:
-        return CT_void;
-        break;
-    }
-
-    return CT_NULL;
-}
-
-node_st *TClookup(node_st *symtbl, char *identifier)
-{
-    // Check if the symbol table and identifier are not null
-    if (symtbl == NULL || identifier == NULL)
-    {
-        return NULL;
-    }
-
-    // Traverse the symbol table hierarchy
-    node_st *temp = symtbl;
-    while (temp != NULL)
-    {
-        // Check if the identifier exists in the current symbol table
-        node_st *entry = SYMTBL_HEAD(temp);
-        while (entry != NULL)
-        {
-            if (STReq(STE_NAME(entry), identifier) == true)
-            {
-                return entry;
-            }
-            entry = STE_NEXT(entry);
-        }
-
-        // Move to the outer symbol table
-        node_st *outer = SYMTBL_OUTER(temp);
-        if (outer != NULL)
-        {
-            temp = outer;
-            continue;
-        }
-
-        // No more outer symbol tables, exit the loop
-        break;
-    }
-
-    // If the identifier is not found, return null
-    return NULL;
-}
-
 /**
  * @fn TCprogram
  */
@@ -289,7 +186,7 @@ node_st *TCassign(node_st *node)
 
     struct data_tc *data = DATA_TC_GET();
 
-    node_st *ste = TClookup(FUNDEF_SYMTBL(data->current_scope), VARLET_NAME(ASSIGN_LET(node)));
+    node_st *ste = VARLET_ENTRY(ASSIGN_LET(node));
 
     // Traverse let
     TRAVlet(node);
@@ -523,7 +420,7 @@ node_st *TCfuncall(node_st *node)
     struct data_tc *data = DATA_TC_GET();
 
     // We find the function definition node.
-    node_st *decl = STE_DECL(TClookup(FUNDEF_SYMTBL(data->current_scope), FUNCALL_NAME(node)));
+    node_st *decl = STE_DECL(FUNCALL_ENTRY(node));
 
     enum Type type = FUNDEF_TYPE(decl);
 
@@ -739,24 +636,9 @@ node_st *TCvar(node_st *node)
     struct data_tc *data = DATA_TC_GET();
 
     // We infer type
-    node_st *ste = TClookup(FUNDEF_SYMTBL(data->current_scope), VAR_NAME(node));
+    node_st *ste = VAR_ENTRY(node);
+
     enum Type type = STE_TYPE(ste);
-
-    // We do a indices check
-    if (VAR_INDICES(node) != NULL)
-    {
-        int decl_dims_count = TCcountindices(STE_DECL(ste));
-        int indices_count = TCcountindices(node);
-
-        if (decl_dims_count != indices_count)
-        {
-            // We sent error if any other expressions mistmatches on type
-            CTI(CTI_ERROR, true, "\n Array dimensions of variable do not match declared dimensions: at: line: %d col: %d-%d. \n",
-                NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
-
-            return node;
-        }
-    }
 
     inferred = type;
 
@@ -771,26 +653,9 @@ node_st *TCvarlet(node_st *node)
     struct data_tc *data = DATA_TC_GET();
 
     // We infer type
-    node_st *ste = TClookup(FUNDEF_SYMTBL(data->current_scope), VARLET_NAME(node));
+    node_st *ste = VARLET_ENTRY(node);
 
     enum Type type = STE_TYPE(ste);
-
-    if (NODE_TYPE(ste) == NT_PARAM && PARAM_DIMS(ste) != NULL)
-    {
-        // We do a indices check if this varlet is simply a assign varlet.
-        int decl_dims_count = TCcountindices(STE_DECL(ste));
-
-        int indices_count = TCcountindices(node);
-
-        if (decl_dims_count != indices_count)
-        {
-            // We sent error if any other expressions mistmatches on type
-            CTI(CTI_ERROR, true, "\n Array dimensions of variable do not match declared dimensions: at: line: %d col: %d-%d. \n",
-                NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
-
-            return node;
-        }
-    }
 
     inferred = type;
 

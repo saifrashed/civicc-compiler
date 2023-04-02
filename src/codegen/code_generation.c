@@ -242,8 +242,6 @@ void CGinit()
     {
         struct data_cg *data = DATA_CG_GET();
         data->output_file = file;
-
-        // fprintf(data->output_file, "Sterkkk\n");
     }
     else
     {
@@ -388,8 +386,6 @@ node_st *CGglobdef(node_st *node)
 
     // Add index to STE
     STE_ASSEMBLY_INDEX(ste) = global_index;
-
-    printf("RESULT: %d\n", STE_ASSEMBLY_INDEX(ste));
 
     // Add to exportvar table
     if (GLOBDEF_EXPORT(node))
@@ -1209,6 +1205,18 @@ node_st *CGnum(node_st *node)
 {
     struct data_cg *data = DATA_CG_GET();
 
+    if (NUM_VAL(node) == 0)
+    {
+        fprintf(data->output_file, "    iloadc_0\n");
+        return node;
+    }
+
+    if (NUM_VAL(node) == 1)
+    {
+        fprintf(data->output_file, "    iloadc_1\n");
+        return node;
+    }
+
     // Add to constant table
     instruction_string = STRcat(instruction_string, ".const int ");
     instruction_string = STRcat(instruction_string, STRitoa(NUM_VAL(node)));
@@ -1227,6 +1235,18 @@ node_st *CGnum(node_st *node)
 node_st *CGfloat(node_st *node)
 {
     struct data_cg *data = DATA_CG_GET();
+
+    if (FLOAT_VAL(node) == 0)
+    {
+        fprintf(data->output_file, "    floadc_0\n");
+        return node;
+    }
+
+    if (NUM_VAL(node) == 1)
+    {
+        fprintf(data->output_file, "    floadc_1\n");
+        return node;
+    }
 
     // Add to constant table
     instruction_string = STRcat(instruction_string, ".const float ");
@@ -1259,228 +1279,3 @@ node_st *CGbool(node_st *node)
 
     return node;
 }
-
-// instruction_string = STRcat(instruction_string, ".exportfun ");
-// instruction_string = STRcat(instruction_string, "\"");
-// instruction_string = STRcat(instruction_string, FUNDEF_NAME(fundef));
-// instruction_string = STRcat(instruction_string, "\" ");
-// instruction_string = STRcat(instruction_string, type);
-// instruction_string = STRcat(instruction_string, params);
-// instruction_string = STRcat(instruction_string, " ");
-// instruction_string = STRcat(instruction_string, FUNDEF_NAME(fundef));
-// instruction_string = STRcat(instruction_string, "\n");
-
-// instruction_string = STRcat(instruction_string, ".const float ");
-// instruction_string = STRcat(instruction_string, STRitoa(FLOAT_VAL(node)));
-// instruction_string = STRcat(instruction_string, "\n");
-
-// instruction_string = STRcat(instruction_string, ".const int ");
-// instruction_string = STRcat(instruction_string, STRitoa(NUM_VAL(node)));
-// instruction_string = STRcat(instruction_string, "\n");
-
-//  fprintf(data->output_file, "    isrg\n");
-
-//     TRAVargs(node);
-
-//     int count = 0;
-
-//     if (FUNCALL_ARGS(node) != NULL)
-//     {
-//         node_st *temp = FUNCALL_ARGS(node);
-
-//         while (temp != NULL)
-//         {
-//             count++;
-//             temp = EXPRS_NEXT(temp);
-//         }
-//     }
-
-//     // If fun does not have a body - and types
-//     if (FUNDEF_BODY(STE_DECL(entry)) == NULL)
-//     {
-//         if (STE_ASSEMBLY_INDEX(entry) == NULL)
-//         {
-//             STE_ASSEMBLY_INDEX(entry) = constant_index;
-
-//             CGappend(STE_DECL(entry));
-
-//             constant_index++;
-//         }
-
-//         fprintf(data->output_file, "    jsre %d\n", STE_ASSEMBLY_INDEX(entry));
-//     }
-//     else
-//     {
-//         fprintf(data->output_file, "    jsr %d %s\n", count, FUNDEF_NAME(STE_DECL(entry)));
-//     }
-
-// /**
-//  * @fn CGglobdef
-//  */
-// node_st *CGglobdef(node_st *node)
-// {
-
-//     struct data_cg *data = DATA_CG_GET();
-
-//     switch (GLOBDEF_TYPE(node))
-//     {
-//     case CT_int:
-//         instruction_string = STRcat(instruction_string, ".global int\n");
-//         break;
-//     case CT_bool:
-//         instruction_string = STRcat(instruction_string, ".global bool\n");
-//         break;
-//     case CT_float:
-//         instruction_string = STRcat(instruction_string, ".global float\n");
-//         break;
-//     case CT_NULL:
-//         break;
-//     case CT_void:
-//         break;
-//     }
-//     // Return the current node
-//     return node;
-// }
-
-// /**
-//  * @fn CGglobdecl
-//  */
-// node_st *CGglobdecl(node_st *node)
-// {
-
-//     struct data_cg *data = DATA_CG_GET();
-
-//     switch (GLOBDECL_TYPE(node))
-//     {
-//     case CT_int:
-//         instruction_string = STRcat(instruction_string, ".global int\n");
-//         break;
-//     case CT_bool:
-//         instruction_string = STRcat(instruction_string, ".global bool\n");
-//         break;
-//     case CT_float:
-//         instruction_string = STRcat(instruction_string, ".global float\n");
-//         break;
-//     case CT_NULL:
-//         break;
-//     case CT_void:
-//         break;
-//     }
-
-//     // Return the current node
-//     return node;
-// }
-
-// void CGappend(node_st *fundef)
-// {
-//     char *type = NULL;
-
-//     switch (FUNDEF_TYPE(fundef))
-//     {
-//     case CT_bool:
-//         type = "bool";
-//         break;
-//     case CT_float:
-//         type = "float";
-//         break;
-//     case CT_int:
-//         type = "int";
-//         break;
-//     case CT_void:
-//         type = "void";
-//         break;
-//     case CT_NULL:
-//         DBUG_ASSERT(false, "unknown type detected!");
-//     }
-
-//     char *params = "";
-
-//     if (FUNDEF_PARAMS(fundef) != NULL)
-//     {
-//         node_st *temp = FUNDEF_PARAMS(fundef);
-
-//         while (temp != NULL)
-//         {
-//             switch (PARAM_TYPE(temp))
-//             {
-//             case CT_bool:
-//                 params = STRcat(params, " bool");
-//                 break;
-//             case CT_float:
-//                 params = STRcat(params, " float");
-//                 break;
-//             case CT_int:
-//                 params = STRcat(params, " int");
-//                 break;
-//             case CT_void:
-//                 params = STRcat(params, " void");
-//                 break;
-//             case CT_NULL:
-//                 DBUG_ASSERT(false, "unknown type detected!");
-//             }
-
-//             temp = PARAM_NEXT(temp);
-//         }
-//     }
-
-//     // If fun does not have a body - and types
-//     if (FUNDEF_BODY(fundef) == NULL)
-//     {
-//         instruction_string = STRcat(instruction_string, ".importfun ");
-//         instruction_string = STRcat(instruction_string, "\"");
-//         instruction_string = STRcat(instruction_string, FUNDEF_NAME(fundef));
-//         instruction_string = STRcat(instruction_string, "\" ");
-//         instruction_string = STRcat(instruction_string, type);
-//         instruction_string = STRcat(instruction_string, params);
-//         instruction_string = STRcat(instruction_string, "\n");
-//     }
-//     // If fun has export - and types
-//     if (FUNDEF_EXPORT(fundef) || STReq(FUNDEF_NAME(fundef), "__init"))
-//     {
-//         instruction_string = STRcat(instruction_string, ".exportfun ");
-//         instruction_string = STRcat(instruction_string, "\"");
-//         instruction_string = STRcat(instruction_string, FUNDEF_NAME(fundef));
-//         instruction_string = STRcat(instruction_string, "\" ");
-//         instruction_string = STRcat(instruction_string, type);
-//         instruction_string = STRcat(instruction_string, params);
-//         instruction_string = STRcat(instruction_string, " ");
-//         instruction_string = STRcat(instruction_string, FUNDEF_NAME(fundef));
-//         instruction_string = STRcat(instruction_string, "\n");
-//     }
-// }
-
-// int add_to_glob(node_st *globdef)
-// {
-//     switch (GLOBDEF_TYPE(globdef))
-//     {
-//     case CT_int:
-//         instruction_string = STRcat(instruction_string, ".global int\n");
-//         break;
-//     case CT_bool:
-//         instruction_string = STRcat(instruction_string, ".global bool\n");
-//         break;
-//     case CT_float:
-//         instruction_string = STRcat(instruction_string, ".global float\n");
-//         break;
-//     case CT_NULL:
-//         break;
-//     case CT_void:
-//         break;
-//     }
-// }
-
-// int add_to_importvar(node_st *globdecl)
-// {
-// }
-
-// int add_to_exportvar(node_st *globdef)
-// {
-// }
-
-// int add_to_importfun(node_st *fundef)
-// {
-// }
-
-// int add_to_exportfun(node_st *fundef)
-// {
-// }

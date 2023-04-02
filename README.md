@@ -37,3 +37,6 @@ Graphviz is required if you want to turn the generated dot diagram into an image
 ### To run civicc tool chain:
 civas test
 civvm civ.out
+
+To create a assembly file  ./civicc ../test/arrays/check_success/scopes.cvc -o test  - in build-debug for own
+To create a assembly file  ../civcc ../test/arrays/check_success/test.cvc -o test    - in bin for reference
